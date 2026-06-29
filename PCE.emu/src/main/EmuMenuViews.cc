@@ -54,7 +54,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 		}
 	};
 
-	TextHeadingMenuItem videoHeading{"Video", attachParams()};
+	TextHeadingMenuItem videoHeading{"视频", attachParams()};
 
 	TextMenuItem visibleVideoLinesItem[5]
 	{
@@ -89,7 +89,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem emuCoreItems[3]
 	{
-		{"Auto",      attachParams(), setEmuCoreDel(), {.id = EmuCore::Auto}},
+		{"自动",      attachParams(), setEmuCoreDel(), {.id = EmuCore::Auto}},
 		{pceFastText, attachParams(), setEmuCoreDel(), {.id = EmuCore::Fast}},
 		{pceText,     attachParams(), setEmuCoreDel(), {.id = EmuCore::Accurate}},
 	};
@@ -144,7 +144,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			menuItem
 		}
@@ -156,7 +156,7 @@ class CustomSystemActionsView : public SystemActionsView
 private:
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](Input::Event e) { pushAndShow(makeView<ConsoleOptionView>(), e); }
 	};
 
@@ -294,7 +294,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	TextMenuItem emuCoreItems[3]
 	{
-		{"Auto",      attachParams(), setEmuCoreDel(), {.id = EmuCore::Auto}},
+		{"自动",      attachParams(), setEmuCoreDel(), {.id = EmuCore::Auto}},
 		{pceFastText, attachParams(), setEmuCoreDel(), {.id = EmuCore::Fast}},
 		{pceText,     attachParams(), setEmuCoreDel(), {.id = EmuCore::Accurate}},
 	};
@@ -377,19 +377,19 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 		{
 			TextMenuItem
 			{
-				"Default", attachParams(),
+				"默认", attachParams(),
 				[=, this]() { system().setVolume(type, 100); },
 				{.id = 100}
 			},
 			TextMenuItem
 			{
-				"Off", attachParams(),
+				"关", attachParams(),
 				[=, this]() { system().setVolume(type, 0); },
 				{.id = 0}
 			},
 			TextMenuItem
 			{
-				"Custom Value", attachParams(),
+				"自定义", attachParams(),
 				[=, this](Input::Event e)
 				{
 					pushAndShowNewCollectValueRangeInputView<int, 0, 200>(attachParams(), e, "Input 0 to 200", "",

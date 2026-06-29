@@ -23,14 +23,14 @@ namespace EmuEx
 static constexpr bool USE_MOBILE_ORIENTATION_NAMES = Config::envIsAndroid || Config::envIsIOS;
 static const char *landscapeName = USE_MOBILE_ORIENTATION_NAMES ? "Landscape" : "90° Left";
 static const char *landscape2Name = USE_MOBILE_ORIENTATION_NAMES ? "Landscape 2" : "90° Right";
-static const char *portraitName = USE_MOBILE_ORIENTATION_NAMES ? "Portrait" : "Standard";
+static const char *portraitName = USE_MOBILE_ORIENTATION_NAMES ? "Portrait" : "标准";
 static const char *portrait2Name = USE_MOBILE_ORIENTATION_NAMES ? "Portrait 2" : "Upside Down";
 
 GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
-	TableView{"GUI Options", attach, item},
+	TableView{"界面选项", attach, item},
 	pauseUnfocused
 	{
-		"Pause if unfocused", attach,
+		"失去焦点时暂停", attach,
 		app().pauseUnfocused,
 		[this](BoolMenuItem &item)
 		{
@@ -48,7 +48,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 		{"8",  attach, {.id = 8000}},
 		{"9",  attach, {.id = 9000}},
 		{"10", attach, {.id = 10000}},
-		{"Custom Value", attach,
+		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueRangeInputView<float, 2, 10>(attachParams(), e, "Input 2.0 to 10.0", "",
@@ -66,7 +66,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	fontSize
 	{
-		"Font Size", attach,
+		"字体大小", attach,
 		MenuId{app().fontSize},
 		fontSizeItem,
 		{
@@ -80,7 +80,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	notificationIcon
 	{
-		"Suspended App Icon", attach,
+		"暂停时图标", attach,
 		app().showsNotificationIcon,
 		[this](BoolMenuItem &item)
 		{
@@ -89,13 +89,13 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	statusBarItem
 	{
-		{"Off",    attach, MenuItem::Config{.id = InEmuTristate::Off}},
-		{"In Emu", attach, MenuItem::Config{.id = InEmuTristate::InEmu}},
-		{"On",     attach, MenuItem::Config{.id = InEmuTristate::On}}
+		{"关",    attach, MenuItem::Config{.id = InEmuTristate::Off}},
+		{"模拟中", attach, MenuItem::Config{.id = InEmuTristate::InEmu}},
+		{"开",     attach, MenuItem::Config{.id = InEmuTristate::On}}
 	},
 	statusBar
 	{
-		"Hide Status Bar", attach,
+		"隐藏状态栏", attach,
 		MenuId(InEmuTristate(app().hidesStatusBar.value())),
 		statusBarItem,
 		MultiChoiceMenuItem::Config
@@ -105,13 +105,13 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	lowProfileOSNavItem
 	{
-		{"Off",    attach, MenuItem::Config{.id = InEmuTristate::Off}},
-		{"In Emu", attach, MenuItem::Config{.id = InEmuTristate::InEmu}},
-		{"On",     attach, MenuItem::Config{.id = InEmuTristate::On}}
+		{"关",    attach, MenuItem::Config{.id = InEmuTristate::Off}},
+		{"模拟中", attach, MenuItem::Config{.id = InEmuTristate::InEmu}},
+		{"开",     attach, MenuItem::Config{.id = InEmuTristate::On}}
 	},
 	lowProfileOSNav
 	{
-		"Dim OS UI", attach,
+		"淡化系统界面", attach,
 		MenuId(InEmuTristate(app().lowProfileOSNav.value())),
 		lowProfileOSNavItem,
 		MultiChoiceMenuItem::Config
@@ -121,13 +121,13 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	hideOSNavItem
 	{
-		{"Off",    attach, MenuItem::Config{.id = InEmuTristate::Off}},
-		{"In Emu", attach, MenuItem::Config{.id = InEmuTristate::InEmu}},
-		{"On",     attach, MenuItem::Config{.id = InEmuTristate::On}}
+		{"关",    attach, MenuItem::Config{.id = InEmuTristate::Off}},
+		{"模拟中", attach, MenuItem::Config{.id = InEmuTristate::InEmu}},
+		{"开",     attach, MenuItem::Config{.id = InEmuTristate::On}}
 	},
 	hideOSNav
 	{
-		"Hide OS Navigation", attach,
+		"隐藏系统导航栏", attach,
 		MenuId(InEmuTristate(app().hidesOSNav.value())),
 		hideOSNavItem,
 		MultiChoiceMenuItem::Config
@@ -137,7 +137,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	idleDisplayPowerSave
 	{
-		"Allow Screen Timeout In Emulation", attach,
+		"模拟时允许熄屏", attach,
 		app().idleDisplayPowerSave,
 		[this](BoolMenuItem &item)
 		{
@@ -146,7 +146,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	navView
 	{
-		"Title Bar", attach,
+		"标题栏", attach,
 		app().showsTitleBar,
 		[this](BoolMenuItem &item)
 		{
@@ -155,7 +155,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	backNav
 	{
-		"Title Back Navigation", attach,
+		"标题栏返回导航", attach,
 		attach.viewManager.needsBackControl,
 		[this](BoolMenuItem &item)
 		{
@@ -166,9 +166,9 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	systemActionsIsDefaultMenu
 	{
-		"Default Menu", attach,
+		"默认菜单", attach,
 		app().systemActionsIsDefaultMenu,
-		"Last Used", "System Actions",
+		"上次使用", "系统操作",
 		[this](BoolMenuItem &item)
 		{
 			app().systemActionsIsDefaultMenu = item.flipBoolValue(*this);
@@ -176,7 +176,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	showBundledGames
 	{
-		"Show Bundled Content", attach,
+		"显示内置内容", attach,
 		app().showsBundledGames,
 		[this](BoolMenuItem &item)
 		{
@@ -185,7 +185,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	showBluetoothScan
 	{
-		"Show Bluetooth Menu Items", attach,
+		"显示蓝牙菜单项", attach,
 		app().showsBluetoothScan,
 		[this](BoolMenuItem &item)
 		{
@@ -194,7 +194,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	showHiddenFiles
 	{
-		"Show Hidden Files", attach,
+		"显示隐藏文件", attach,
 		app().showHiddenFilesInPicker,
 		[this](BoolMenuItem &item)
 		{
@@ -203,7 +203,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	maxRecentContent
 	{
-		"Max Recent Content Items", std::to_string(app().recentContent.maxRecentContent), attach,
+		"最大最近内容数", std::to_string(app().recentContent.maxRecentContent), attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueRangeInputView<int, 1, 100>(attachParams(), e,
@@ -218,11 +218,11 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	orientationHeading
 	{
-		"Orientation", attach
+		"方向", attach
 	},
 	menuOrientationItem
 	{
-		{"Auto",         attach, {.id = Orientations{}}},
+		{"自动",         attach, {.id = Orientations{}}},
 		{landscapeName,  attach, {.id = Orientations{.landscapeRight = 1}}},
 		{landscape2Name, attach, {.id = Orientations{.landscapeLeft = 1}}},
 		{portraitName,   attach, {.id = Orientations{.portrait = 1}}},
@@ -230,7 +230,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	menuOrientation
 	{
-		"In Menu", attach,
+		"菜单中", attach,
 		MenuId{uint8_t(app().menuOrientation.value())},
 		menuOrientationItem,
 		{
@@ -239,7 +239,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	emuOrientationItem
 	{
-		{"Auto",         attach, {.id = Orientations{}}},
+		{"自动",         attach, {.id = Orientations{}}},
 		{landscapeName,  attach, {.id = Orientations{.landscapeRight = 1}}},
 		{landscape2Name, attach, {.id = Orientations{.landscapeLeft = 1}}},
 		{portraitName,   attach, {.id = Orientations{.portrait = 1}}},
@@ -247,7 +247,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	emuOrientation
 	{
-		"In Emu", attach,
+		"模拟中", attach,
 		MenuId{uint8_t(app().emuOrientation.value())},
 		emuOrientationItem,
 		{
@@ -256,7 +256,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	layoutBehindSystemUI
 	{
-		"Display Behind OS UI", attach,
+		"在系统界面下方显示", attach,
 		app().doesLayoutBehindSystemUI(),
 		[this](BoolMenuItem &item)
 		{
@@ -265,7 +265,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	setWindowSize
 	{
-		"Set Window Size", attach,
+		"设置窗口大小", attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValuePairRangeInputView<int, 320, 8192, 240, 8192>(attachParams(), e,
@@ -279,7 +279,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	toggleFullScreen
 	{
-		"Toggle Full Screen", attach,
+		"切换全屏", attach,
 		[this]{ app().emuWindow().toggleFullScreen(); }
 	}
 {

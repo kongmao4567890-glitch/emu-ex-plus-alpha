@@ -72,7 +72,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem rotationItem[4]
 	{
-		{"Auto",           attachParams(), setRotationDel(), {.id = LynxRotation::Auto}},
+		{"自动",           attachParams(), setRotationDel(), {.id = LynxRotation::Auto}},
 		{"Horizontal",     attachParams(), setRotationDel(), {.id = LynxRotation::Horizontal}},
 		{"Vertical Left",  attachParams(), setRotationDel(), {.id = LynxRotation::VerticalLeft}},
 		{"Vertical Right", attachParams(), setRotationDel(), {.id = LynxRotation::VerticalRight}},
@@ -94,7 +94,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			menuItem
 		} {}
@@ -105,7 +105,7 @@ class CustomSystemActionsView : public SystemActionsView
 private:
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](Input::Event e) { pushAndShow(makeView<ConsoleOptionView>(), e); }
 	};
 

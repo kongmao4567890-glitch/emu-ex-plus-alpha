@@ -32,9 +32,9 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 {
 	TextMenuItem biosItems[3]
 	{
-		{"Auto", attachParams(), {.id = AutoTristate::Auto}},
-		{"Off",  attachParams(), {.id = AutoTristate::Off}},
-		{"On",   attachParams(), {.id = AutoTristate::On}},
+		{"自动", attachParams(), {.id = AutoTristate::Auto}},
+		{"关",  attachParams(), {.id = AutoTristate::Off}},
+		{"开",   attachParams(), {.id = AutoTristate::On}},
 	};
 
 	MultiChoiceMenuItem bios
@@ -54,9 +54,9 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem rtcItem[3]
 	{
-		{"Auto", attachParams(), {.id = RtcMode::AUTO}},
-		{"Off",  attachParams(), {.id = RtcMode::OFF}},
-		{"On",   attachParams(), {.id = RtcMode::ON}},
+		{"自动", attachParams(), {.id = RtcMode::AUTO}},
+		{"关",  attachParams(), {.id = RtcMode::OFF}},
+		{"开",   attachParams(), {.id = RtcMode::ON}},
 	};
 
 	MultiChoiceMenuItem rtc
@@ -69,7 +69,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 			{
 				if(idx == 0)
 				{
-					t.resetString(rtcIsEnabled() ? "On" : "Off");
+					t.resetString(rtcIsEnabled() ? "开" : "关");
 					return true;
 				}
 				return false;
@@ -84,13 +84,13 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem saveTypeItem[7]
 	{
-		{"Auto",            attachParams(), {.id = packSaveTypeOverride(GBA_SAVE_AUTO)}},
+		{"自动",            attachParams(), {.id = packSaveTypeOverride(GBA_SAVE_AUTO)}},
 		{"EEPROM",          attachParams(), {.id = packSaveTypeOverride(GBA_SAVE_EEPROM)}},
 		{"SRAM",            attachParams(), {.id = packSaveTypeOverride(GBA_SAVE_SRAM)}},
 		{"Flash (64K)",     attachParams(), {.id = packSaveTypeOverride(GBA_SAVE_FLASH, SIZE_FLASH512)}},
 		{"Flash (128K)",    attachParams(), {.id = packSaveTypeOverride(GBA_SAVE_FLASH, SIZE_FLASH1M)}},
 		{"EEPROM + Sensor", attachParams(), {.id = packSaveTypeOverride(GBA_SAVE_EEPROM_SENSOR)}},
-		{"None",            attachParams(), {.id = packSaveTypeOverride(GBA_SAVE_NONE)}},
+		{"无",            attachParams(), {.id = packSaveTypeOverride(GBA_SAVE_NONE)}},
 	};
 
 	MultiChoiceMenuItem saveType
@@ -142,8 +142,8 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	#ifdef IG_CONFIG_SENSORS
 	TextMenuItem hardwareSensorItem[5]
 	{
-		{"Auto",          attachParams(), {.id = GbaSensorType::Auto}},
-		{"None",          attachParams(), {.id = GbaSensorType::None}},
+		{"自动",          attachParams(), {.id = GbaSensorType::Auto}},
+		{"无",          attachParams(), {.id = GbaSensorType::None}},
 		{"Accelerometer", attachParams(), {.id = GbaSensorType::Accelerometer}},
 		{"Gyroscope",     attachParams(), {.id = GbaSensorType::Gyroscope}},
 		{"Light",         attachParams(), {.id = GbaSensorType::Light}},
@@ -186,7 +186,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			menuItem
 		} {}
@@ -196,7 +196,7 @@ class CustomSystemActionsView : public SystemActionsView
 {
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](TextMenuItem &, View &, Input::Event e)
 		{
 			if(system().hasContent())
@@ -229,19 +229,19 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 		{
 			TextMenuItem
 			{
-				"Default", attachParams(),
+				"默认", attachParams(),
 				[gbVol]() { soundSetVolume(gGba, 1.f, gbVol); },
 				{.id = 100}
 			},
 			TextMenuItem
 			{
-				"Off", attachParams(),
+				"关", attachParams(),
 				[gbVol]() { soundSetVolume(gGba, 0, gbVol); },
 				{.id = 0}
 			},
 			TextMenuItem
 			{
-				"Custom Value", attachParams(),
+				"自定义", attachParams(),
 				[this, gbVol](Input::Event e)
 				{
 					pushAndShowNewCollectValueRangeInputView<int, 0, 100>(attachParams(), e, "Input 0 to 100", "",
@@ -315,13 +315,13 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 	{
 		TextMenuItem
 		{
-			"Default", attachParams(),
+			"默认", attachParams(),
 			[]() { soundSetFiltering(gGba, .5f); },
 			{.id = 50}
 		},
 		TextMenuItem
 		{
-			"Custom Value", attachParams(),
+			"自定义", attachParams(),
 			[this](Input::Event e)
 			{
 				pushAndShowNewCollectValueRangeInputView<int, 0, 100>(attachParams(), e, "Input 0 to 100", "",
@@ -401,7 +401,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 		{"Indoor Light",  attachParams(), {.id = 100}},
 		{"Overcast Day",  attachParams(), {.id = 1000}},
 		{"Sunny Day",     attachParams(), {.id = 10000}},
-		{"Custom Value",  attachParams(),
+		{"自定义",  attachParams(),
 			[this](Input::Event e)
 			{
 				pushAndShowNewCollectValueRangeInputView<int, 0, 50000>(attachParams(), e, "Input 0 to 50000", "",
@@ -457,7 +457,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		cheatsMenuName(appContext(), system().cheatsDir), attachParams(),
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<UserPathSelectView>("Cheats", system().userPath(system().cheatsDir),
+			pushAndShow(makeViewWithName<UserPathSelectView>("金手指", system().userPath(system().cheatsDir),
 				[this](CStringView path)
 				{
 					GbaSystem::log.info("set cheats path:{}", path);

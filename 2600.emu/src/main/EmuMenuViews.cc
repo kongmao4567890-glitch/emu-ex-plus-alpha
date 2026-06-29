@@ -104,9 +104,9 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 {
 	TextMenuItem tvPhosphorItem[3]
 	{
-		{"Off",  attachParams(), setTVPhosphorDel(), {.id = 0}},
-		{"On",   attachParams(), setTVPhosphorDel(), {.id = 1}},
-		{"Auto", attachParams(), setTVPhosphorDel(), {.id = TV_PHOSPHOR_AUTO}},
+		{"关",  attachParams(), setTVPhosphorDel(), {.id = 0}},
+		{"开",   attachParams(), setTVPhosphorDel(), {.id = 1}},
+		{"自动", attachParams(), setTVPhosphorDel(), {.id = TV_PHOSPHOR_AUTO}},
 	};
 
 	MultiChoiceMenuItem tvPhosphor
@@ -120,7 +120,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 				if(idx == 2 && system().osystem.hasConsole())
 				{
 					bool phospherInUse = system().osystem.console().properties().get(PropType::Display_Phosphor) == "YES";
-					t.resetString(phospherInUse ? "On" : "Off");
+					t.resetString(phospherInUse ? "开" : "关");
 					return true;
 				}
 				else
@@ -131,7 +131,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem videoSystemItem[7]
 	{
-		{"Auto",     attachParams(), setVideoSystemDel(), {.id = 0}},
+		{"自动",     attachParams(), setVideoSystemDel(), {.id = 0}},
 		{"NTSC",     attachParams(), setVideoSystemDel(), {.id = 1}},
 		{"PAL",      attachParams(), setVideoSystemDel(), {.id = 2}},
 		{"SECAM",    attachParams(), setVideoSystemDel(), {.id = 3}},
@@ -181,7 +181,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem inputPortsItem[5]
 	{
-		{"Auto",            attachParams(), setInputPortsDel(), {.id = Controller::Type::Unknown}},
+		{"自动",            attachParams(), setInputPortsDel(), {.id = Controller::Type::Unknown}},
 		{"Joystick",        attachParams(), setInputPortsDel(), {.id = Controller::Type::Joystick}},
 		{"Paddles",         attachParams(), setInputPortsDel(), {.id = Controller::Type::Paddles}},
 		{"Genesis Gamepad", attachParams(), setInputPortsDel(), {.id = Controller::Type::Genesis}},
@@ -190,7 +190,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem inputPorts
 	{
-		"Input Ports", attachParams(),
+		"输入端口", attachParams(),
 		MenuId{system().optionInputPort1.value()},
 		inputPortsItem,
 		{
@@ -222,7 +222,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem aPaddleRegionItem[4]
 	{
-		{"Off",        attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::OFF}},
+		{"关",        attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::OFF}},
 		{"Left Half",  attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::LEFT}},
 		{"Right Half", attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::RIGHT}},
 		{"Full",       attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::FULL}},
@@ -246,8 +246,8 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem dPaddleSensitivityItem[2]
 	{
-		{"Default", attachParams(), [this]() { setDPaddleSensitivity(1); }, {.id = 1}},
-		{"Custom Value", attachParams(),
+		{"默认", attachParams(), [this]() { setDPaddleSensitivity(1); }, {.id = 1}},
+		{"自定义", attachParams(),
 			[this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueInputView<int>(attachParams(), e, "Input 1 to 20", "",
@@ -262,7 +262,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 						}
 						else
 						{
-							app().postErrorMessage("Value not in range");
+							app().postErrorMessage("值超出范围");
 							return false;
 						}
 					});
@@ -305,7 +305,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			menuItem
 		}
@@ -389,7 +389,7 @@ private:
 
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](const Input::Event &e)
 		{
 			if(system().hasContent())

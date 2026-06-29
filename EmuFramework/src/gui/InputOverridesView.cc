@@ -32,13 +32,13 @@ InputOverridesView::InputOverridesView(ViewAttachParams attach,
 	inputManager{inputManager_},
 	deleteDeviceConfig
 	{
-		"Delete Saved Device Settings", attach,
+		"删除已保存的设备设置", attach,
 		[this](TextMenuItem &item, View &, const Input::Event &e)
 		{
 			auto &savedSessionDevConfigs = inputManager.savedSessionDevConfigs;
 			if(!savedSessionDevConfigs.size())
 			{
-				app().postMessage("No saved device settings");
+				app().postMessage("无已保存的设备设置");
 				return;
 			}
 			auto multiChoiceView = makeViewWithName<TextTableView>(item, savedSessionDevConfigs.size());
@@ -62,7 +62,7 @@ InputOverridesView::InputOverridesView(ViewAttachParams attach,
 			pushAndShow(std::move(multiChoiceView), e);
 		}
 	},
-	deviceListHeading{"Individual Device Settings", attach}
+	deviceListHeading{"单独设备设置", attach}
 {
 	loadItems();
 	inputManager.onUpdateDevices = [this]()
@@ -117,7 +117,7 @@ constexpr std::string_view playerAsString(int p)
 {
 	assume(p != playerIndexUnset);
 	if(p == playerIndexMulti)
-		return "Multiple";
+		return "多个";
 	return playerNumStrings[p];
 }
 
@@ -130,8 +130,8 @@ InputOverridesDeviceView::InputOverridesDeviceView(UTF16String name, ViewAttachP
 		[&]
 		{
 			DynArray<TextMenuItem> items{AppMeta::maxPlayers + 2uz};
-			items[0] = {"Default", attach, {.id = playerIndexUnset}};
-			items[1] = {"Multiple", attach, {.id = playerIndexMulti}};
+			items[0] = {"默认", attach, {.id = playerIndexUnset}};
+			items[1] = {"多个", attach, {.id = playerIndexMulti}};
 			for(auto i: iotaCount(AppMeta::maxPlayers))
 			{
 				items[i + 2] = {playerNumStrings[i], attach, {.id = i}};
@@ -141,7 +141,7 @@ InputOverridesDeviceView::InputOverridesDeviceView(UTF16String name, ViewAttachP
 	},
 	player
 	{
-		"Player", attach,
+		"玩家", attach,
 		MenuId{inputDevData(dev).devConf.savedSessionPlayer()},
 		playerItems,
 		{

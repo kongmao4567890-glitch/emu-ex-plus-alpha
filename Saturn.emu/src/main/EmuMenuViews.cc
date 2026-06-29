@@ -148,7 +148,7 @@ constexpr auto cartTypeToString(int t)
 {
 	switch(t)
 	{
-		case CART_NONE: return "None";
+		case CART_NONE: return "无";
 		case CART_BACKUP_MEM: return "512K Backup RAM";
 		case CART_EXTRAM_1M: return "1M RAM";
 		case CART_EXTRAM_4M: return "4M RAM";
@@ -179,7 +179,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 {
 	TextMenuItem cartTypeItems[8]
 	{
-		{"Auto",                            attachParams(), {.id = CART__RESERVED}},
+		{"自动",                            attachParams(), {.id = CART__RESERVED}},
 		{cartTypeToString(CART_NONE),       attachParams(), {.id = CART_NONE}},
 		{cartTypeToString(CART_BACKUP_MEM), attachParams(), {.id = CART_BACKUP_MEM}},
 		{cartTypeToString(CART_EXTRAM_1M),  attachParams(), {.id = CART_EXTRAM_1M}},
@@ -215,7 +215,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem regionItems[9]
 	{
-		{"Auto",                              attachParams(), {.id = 0}},
+		{"自动",                              attachParams(), {.id = 0}},
 		{regionToString(SMPC_AREA_JP),        attachParams(), {.id = SMPC_AREA_JP}},
 		{regionToString(SMPC_AREA_NA),        attachParams(), {.id = SMPC_AREA_NA}},
 		{regionToString(SMPC_AREA_EU_PAL),    attachParams(), {.id = SMPC_AREA_EU_PAL}},
@@ -267,7 +267,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 		};
 	}
 
-	TextHeadingMenuItem videoHeading{"Video", attachParams()};
+	TextHeadingMenuItem videoHeading{"视频", attachParams()};
 
 	BoolMenuItem showHOverscan
 	{
@@ -335,8 +335,8 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem contentRotationItems[5]
 	{
-		{"Auto",        attachParams(), {.id = Rotation::ANY}},
-		{"Standard",    attachParams(), {.id = Rotation::UP}},
+		{"自动",        attachParams(), {.id = Rotation::ANY}},
+		{"标准",    attachParams(), {.id = Rotation::UP}},
 		{"90° Right",   attachParams(), {.id = Rotation::RIGHT}},
 		{"Upside Down", attachParams(), {.id = Rotation::DOWN}},
 		{"90° Left",    attachParams(), {.id = Rotation::LEFT}},
@@ -344,7 +344,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem contentRotation
 	{
-		"Content Rotation", attachParams(),
+		"内容旋转", attachParams(),
 		MenuId{system().sysContentRotation},
 		contentRotationItems,
 		{
@@ -359,9 +359,9 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem widescreenModeItems[3]
 	{
-		{"Auto",  attachParams(), {.id = WidescreenMode::Auto}},
-		{"On",    attachParams(), {.id = WidescreenMode::On}},
-		{"Off",   attachParams(), {.id = WidescreenMode::Off}},
+		{"自动",  attachParams(), {.id = WidescreenMode::Auto}},
+		{"开",    attachParams(), {.id = WidescreenMode::On}},
+		{"关",   attachParams(), {.id = WidescreenMode::Off}},
 	};
 
 	MultiChoiceMenuItem widescreenMode
@@ -403,7 +403,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	{
 		{"Gamepad", attachParams(), setInputPortsDel(), {.id = InputDeviceType::gamepad}},
 		{"Gun",     attachParams(), setInputPortsDel(), {.id = InputDeviceType::gun}},
-		{"None",    attachParams(), setInputPortsDel(), {.id = InputDeviceType::none}},
+		{"无",    attachParams(), setInputPortsDel(), {.id = InputDeviceType::none}},
 	};
 
 	MultiChoiceMenuItem inputDeviceItem(int idx)
@@ -468,7 +468,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			menuItems
 		},
@@ -512,7 +512,7 @@ class CustomSystemActionsView : public SystemActionsView
 private:
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](Input::Event e) { pushAndShow(makeView<ConsoleOptionView>(), e); }
 	};
 

@@ -33,7 +33,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 {
 	BoolMenuItem fourScore
 	{
-		"4-Player Adapter", attachParams(),
+		"四人适配器", attachParams(),
 		(bool)system().optionFourScore,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -55,7 +55,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem inputPortsItem[4]
 	{
-		{"Auto",          attachParams(), {.id = packInputEnums(SI_UNSET, SI_UNSET)}},
+		{"自动",          attachParams(), {.id = packInputEnums(SI_UNSET, SI_UNSET)}},
 		{"Gamepads",      attachParams(), {.id = packInputEnums(SI_GAMEPAD, SI_GAMEPAD)}},
 		{"Gun (2P, NES)", attachParams(), {.id = packInputEnums(SI_GAMEPAD, SI_ZAPPER)}},
 		{"Gun (1P, VS)",  attachParams(), {.id = packInputEnums(SI_ZAPPER, SI_GAMEPAD)}},
@@ -63,7 +63,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem inputPorts
 	{
-		"Input Ports", attachParams(),
+		"输入端口", attachParams(),
 		MenuId{packInputEnums(system().inputPort1.value(), system().inputPort2.value())},
 		inputPortsItem,
 		{
@@ -91,7 +91,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem videoSystemItem[4]
 	{
-		{"Auto",  attachParams(), {.id = 0}},
+		{"自动",  attachParams(), {.id = 0}},
 		{"NTSC",  attachParams(), {.id = 1}},
 		{"PAL",   attachParams(), {.id = 2}},
 		{"Dendy", attachParams(), {.id = 3}},
@@ -99,7 +99,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem videoSystem
 	{
-		"System", attachParams(),
+		"系统", attachParams(),
 		MenuId{system().optionVideoSystem},
 		videoSystemItem,
 		{
@@ -151,7 +151,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 		}
 	};
 
-	TextHeadingMenuItem videoHeading{"Video", attachParams()};
+	TextHeadingMenuItem videoHeading{"视频", attachParams()};
 
 	static uint16_t packVideoLines(uint8_t start, uint8_t total)
 	{
@@ -271,7 +271,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			menuItem
 		} {}
@@ -295,7 +295,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	TextMenuItem videoSystemItem[4]
 	{
-		{"Auto", attachParams(), [this](){ system().optionDefaultVideoSystem = 0; }},
+		{"自动", attachParams(), [this](){ system().optionDefaultVideoSystem = 0; }},
 		{"NTSC", attachParams(), [this](){ system().optionDefaultVideoSystem = 1; }},
 		{"PAL", attachParams(), [this](){ system().optionDefaultVideoSystem = 2; }},
 		{"Dendy", attachParams(), [this](){ system().optionDefaultVideoSystem = 3; }},
@@ -456,7 +456,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	TextMenuItem qualityItem[3]
 	{
-		{"Normal", attachParams(), [this](){ setQuality(0); }},
+		{"普通", attachParams(), [this](){ setQuality(0); }},
 		{"High", attachParams(), [this]() { setQuality(1); }},
 		{"Highest", attachParams(), [this]() { setQuality(2); }}
 	};
@@ -566,7 +566,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		cheatsMenuName(appContext(), system().cheatsDir), attachParams(),
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<UserPathSelectView>("Cheats", system().userPath(system().cheatsDir),
+			pushAndShow(makeViewWithName<UserPathSelectView>("金手指", system().userPath(system().cheatsDir),
 				[this](CStringView path)
 				{
 					NesSystem::log.info("set cheats path:{}", path);
@@ -732,7 +732,7 @@ private:
 
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](Input::Event e) { pushAndShow(makeView<ConsoleOptionView>(), e); }
 	};
 
@@ -1000,7 +1000,7 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, Cheat& cheat_, Cheat
 	},
 	remove
 	{
-		"Delete", attach,
+		"删除", attach,
 		[this](const Input::Event& e)
 		{
 			pushAndShowModal(makeView<YesNoAlertView>("Really delete this patch?",

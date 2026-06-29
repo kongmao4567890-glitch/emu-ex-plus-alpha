@@ -40,7 +40,7 @@ constexpr Gfx::DrawableConfig unpackDrawableConfig(uint16_t c)
 }
 
 VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLayer_, bool customMenu):
-	TableView{"Video Options", attach, item},
+	TableView{"视频选项", attach, item},
 	videoLayer{videoLayer_},
 	textureBufferModeItem
 	{
@@ -69,7 +69,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	textureBufferMode
 	{
-		"GPU Copy Mode", attach,
+		"GPU 复制模式", attach,
 		MenuId{renderer().evalTextureBufferMode(app().textureBufferMode)},
 		textureBufferModeItem
 	},
@@ -88,16 +88,16 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 			}, MenuItem::Config{.id = std::bit_cast<MenuId>(1.f)});
 			if(AppMeta::hasRectangularPixels)
 			{
-				aspectRatioItems.emplace_back("Square Pixels", attach, [this]()
+				aspectRatioItems.emplace_back("方形像素", attach, [this]()
 				{
 					app().setVideoAspectRatio(-1);
 				}, MenuItem::Config{.id = std::bit_cast<MenuId>(-1.f)});
 			}
-			aspectRatioItems.emplace_back("Fill Display", attach, [this]()
+			aspectRatioItems.emplace_back("填充屏幕", attach, [this]()
 			{
 				app().setVideoAspectRatio(0);
 			}, MenuItem::Config{.id = 0});
-			aspectRatioItems.emplace_back("Custom Value", attach, [this](const Input::Event &e)
+			aspectRatioItems.emplace_back("自定义", attach, [this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueInputView<std::pair<float, float>>(attachParams(), e,
 					"Input decimal or fraction", "",
@@ -112,7 +112,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 						}
 						else
 						{
-							app().postErrorMessage("Value not in range");
+							app().postErrorMessage("值超出范围");
 							return false;
 						}
 					});
@@ -123,7 +123,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	aspectRatio
 	{
-		"Aspect Ratio", attach,
+		"宽高比", attach,
 		std::bit_cast<MenuId>(app().videoAspectRatio()),
 		aspectRatioItem,
 		{
@@ -145,7 +145,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 		{"80%",                   attach, {.id = 80}},
 		{"Integer-only",          attach, {.id = optionContentScaleIntegerOnly}},
 		{"Integer-only (Height)", attach, {.id = optionContentScaleIntegerOnlyY}},
-		{"Custom Value", attach,
+		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueRangeInputView<int, 10, 200>(attachParams(), e, "Input 10 to 200", "",
@@ -162,7 +162,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	contentScale
 	{
-		"Content Scale", attach,
+		"内容缩放", attach,
 		MenuId{videoLayer_.scale},
 		contentScaleItems,
 		{
@@ -183,7 +183,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 		{"100%", attach, {.id = 100}},
 		{"95%", attach,  {.id = 95}},
 		{"90%", attach,  {.id = 90}},
-		{"Custom Value", attach,
+		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueRangeInputView<int, 50, 100>(attachParams(), e, "Input 50 to 100", "",
@@ -200,7 +200,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	menuScale
 	{
-		"Menu Scale", attach,
+		"菜单缩放", attach,
 		MenuId{app().menuScale},
 		menuScaleItems,
 		{
@@ -214,15 +214,15 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	contentRotationItem
 	{
-		{"Auto",        attach, {.id = Rotation::ANY}},
-		{"Standard",    attach, {.id = Rotation::UP}},
+		{"自动",        attach, {.id = Rotation::ANY}},
+		{"标准",    attach, {.id = Rotation::UP}},
 		{"90° Right",   attach, {.id = Rotation::RIGHT}},
 		{"Upside Down", attach, {.id = Rotation::DOWN}},
 		{"90° Left",    attach, {.id = Rotation::LEFT}},
 	},
 	contentRotation
 	{
-		"Content Rotation", attach,
+		"内容旋转", attach,
 		MenuId{app().contentRotation.value()},
 		contentRotationItem,
 		{
@@ -231,7 +231,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	placeVideo
 	{
-		"Set Video Position", attach,
+		"设置视频位置", attach,
 		[this](const Input::Event &e)
 		{
 			if(!system().hasContent())
@@ -241,9 +241,9 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	imgFilter
 	{
-		"Image Interpolation", attach,
+		"图像插值", attach,
 		videoLayer_.usingLinearFilter(),
-		"None", "Linear",
+		"无", "Linear",
 		[this](BoolMenuItem &item)
 		{
 			videoLayer.setLinearFilter(item.flipBoolValue(*this));
@@ -252,7 +252,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	imgEffectItem
 	{
-		{"Off",         attach, {.id = ImageEffectId::DIRECT}},
+		{"关",         attach, {.id = ImageEffectId::DIRECT}},
 		{"hq2x",        attach, {.id = ImageEffectId::HQ2X}},
 		{"Scale2x",     attach, {.id = ImageEffectId::SCALE2X}},
 		{"Prescale 2x", attach, {.id = ImageEffectId::PRESCALE2X}},
@@ -261,7 +261,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	imgEffect
 	{
-		"Image Effect", attach,
+		"图像效果", attach,
 		MenuId{videoLayer_.effectId()},
 		imgEffectItem,
 		{
@@ -274,7 +274,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	overlayEffectItem
 	{
-		{"Off",            attach, {.id = 0}},
+		{"关",            attach, {.id = 0}},
 		{"Scanlines",      attach, {.id = ImageOverlayId::SCANLINES}},
 		{"Scanlines 2x",   attach, {.id = ImageOverlayId::SCANLINES_2}},
 		{"LCD Grid",       attach, {.id = ImageOverlayId::LCD}},
@@ -285,7 +285,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	overlayEffect
 	{
-		"Overlay Effect", attach,
+		"叠加效果", attach,
 		MenuId{videoLayer_.overlayEffectId()},
 		overlayEffectItem,
 		{
@@ -302,7 +302,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 		{"75%",  attach, {.id = 75}},
 		{"50%",  attach, {.id = 50}},
 		{"25%",  attach, {.id = 25}},
-		{"Custom Value", attach,
+		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueRangeInputView<int, 0, 100>(attachParams(), e, "Input 0 to 100", "",
@@ -320,7 +320,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	overlayEffectLevel
 	{
-		"Overlay Effect Level", attach,
+		"叠加效果强度", attach,
 		MenuId{videoLayer_.overlayIntensity() * 100.f},
 		overlayEffectLevelItem,
 		{
@@ -344,7 +344,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	imgEffectPixelFormat
 	{
-		"Effect Color Format", attach,
+		"效果颜色格式", attach,
 		MenuId{app().imageEffectPixelFormat.value()},
 		imgEffectPixelFormatItem,
 		{
@@ -376,13 +376,13 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 				auto conf = unpackDrawableConfig(item.id);
 				if(!app().setWindowDrawableConfig(conf))
 				{
-					app().postMessage("Restart app for option to take effect");
+					app().postMessage("重启应用使选项生效");
 					return;
 				}
 				renderPixelFormat.updateDisplayString();
 				imgEffectPixelFormat.updateDisplayString();
 			};
-			items.emplace_back("Auto", attach, setWindowDrawableConfigDel, MenuItem::Config{.id = 0});
+			items.emplace_back("自动", attach, setWindowDrawableConfigDel, MenuItem::Config{.id = 0});
 			for(auto desc: renderer().supportedDrawableConfigs())
 			{
 				items.emplace_back(desc.name, attach, setWindowDrawableConfigDel, MenuItem::Config{.id = pack(desc.config)});
@@ -392,7 +392,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	windowPixelFormat
 	{
-		"Display Color Format", attach,
+		"显示颜色格式", attach,
 		MenuId{pack(app().windowDrawableConfig)},
 		windowPixelFormatItem,
 		{
@@ -410,7 +410,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	secondDisplay
 	{
-		"2nd Window (for testing only)", attach,
+		"第二窗口（仅测试用）", attach,
 		false,
 		[this](BoolMenuItem &item)
 		{
@@ -419,9 +419,9 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	showOnSecondScreen
 	{
-		"External Screen", attach,
+		"外接屏幕", attach,
 		app().showOnSecondScreen,
-		"OS Managed", "Emu Content",
+		"系统管理", "模拟内容",
 		[this](BoolMenuItem &item)
 		{
 			app().showOnSecondScreen = item.flipBoolValue(*this);
@@ -437,7 +437,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	renderPixelFormat
 	{
-		"Render Color Format", attach,
+		"渲染颜色格式", attach,
 		MenuId{app().renderPixelFormat.value().id},
 		renderPixelFormatItem,
 		{
@@ -456,41 +456,41 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	brightnessItem
 	{
 		{
-			"Default", attach, [this](View &v)
+			"默认", attach, [this](View &v)
 			{
 				videoLayer.setBrightness(1.f, ImageChannel::All);
 				setAllColorLevelsSelected(MenuId{100});
 				v.dismiss();
 			}
 		},
-		{"Custom Value", attach, setVideoBrightnessCustomDel(ImageChannel::All)},
+		{"自定义", attach, setVideoBrightnessCustomDel(ImageChannel::All)},
 	},
 	redItem
 	{
-		{"Default", attach, [this](){ videoLayer.setBrightness(1.f, ImageChannel::Red); }, {.id = 100}},
-		{"Custom Value", attach, setVideoBrightnessCustomDel(ImageChannel::Red), {.id = defaultMenuId}},
+		{"默认", attach, [this](){ videoLayer.setBrightness(1.f, ImageChannel::Red); }, {.id = 100}},
+		{"自定义", attach, setVideoBrightnessCustomDel(ImageChannel::Red), {.id = defaultMenuId}},
 	},
 	greenItem
 	{
-		{"Default", attach, [this](){ videoLayer.setBrightness(1.f, ImageChannel::Green); }, {.id = 100}},
-		{"Custom Value", attach, setVideoBrightnessCustomDel(ImageChannel::Green), {.id = defaultMenuId}},
+		{"默认", attach, [this](){ videoLayer.setBrightness(1.f, ImageChannel::Green); }, {.id = 100}},
+		{"自定义", attach, setVideoBrightnessCustomDel(ImageChannel::Green), {.id = defaultMenuId}},
 	},
 	blueItem
 	{
-		{"Default", attach, [this](){ videoLayer.setBrightness(1.f, ImageChannel::Blue); }, {.id = 100}},
-		{"Custom Value", attach, setVideoBrightnessCustomDel(ImageChannel::Blue), {.id = defaultMenuId}},
+		{"默认", attach, [this](){ videoLayer.setBrightness(1.f, ImageChannel::Blue); }, {.id = 100}},
+		{"自定义", attach, setVideoBrightnessCustomDel(ImageChannel::Blue), {.id = defaultMenuId}},
 	},
 	brightness
 	{
-		"Set All Levels", attach,
+		"设置所有等级", attach,
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<TableView>("All Levels", brightnessItem), e);
+			pushAndShow(makeViewWithName<TableView>("所有等级", brightnessItem), e);
 		}
 	},
 	red
 	{
-		"Red", attach,
+		"红色", attach,
 		MenuId{videoLayer_.channelBrightnessAsInt(ImageChannel::Red)},
 		redItem,
 		{
@@ -503,7 +503,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	green
 	{
-		"Green", attach,
+		"绿色", attach,
 		MenuId{videoLayer_.channelBrightnessAsInt(ImageChannel::Green)},
 		greenItem,
 		{
@@ -516,7 +516,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	blue
 	{
-		"Blue", attach,
+		"蓝色", attach,
 		MenuId{videoLayer_.channelBrightnessAsInt(ImageChannel::Blue)},
 		blueItem,
 		{
@@ -527,9 +527,9 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 			}
 		},
 	},
-	colorLevelsHeading{"Color Levels", attach},
-	advancedHeading{"Advanced", attach},
-	systemSpecificHeading{"System-specific", attach}
+	colorLevelsHeading{"颜色等级", attach},
+	advancedHeading{"高级", attach},
+	systemSpecificHeading{"系统专用", attach}
 {
 	if(!customMenu)
 	{

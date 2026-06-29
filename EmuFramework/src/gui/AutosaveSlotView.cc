@@ -45,21 +45,21 @@ public:
 		slotName{slotName_},
 		rename
 		{
-			"Rename", attach,
+			"重命名", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueInputView<const char*>(attachParams(), e,
-					"Input name", slotName,
+					"输入名称", slotName,
 					[this](CollectTextInputView &, auto str)
 					{
 						if(appContext().fileUriExists(system().contentLocalSaveDirectory(str)))
 						{
-							app().postErrorMessage("A save slot with that name already exists");
+							app().postErrorMessage("已有同名存档槽");
 							return false;
 						}
 						if(!app().autosaveManager.renameSlot(slotName, str))
 						{
-							app().postErrorMessage("Error renaming save slot");
+							app().postErrorMessage("重命名存档槽失败");
 							return false;
 						}
 						srcView.updateItem(slotName, str);
@@ -70,15 +70,15 @@ public:
 		},
 		remove
 		{
-			"Delete", attach,
+			"删除", attach,
 			[this](const Input::Event &e)
 			{
 				if(slotName == app().autosaveManager.slotName())
 				{
-					app().postErrorMessage("Can't delete the currently active save slot");
+					app().postErrorMessage("无法删除当前激活的存档槽");
 					return;
 				}
-				pushAndShowModal(makeView<YesNoAlertView>("Really delete this save slot?",
+				pushAndShowModal(makeView<YesNoAlertView>("确定删除此存档槽？",
 					YesNoAlertView::Delegates
 					{
 						.onYes = [this]
@@ -103,7 +103,7 @@ private:
 
 ManageAutosavesView::ManageAutosavesView(ViewAttachParams attach, AutosaveSlotView &srcView,
 	const std::vector<SlotTextMenuItem> &items):
-	TableView{"Manage Save Slots", attach, extraSlotItems},
+	TableView{"管理存档槽", attach, extraSlotItems},
 	srcView{srcView}
 {
 	extraSlotItems.reserve(items.size());
@@ -120,7 +120,7 @@ static std::string slotDescription(EmuApp &app, std::string_view saveName)
 {
 	auto desc = app.appContext().fileUriFormatLastWriteTimeLocal(app.autosaveManager.statePath(saveName));
 	if(desc.empty())
-		desc = "No saved state";
+		desc = "无已保存的状态";
 	return desc;
 }
 
@@ -143,10 +143,10 @@ void ManageAutosavesView::updateItem(std::string_view name, std::string_view new
 }
 
 AutosaveSlotView::AutosaveSlotView(ViewAttachParams attach):
-	TableView{"Autosave Slot", attach, menuItems},
+	TableView{"自动存档槽", attach, menuItems},
 	newSlot
 	{
-		"Create New Save Slot", attach, [this](const Input::Event &e)
+		"创建新存档槽", attach, [this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueInputView<const char*>(attachParams(), e,
 				"Save Slot Name", "", [this](CollectTextInputView &, auto str_)
@@ -154,12 +154,12 @@ AutosaveSlotView::AutosaveSlotView(ViewAttachParams attach):
 				std::string_view name{str_};
 				if(appContext().fileUriExists(app().system().contentLocalSaveDirectory(name)))
 				{
-					app().postErrorMessage("A save slot with that name already exists");
+					app().postErrorMessage("已有同名存档槽");
 					return false;
 				}
 				if(!app().autosaveManager.setSlot(name))
 				{
-					app().postErrorMessage("Error creating save slot");
+					app().postErrorMessage("创建存档槽失败");
 					return false;
 				}
 				app().showEmulation();
@@ -170,17 +170,17 @@ AutosaveSlotView::AutosaveSlotView(ViewAttachParams attach):
 	},
 	manageSlots
 	{
-		"Manage Save Slots", attach, [this](const Input::Event &e)
+		"管理存档槽", attach, [this](const Input::Event &e)
 		{
 			if(extraSlotItems.empty())
 			{
-				app().postMessage("No extra save slots exist");
+				app().postMessage("无额外存档槽");
 				return;
 			}
 			pushAndShow(makeView<ManageAutosavesView>(*this, extraSlotItems), e);
 		}
 	},
-	actions{"Actions", attach}
+	actions{"操作", attach}
 {
 	refreshSlots();
 	loadItems();
@@ -224,7 +224,7 @@ void AutosaveSlotView::refreshSlots()
 	}, {.test = true});
 	noSaveSlot =
 	{
-		"No Save",
+		"不存档",
 		attachParams(), [this]()
 		{
 			if(app().autosaveManager.setSlot(noAutosaveName))

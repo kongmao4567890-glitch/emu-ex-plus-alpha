@@ -45,7 +45,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem multitap
 	{
-		"4-Player Adapter", attachParams(),
+		"四人适配器", attachParams(),
 		(bool)system().optionMultiTap,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -66,7 +66,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem inputPortsItem[4]
 	{
-		{"Auto",      attachParams(), setInputPortsDel(-1, -1), {.id = -1}},
+		{"自动",      attachParams(), setInputPortsDel(-1, -1), {.id = -1}},
 		{"Gamepads",  attachParams(), setInputPortsDel(SYSTEM_MD_GAMEPAD, SYSTEM_MD_GAMEPAD), {.id = SYSTEM_MD_GAMEPAD}},
 		{"Menacer",   attachParams(), setInputPortsDel(SYSTEM_MD_GAMEPAD, SYSTEM_MENACER),    {.id = SYSTEM_MENACER}},
 		{"Justifier", attachParams(), setInputPortsDel(SYSTEM_MD_GAMEPAD, SYSTEM_JUSTIFIER),  {.id = SYSTEM_JUSTIFIER}},
@@ -74,7 +74,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem inputPorts
 	{
-		"Input Ports", attachParams(),
+		"输入端口", attachParams(),
 		MenuId{system().mdInputPortDev[1]},
 		inputPortsItem,
 		{
@@ -99,7 +99,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem videoSystemItem[3]
 	{
-		{"Auto", attachParams(), [this](Input::Event e){ setVideoSystem(0, e); }},
+		{"自动", attachParams(), [this](Input::Event e){ setVideoSystem(0, e); }},
 		{"NTSC", attachParams(), [this](Input::Event e){ setVideoSystem(1, e); }},
 		{"PAL", attachParams(),  [this](Input::Event e){ setVideoSystem(2, e); }},
 	};
@@ -131,7 +131,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem regionItem[4]
 	{
-		{"Auto",   attachParams(), [this](Input::Event e){ setRegion(0, e); }},
+		{"自动",   attachParams(), [this](Input::Event e){ setRegion(0, e); }},
 		{"USA",    attachParams(), [this](Input::Event e){ setRegion(1, e); }},
 		{"Europe", attachParams(), [this](Input::Event e){ setRegion(2, e); }},
 		{"Japan",  attachParams(), [this](Input::Event e){ setRegion(3, e); }},
@@ -177,7 +177,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			item
 		}
@@ -198,7 +198,7 @@ class CustomSystemActionsView : public SystemActionsView
 private:
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](TextMenuItem &, View &, Input::Event e)
 		{
 			if(system().hasContent())
@@ -276,7 +276,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		cheatsMenuName(appContext(), system().cheatsDir), attachParams(),
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<UserPathSelectView>("Cheats", system().userPath(system().cheatsDir),
+			pushAndShow(makeViewWithName<UserPathSelectView>("金手指", system().userPath(system().cheatsDir),
 				[this](CStringView path)
 				{
 					logMsg("set cheats path:%s", path.data());

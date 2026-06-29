@@ -43,7 +43,7 @@ static void onScanStatus(EmuApp &app, BluetoothScanState status, int arg);
 template <class ViewT>
 static void handledFailedBTAdapterInit(ViewT& view, [[maybe_unused]] ViewAttachParams attach, [[maybe_unused]] const Input::Event& e)
 {
-	view.app().postErrorMessage("Unable to initialize Bluetooth adapter");
+	view.app().postErrorMessage("无法初始化蓝牙适配器");
 	if constexpr(Config::Bluetooth::driver == Config::Bluetooth::Driver::Btstack)
 	{
 		if(!FS::exists("/var/lib/dpkg/info/ch.ringwald.btstack.list"))
@@ -61,7 +61,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	TableView{AppMeta::mainViewName, attach, item},
 	loadGame
 	{
-		"Open Content", attach,
+		"打开内容", attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShow(FilePicker::forLoading(attachParams(), e), e, false);
@@ -69,7 +69,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	systemActions
 	{
-		"System Actions", attach,
+		"系统操作", attach,
 		[this](const Input::Event &e)
 		{
 			if(!system().hasContent())
@@ -79,7 +79,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	recentGames
 	{
-		"Recent Content", attach,
+		"最近内容", attach,
 		[this](const Input::Event &e)
 		{
 			if(app().recentContent.size())
@@ -90,7 +90,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	bundledGames
 	{
-		"Bundled Content", attach,
+		"内置内容", attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShow(makeView<BundledGamesView>(), e);
@@ -98,7 +98,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	options
 	{
-		"Options", attach,
+		"选项", attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShow(makeView<OptionCategoryView>(), e);
@@ -106,7 +106,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	onScreenInputManager
 	{
-		"On-screen Input Setup", attach,
+		"触屏输入设置", attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShow(makeView<TouchConfigView>(app().defaultVController()), e);
@@ -114,7 +114,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	inputManager
 	{
-		"Key/Gamepad Input Setup", attach,
+		"按键/手柄输入设置", attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShow(makeView<InputManagerView>(app().inputManager), e);
@@ -122,7 +122,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	benchmark
 	{
-		"Benchmark Content", attach,
+		"基准测试内容", attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShow(FilePicker::forBenchmarking(attachParams(), e), e, false);
@@ -130,7 +130,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	scanWiimotes
 	{
-		"Scan for Wiimotes/iCP/JS1", attach,
+		"扫描 Wiimotes/iCP/JS1", attach,
 		[this](const Input::Event &e)
 		{
 			app().bluetoothAdapter.openDefault();
@@ -146,7 +146,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 				}
 				else
 				{
-					app().postMessage(1, false, "Still scanning");
+					app().postMessage(1, false, "仍在扫描");
 				}
 			}
 			else
@@ -158,7 +158,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	bluetoothDisconnect
 	{
-		"Disconnect Bluetooth", attach,
+		"断开蓝牙连接", attach,
 		[this](const Input::Event &e)
 		{
 			auto devConnected = Bluetooth::devsConnected(appContext());
@@ -171,13 +171,13 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	acceptPS3ControllerConnection
 	{
-		"Scan for PS3 Controller", attach,
+		"扫描 PS3 手柄", attach,
 		[this](const Input::Event &e)
 		{
 			app().bluetoothAdapter.openDefault();
 			if(app().bluetoothAdapter.isOpen())
 			{
-				app().postMessage(4, "Prepare to push the PS button");
+				app().postMessage(4, "准备按下 PS 按钮");
 				auto startedScan = Bluetooth::listenForDevices(appContext(), app().bluetoothAdapter,
 					[this](BluetoothAdapter&, BluetoothScanState status, int arg)
 					{
@@ -188,7 +188,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 								app().postErrorMessage(Config::envIsLinux ? 8 : 2,
 									Config::envIsLinux ?
 										"Unable to register server, make sure this executable has cap_net_bind_service enabled and bluetoothd isn't running" :
-										"Bluetooth setup failed");
+										"蓝牙设置失败");
 								break;
 							}
 							case BluetoothScanState::Complete:
@@ -201,7 +201,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 					});
 				if(!startedScan)
 				{
-					app().postMessage(1, "Still scanning");
+					app().postMessage(1, "仍在扫描");
 				}
 			}
 			else
@@ -213,7 +213,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	about
 	{
-		"About", attach,
+		"关于", attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShow(makeView<CreditsView>(AppMeta::creditsViewStr), e);
@@ -221,7 +221,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 	},
 	exitApp
 	{
-		"Exit", attach,
+		"退出", attach,
 		[this]()
 		{
 			appContext().exit();
@@ -248,12 +248,12 @@ static void onScanStatus(EmuApp &app, BluetoothScanState status, int arg)
 		}
 		case BluetoothScanState::Failed:
 		{
-			app.postErrorMessage("Scan failed");
+			app.postErrorMessage("扫描失败");
 			break;
 		}
 		case BluetoothScanState::NoDevs:
 		{
-			app.postMessage("No devices found");
+			app.postMessage("未找到设备");
 			break;
 		}
 		case BluetoothScanState::Processing:
@@ -276,7 +276,7 @@ static void onScanStatus(EmuApp &app, BluetoothScanState status, int arg)
 			}
 			else
 			{
-				app.postMessage("Scan complete, no recognized devices");
+				app.postMessage("扫描完成，未找到可识别的设备");
 			}
 			break;
 		}
@@ -335,7 +335,7 @@ void MainMenuView::reloadItems()
 OptionCategoryView::OptionCategoryView(ViewAttachParams attach):
 	TableView
 	{
-		"Options",
+		"选项",
 		attach,
 		[this](ItemMessage msg) -> ItemReply
 		{
@@ -349,49 +349,49 @@ OptionCategoryView::OptionCategoryView(ViewAttachParams attach):
 	subConfig
 	{
 		{
-			"Frame Timing", attach,
+			"帧时序", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShow(makeView<FrameTimingView>(), e);
 			}
 		},
 		{
-			"Video", attach,
+			"视频", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShow(app().makeView(attachParams(), EmuApp::ViewID::VIDEO_OPTIONS), e);
 			}
 		},
 		{
-			"Audio", attach,
+			"音频", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShow(app().makeView(attachParams(), EmuApp::ViewID::AUDIO_OPTIONS), e);
 			}
 		},
 		{
-			"System", attach,
+			"系统", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShow(app().makeView(attachParams(), EmuApp::ViewID::SYSTEM_OPTIONS), e);
 			}
 		},
 		{
-			"File Paths", attach,
+			"文件路径", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShow(app().makeView(attachParams(), EmuApp::ViewID::FILE_PATH_OPTIONS), e);
 			}
 		},
 		{
-			"GUI", attach,
+			"界面", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShow(app().makeView(attachParams(), EmuApp::ViewID::GUI_OPTIONS), e);
 			}
 		},
 		{
-			"Online Documentation", attach,
+			"在线文档", attach,
 			[this]
 			{
 				appContext().openURL("https://www.explusalpha.com/contents/emuex/documentation");
@@ -403,7 +403,7 @@ OptionCategoryView::OptionCategoryView(ViewAttachParams attach):
 	{
 		subConfig[lastIndex(subConfig)] =
 		{
-			"Beta Testing Opt-in/out", attach,
+			"测试版参与/退出", attach,
 			[this]()
 			{
 				appContext().openURL(std::format("https://play.google.com/apps/testing/{}", ApplicationMeta::id));

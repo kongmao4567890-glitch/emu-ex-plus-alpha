@@ -28,15 +28,15 @@ static auto slotHeadingName(EmuApp& app)
 }
 
 StateSlotView::StateSlotView(ViewAttachParams attach):
-	TableView{"Save States", attach, menuItems},
+	TableView{"存档", attach, menuItems},
 	load
 	{
-		"Load State", attach,
+		"读取存档", attach,
 		[this](TextMenuItem &item, View &, const Input::Event &e)
 		{
 			if(!item.active())
 				return;
-			pushAndShowModal(makeView<YesNoAlertView>("Really load state?",
+			pushAndShowModal(makeView<YesNoAlertView>("确定读取状态？",
 				YesNoAlertView::Delegates
 				{
 					.onYes = [this]
@@ -50,7 +50,7 @@ StateSlotView::StateSlotView(ViewAttachParams attach):
 	},
 	save
 	{
-		"Save State", attach,
+		"保存存档", attach,
 		[this](const Input::Event &e)
 		{
 			if(app().shouldOverwriteExistingState())
@@ -59,7 +59,7 @@ StateSlotView::StateSlotView(ViewAttachParams attach):
 			}
 			else
 			{
-				pushAndShowModal(makeView<YesNoAlertView>("Really overwrite state?",
+				pushAndShowModal(makeView<YesNoAlertView>("确定覆盖状态？",
 					YesNoAlertView::Delegates{.onYes = [this]{ doSaveState(); }}), e);
 			}
 		}

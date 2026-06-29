@@ -41,5 +41,6 @@ $(makeFile) : $(libvorbisSrcDir)/configure
 	@mkdir -p $(@D)
 	dir=`pwd` && cd $(@D) && $(toolchainEnvParams) CFLAGS="$(CPPFLAGS) $(CFLAGS)" \
 	LDFLAGS="$(LDFLAGS) $(LDLIBS)" $(libvorbisSrcDir)/configure \
-	--prefix='$${pcfiledir}/../..' --disable-docs --disable-examples --disable-oggtest \
+	--prefix='$${pcfiledir}/../..' --with-ogg=$(IMAGINE_SDK_PLATFORM_PATH) \
+	--disable-docs --disable-examples --disable-oggtest \
 	--disable-shared --host=$(CHOST) PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) PKG_CONFIG=pkg-config $(buildArg)

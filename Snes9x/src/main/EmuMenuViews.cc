@@ -34,7 +34,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	TextMenuItem dspInterpolationItem[5]
 	{
-		{"None",     attachParams(), [this](){ setDSPInterpolation(0); }},
+		{"无",     attachParams(), [this](){ setDSPInterpolation(0); }},
 		{"Linear",   attachParams(), [this](){ setDSPInterpolation(1); }},
 		{"Gaussian", attachParams(), [this](){ setDSPInterpolation(2); }},
 		{"Cubic",    attachParams(), [this](){ setDSPInterpolation(3); }},
@@ -61,7 +61,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 {
 	BoolMenuItem multitap
 	{
-		"5-Player Adapter", attachParams(),
+		"五人适配器", attachParams(),
 		(bool)system().optionMultitap,
 		[this](BoolMenuItem &item)
 		{
@@ -84,7 +84,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem inputPorts
 	{
-		"Input Ports", attachParams(),
+		"输入端口", attachParams(),
 		MenuId{system().snesInputPort},
 		inputPortsItem
 	};
@@ -102,7 +102,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem videoSystemItem[4]
 	{
-		{"Auto",             attachParams(), [this](Input::Event e){ setVideoSystem(0, e); }},
+		{"自动",             attachParams(), [this](Input::Event e){ setVideoSystem(0, e); }},
 		{"NTSC",             attachParams(), [this](Input::Event e){ setVideoSystem(1, e); }},
 		{"PAL",              attachParams(), [this](Input::Event e){ setVideoSystem(2, e); }},
 		{"NTSC + PAL Spoof", attachParams(), [this](Input::Event e){ setVideoSystem(3, e); }},
@@ -110,7 +110,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem videoSystem
 	{
-		"System", attachParams(),
+		"系统", attachParams(),
 		system().optionVideoSystem.value(),
 		videoSystemItem
 	};
@@ -122,7 +122,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 		app().promptSystemReloadDueToSetOption(attachParams(), e);
 	}
 
-	TextHeadingMenuItem videoHeading{"Video", attachParams()};
+	TextHeadingMenuItem videoHeading{"视频", attachParams()};
 
 	BoolMenuItem allowExtendedLines
 	{
@@ -192,7 +192,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	TextMenuItem superFXClockItem[2]
 	{
 		{"100%", attachParams(), [this]() { setSuperFXClock(100); }},
-		{"Custom Value", attachParams(),
+		{"自定义", attachParams(),
 			[this](Input::Event e)
 			{
 				pushAndShowNewCollectValueInputView<int>(attachParams(), e, "Input 5 to 250", "",
@@ -207,7 +207,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 						}
 						else
 						{
-							app().postErrorMessage("Value not in range");
+							app().postErrorMessage("值超出范围");
 							return false;
 						}
 					});
@@ -257,7 +257,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			menuItem
 		}
@@ -269,7 +269,7 @@ class CustomSystemActionsView : public SystemActionsView
 private:
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](TextMenuItem &, View &, Input::Event e)
 		{
 			if(system().hasContent())
@@ -297,7 +297,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		cheatsMenuName(appContext(), system().cheatsDir), attachParams(),
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<UserPathSelectView>("Cheats", system().userPath(system().cheatsDir),
+			pushAndShow(makeViewWithName<UserPathSelectView>("金手指", system().userPath(system().cheatsDir),
 				[this](CStringView path)
 				{
 					Snes9xSystem::log.info("set cheats path:{}", path);
@@ -605,7 +605,7 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, CheatCode& code_, Ed
 	},
 	remove
 	{
-		"Delete", attach,
+		"删除", attach,
 		[this](const Input::Event& e)
 		{
 			pushAndShowModal(makeView<YesNoAlertView>("Really delete this patch?",

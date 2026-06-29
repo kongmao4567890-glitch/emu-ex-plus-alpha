@@ -24,7 +24,7 @@ static std::string makeFrameRateStr(VideoSystem vidSys, const OutputTimingManage
 {
 	auto opt = mgr.frameRateOption(vidSys);
 	if(opt == OutputTimingManager::autoOption)
-		return "Auto";
+		return "自动";
 	else if(opt == OutputTimingManager::originalOption)
 		return "Original";
 	else
@@ -32,7 +32,7 @@ static std::string makeFrameRateStr(VideoSystem vidSys, const OutputTimingManage
 }
 
 FrameTimingView::FrameTimingView(ViewAttachParams attach):
-	TableView{"Frame Timing Options", attach, item},
+	TableView{"帧时序选项", attach, item},
 	frameIntervalItem
 	{
 		{"Full (No Skip)", attach, {.id = 0}},
@@ -43,7 +43,7 @@ FrameTimingView::FrameTimingView(ViewAttachParams attach):
 	},
 	frameInterval
 	{
-		"Frame Rate Target", attach,
+		"帧率目标", attach,
 		MenuId{app().frameInterval},
 		frameIntervalItem,
 		MultiChoiceMenuItem::Config
@@ -90,7 +90,7 @@ FrameTimingView::FrameTimingView(ViewAttachParams attach):
 	},
 	frameRate
 	{
-		"Input Rate", attach,
+		"输入帧率", attach,
 		app().outputTimingManager.frameRateOptionAsMenuId(VideoSystem::NATIVE_NTSC),
 		frameRateItems,
 		{
@@ -108,7 +108,7 @@ FrameTimingView::FrameTimingView(ViewAttachParams attach):
 	},
 	frameRatePAL
 	{
-		"Input Rate (PAL)", attach,
+		"输入帧率（PAL）", attach,
 		app().outputTimingManager.frameRateOptionAsMenuId(VideoSystem::PAL),
 		frameRateItems,
 		{
@@ -126,13 +126,13 @@ FrameTimingView::FrameTimingView(ViewAttachParams attach):
 	},
 	frameTimingStats
 	{
-		"Show Frame Timing Stats", attach,
+		"显示帧时序统计", attach,
 		app().showFrameTimingStats,
 		[this](BoolMenuItem &item) { app().showFrameTimingStats = item.flipBoolValue(*this); }
 	},
 	lowLatencyVideo
 	{
-		"Low Latency Mode", attach,
+		"低延迟模式", attach,
 		app().lowLatencyVideo,
 		[this](BoolMenuItem& item) { app().setLowLatencyVideo(item.flipBoolValue(*this)); }
 	},
@@ -141,7 +141,7 @@ FrameTimingView::FrameTimingView(ViewAttachParams attach):
 		[&]()
 		{
 			StaticArrayList<TextMenuItem, maxFrameClockItems> frameClockItems;
-			frameClockItems.emplace_back("Auto", attach, MenuItem::Config{.id = FrameClockSource::Unset});
+			frameClockItems.emplace_back("自动", attach, MenuItem::Config{.id = FrameClockSource::Unset});
 			if(app().emuWindow().supportsFrameClockSource(FrameClockSource::Screen))
 				frameClockItems.emplace_back("Screen (For standard displays)", attach, MenuItem::Config{.id = FrameClockSource::Screen});
 			if(app().emuWindow().supportsFrameClockSource(FrameClockSource::Renderer))
@@ -152,7 +152,7 @@ FrameTimingView::FrameTimingView(ViewAttachParams attach):
 	},
 	frameClock
 	{
-		"Frame Clock", attach,
+		"帧时钟", attach,
 		MenuId{FrameClockSource(app().frameClockSource)},
 		frameClockItems,
 		MultiChoiceMenuItem::Config
@@ -171,13 +171,13 @@ FrameTimingView::FrameTimingView(ViewAttachParams attach):
 	},
 	outputRateModeItems
 	{
-		{"Auto",                                     attach, MenuItem::Config{.id = OutputFrameRateMode::Auto}},
+		{"自动",                                     attach, MenuItem::Config{.id = OutputFrameRateMode::Auto}},
 		{"Detect (Calculate rate during emulation)", attach, MenuItem::Config{.id = OutputFrameRateMode::Detect}},
 		{"Screen (Use reported rate directly)",      attach, MenuItem::Config{.id = OutputFrameRateMode::Screen}},
 	},
 	outputRateMode
 	{
-		"Output Rate", attach,
+		"输出帧率", attach,
 		MenuId{OutputFrameRateMode(app().outputFrameRateMode)},
 		outputRateModeItems,
 		MultiChoiceMenuItem::Config
@@ -195,13 +195,13 @@ FrameTimingView::FrameTimingView(ViewAttachParams attach):
 	},
 	presentModeItems
 	{
-		{"Auto",                              attach, MenuItem::Config{.id = Gfx::PresentMode::Auto}},
+		{"自动",                              attach, MenuItem::Config{.id = Gfx::PresentMode::Auto}},
 		{"Immediate (For VRR/VSync off use)", attach, MenuItem::Config{.id = Gfx::PresentMode::Immediate}},
 		{"Queued (For standard use)",         attach, MenuItem::Config{.id = Gfx::PresentMode::FIFO}},
 	},
 	presentMode
 	{
-		"Present Mode", attach,
+		"呈现模式", attach,
 		MenuId{Gfx::PresentMode(app().presentMode)},
 		presentModeItems,
 		MultiChoiceMenuItem::Config
@@ -222,7 +222,7 @@ FrameTimingView::FrameTimingView(ViewAttachParams attach):
 		[&]
 		{
 			std::vector<TextMenuItem> items;
-			items.emplace_back("Off", attach, [this]() { app().overrideScreenFrameRate = 0; }, MenuItem::Config{.id = 0});
+			items.emplace_back("关", attach, [this]() { app().overrideScreenFrameRate = 0; }, MenuItem::Config{.id = 0});
 			for(auto rate : app().emuScreen().supportedFrameRates())
 			{
 				doIfUsed(screenFrameRateItems, [&]([[maybe_unused]] auto& _)
@@ -240,17 +240,17 @@ FrameTimingView::FrameTimingView(ViewAttachParams attach):
 	},
 	screenFrameRate
 	{
-		"Override Screen Frame Rate", attach,
+		"覆盖屏幕帧率", attach,
 		std::bit_cast<MenuId>(float(app().overrideScreenFrameRate)),
 		screenFrameRateItems
 	},
 	blankFrameInsertion
 	{
-		"Allow Blank Frame Insertion", attach,
+		"允许空白帧插入", attach,
 		app().allowBlankFrameInsertion,
 		[this](BoolMenuItem &item) { app().allowBlankFrameInsertion = item.flipBoolValue(*this); }
 	},
-	advancedHeading{"Advanced", attach}
+	advancedHeading{"高级", attach}
 {
 	loadStockItems();
 }

@@ -23,14 +23,14 @@ namespace EmuEx
 {
 
 SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
-	TableView{"System Options", attach, item},
+	TableView{"系统选项", attach, item},
 	autosaveTimerItem
 	{
-		{"Off",    attach, {.id = 0}},
+		{"关",    attach, {.id = 0}},
 		{"5min",  attach, {.id = 5}},
 		{"10min", attach, {.id = 10}},
 		{"15min", attach, {.id = 15}},
-		{"Custom Value", attach, [this](const Input::Event &e)
+		{"自定义", attach, [this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueRangeInputView<int, 0, maxAutosaveSaveFreq.count()>(attachParams(), e, "Input 0 to 720", "",
 					[this](CollectTextInputView &, auto val)
@@ -46,7 +46,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	autosaveTimer
 	{
-		"Timer", attach,
+		"计时器", attach,
 		MenuId{app().autosaveManager.saveTimer.frequency.count()},
 		autosaveTimerItem,
 		{
@@ -62,14 +62,14 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	autosaveLaunchItem
 	{
-		{"Main Slot",            attach, {.id = AutosaveLaunchMode::Load}},
-		{"Main Slot (No State)", attach, {.id = AutosaveLaunchMode::LoadNoState}},
-		{"No Save Slot",         attach, {.id = AutosaveLaunchMode::NoSave}},
-		{"Select Slot",          attach, {.id = AutosaveLaunchMode::Ask}},
+		{"主槽",            attach, {.id = AutosaveLaunchMode::Load}},
+		{"主槽（无状态）", attach, {.id = AutosaveLaunchMode::LoadNoState}},
+		{"无存档槽",         attach, {.id = AutosaveLaunchMode::NoSave}},
+		{"选择槽位",          attach, {.id = AutosaveLaunchMode::Ask}},
 	},
 	autosaveLaunch
 	{
-		"Launch Mode", attach,
+		"启动模式", attach,
 		MenuId{app().autosaveManager.autosaveLaunchMode},
 		autosaveLaunchItem,
 		{
@@ -78,9 +78,9 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	autosaveContent
 	{
-		"Content", attach,
+		"内容", attach,
 		app().autosaveManager.saveOnlyBackupMemory,
-		"State & Backup RAM", "Only Backup RAM",
+		"状态和备份内存", "仅备份内存",
 		[this](BoolMenuItem &item)
 		{
 			app().autosaveManager.saveOnlyBackupMemory = item.flipBoolValue(*this);
@@ -88,7 +88,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	confirmOverwriteState
 	{
-		"Confirm Overwrite State", attach,
+		"覆盖存档时确认", attach,
 		app().confirmOverwriteState,
 		[this](BoolMenuItem &item)
 		{
@@ -102,7 +102,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 		{"4x",    attach, {.id = 400}},
 		{"8x",    attach, {.id = 800}},
 		{"16x",   attach, {.id = 1600}},
-		{"Custom Value", attach,
+		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueRangeInputView<float, 1, 20>(attachParams(), e, "Input above 1.0 to 20.0", "",
@@ -120,7 +120,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	fastModeSpeed
 	{
-		"Fast-forward Speed", attach,
+		"快进速度", attach,
 		MenuId{app().altSpeed(AltSpeedMode::fast)},
 		fastModeSpeedItem,
 		{
@@ -136,7 +136,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	{
 		{"0.25x", attach, {.id = 25}},
 		{"0.50x", attach, {.id = 50}},
-		{"Custom Value", attach,
+		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueInputView<float>(attachParams(), e, "Input 0.05 up to 1.0", "",
@@ -151,7 +151,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 						}
 						else
 						{
-							app().postErrorMessage("Value not in range");
+							app().postErrorMessage("值超出范围");
 							return false;
 						}
 					});
@@ -161,7 +161,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	slowModeSpeed
 	{
-		"Slow-motion Speed", attach,
+		"慢放速度", attach,
 		MenuId{app().altSpeed(AltSpeedMode::slow)},
 		slowModeSpeedItem,
 		{
@@ -178,7 +178,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 		{"0",  attach, {.id = 0}},
 		{"30", attach, {.id = 30}},
 		{"60", attach, {.id = 60}},
-		{"Custom Value", attach, [this](const Input::Event &e)
+		{"自定义", attach, [this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueRangeInputView<int, 0, 50000>(attachParams(), e,
 					"Input 0 to 50000", std::to_string(app().rewindManager.maxStates),
@@ -195,7 +195,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	rewindStates
 	{
-		"States", attach,
+		"状态数", attach,
 		MenuId{app().rewindManager.maxStates},
 		rewindStatesItem,
 		{
@@ -213,7 +213,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	rewindTimeInterval
 	{
-		"State Interval (Seconds)", std::to_string(app().rewindManager.saveTimer.frequency.count()), attach,
+		"状态间隔（秒）", std::to_string(app().rewindManager.saveTimer.frequency.count()), attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueRangeInputView<int, 1, 60>(attachParams(), e,
@@ -228,9 +228,9 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	performanceMode
 	{
-		"Performance Mode", attach,
+		"性能模式", attach,
 		app().useSustainedPerformanceMode,
-		"Normal", "Sustained",
+		"普通", "持续",
 		[this](BoolMenuItem &item)
 		{
 			app().useSustainedPerformanceMode = item.flipBoolValue(*this);
@@ -238,7 +238,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	noopThread
 	{
-		"No-op Thread (Experimental)", attach,
+		"空操作线程（实验性）", attach,
 		(bool)app().useNoopThread,
 		[this](BoolMenuItem &item)
 		{
@@ -247,15 +247,15 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 	},
 	cpuAffinity
 	{
-		"Configure CPU Affinity", attach,
+		"配置 CPU 亲和性", attach,
 		[this](const Input::Event &e)
 		{
 			pushAndShow(makeView<CPUAffinityView>(appContext().cpuCount()), e);
 		}
 	},
-	autosaveHeading{"Autosave Options", attach},
-	rewindHeading{"Rewind Options", attach},
-	otherHeading{"Other Options", attach}
+	autosaveHeading{"自动存档选项", attach},
+	rewindHeading{"倒回选项", attach},
+	otherHeading{"其他选项", attach}
 {
 	if(!customMenu)
 	{

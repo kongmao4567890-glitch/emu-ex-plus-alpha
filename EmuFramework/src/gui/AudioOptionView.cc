@@ -23,11 +23,11 @@ namespace EmuEx
 {
 
 AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool customMenu):
-	TableView{"Audio Options", attach, item},
+	TableView{"音频选项", attach, item},
 	audio{audio_},
 	snd
 	{
-		"Sound", attach,
+		"声音", attach,
 		audio_.isEnabled(),
 		[this](BoolMenuItem &item)
 		{
@@ -36,7 +36,7 @@ AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool
 	},
 	soundDuringFastSlowMode
 	{
-		"Sound During Fast/Slow Mode", attach,
+		"快进/慢放时播放声音", attach,
 		audio_.isEnabledDuringAltSpeed(),
 		[this](BoolMenuItem &item)
 		{
@@ -48,7 +48,7 @@ AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool
 		{"100%", attach, {.id = 100}},
 		{"50%",  attach, {.id = 50}},
 		{"25%",  attach, {.id = 25}},
-		{"Custom Value", attach, [this](const Input::Event &e)
+		{"自定义", attach, [this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueRangeInputView<int, 0, 125>(attachParams(), e, "Input 0 to 125", "",
 					[this](CollectTextInputView &, auto val)
@@ -64,7 +64,7 @@ AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool
 	},
 	soundVolume
 	{
-		"Volume", attach,
+		"音量", attach,
 		MenuId{audio_.maxVolume()},
 		soundVolumeItem,
 		{
@@ -88,7 +88,7 @@ AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool
 	},
 	soundBuffers
 	{
-		"Buffer Size In Frames", attach,
+		"缓冲帧数", attach,
 		MenuId{audio_.soundBuffers},
 		soundBuffersItem,
 		{
@@ -97,7 +97,7 @@ AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool
 	},
 	addSoundBuffersOnUnderrun
 	{
-		"Auto-increase Buffer Size", attach,
+		"自动增加缓冲大小", attach,
 		audio_.addSoundBuffersOnUnderrunSetting,
 		[this](BoolMenuItem &item)
 		{
@@ -127,13 +127,13 @@ AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool
 	},
 	audioRate
 	{
-		"Sound Rate", attach,
+		"采样率", attach,
 		MenuId{audio_.rate()},
 		audioRateItem
 	},
 	audioSoloMix
 	{
-		"Mix With Other Apps", attach,
+		"与其他应用混音", attach,
 		!audio_.manager.soloMix(),
 		[this](BoolMenuItem &item)
 		{
@@ -145,7 +145,7 @@ AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool
 		[this]()
 		{
 			ApiItemContainer items{};
-			items.emplace_back("Auto", attachParams(), [this](View &view)
+			items.emplace_back("自动", attachParams(), [this](View &view)
 			{
 				audio.setOutputAPI(Audio::Api::DEFAULT);
 				doIfUsed(api, [&](auto &api){ api.setSelected(MenuId{audio.manager.makeValidAPI()}); });
@@ -164,7 +164,7 @@ AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool
 	},
 	api
 	{
-		"Audio Driver", attach,
+		"音频驱动", attach,
 		MenuId{audio_.manager.makeValidAPI(audio_.outputAPI())},
 		apiItem
 	}

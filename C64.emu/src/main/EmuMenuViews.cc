@@ -120,10 +120,10 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	TextMenuItem borderModeItem[4]
 	{
-		{"Normal", attachParams(), {.id = VICII_NORMAL_BORDERS}},
+		{"普通", attachParams(), {.id = VICII_NORMAL_BORDERS}},
 		{"Full",   attachParams(), {.id = VICII_FULL_BORDERS}},
 		{"Debug",  attachParams(), {.id = VICII_DEBUG_BORDERS}},
-		{"None",   attachParams(), {.id = VICII_NO_BORDERS}},
+		{"无",   attachParams(), {.id = VICII_NO_BORDERS}},
 	};
 
 	MultiChoiceMenuItem borderMode
@@ -464,7 +464,7 @@ private:
 
 	TextMenuItem reset
 	{
-		"Reset", attachParams(),
+		"重置", attachParams(),
 		[this](View& view)
 		{
 			system().enterCPUTrap();
@@ -1003,7 +1003,7 @@ class MachineOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem reuItem[9]
 	{
-		{"Off",    attachParams(), {.id = 0}},
+		{"关",    attachParams(), {.id = 0}},
 		{"128KiB", attachParams(), {.id = 128}},
 		{"256KiB", attachParams(), {.id = 256}},
 		{"512KiB", attachParams(), {.id = 512}},

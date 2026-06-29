@@ -75,15 +75,15 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 	{
 		{"Original",   attachParams(), setGbPaletteDel(), {.id = 0}},
 		{"Brown",      attachParams(), setGbPaletteDel(), {.id = 1}},
-		{"Red",        attachParams(), setGbPaletteDel(), {.id = 2}},
+		{"红色",        attachParams(), setGbPaletteDel(), {.id = 2}},
 		{"Dark Brown", attachParams(), setGbPaletteDel(), {.id = 3}},
 		{"Pastel",     attachParams(), setGbPaletteDel(), {.id = 4}},
 		{"Orange",     attachParams(), setGbPaletteDel(), {.id = 5}},
 		{"Yellow",     attachParams(), setGbPaletteDel(), {.id = 6}},
-		{"Blue",       attachParams(), setGbPaletteDel(), {.id = 7}},
+		{"蓝色",       attachParams(), setGbPaletteDel(), {.id = 7}},
 		{"Dark Blue",  attachParams(), setGbPaletteDel(), {.id = 8}},
 		{"Gray",       attachParams(), setGbPaletteDel(), {.id = 9}},
-		{"Green",      attachParams(), setGbPaletteDel(), {.id = 10}},
+		{"绿色",      attachParams(), setGbPaletteDel(), {.id = 10}},
 		{"Dark Green", attachParams(), setGbPaletteDel(), {.id = 11}},
 		{"Reverse",    attachParams(), setGbPaletteDel(), {.id = 12}},
 	};
@@ -155,7 +155,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			menuItem
 		}
@@ -166,7 +166,7 @@ class CustomSystemActionsView : public SystemActionsView
 {
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](TextMenuItem &, View &, Input::Event e)
 		{
 			if(system().hasContent())
@@ -193,7 +193,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		cheatsMenuName(appContext(), system().cheatsDir), attachParams(),
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<UserPathSelectView>("Cheats", system().userPath(system().cheatsDir),
+			pushAndShow(makeViewWithName<UserPathSelectView>("金手指", system().userPath(system().cheatsDir),
 				[this](CStringView path)
 				{
 					GbcSystem::log.info("set cheats path:{}", path);

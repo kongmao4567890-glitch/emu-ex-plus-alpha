@@ -37,9 +37,9 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 {
 	TextMenuItem timerItem[3]
 	{
-		{"Off",  attachParams(), setTimerIntDel(), {.id = 0}},
-		{"On",   attachParams(), setTimerIntDel(), {.id = 1}},
-		{"Auto", attachParams(), setTimerIntDel(), {.id = 2}},
+		{"关",  attachParams(), setTimerIntDel(), {.id = 0}},
+		{"开",   attachParams(), setTimerIntDel(), {.id = 1}},
+		{"自动", attachParams(), setTimerIntDel(), {.id = 2}},
 	};
 
 	TextMenuItem::SelectDelegate setTimerIntDel()
@@ -62,7 +62,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 			{
 				if(idx == 2)
 				{
-					t.resetString(conf.raster ? "On" : "Off");
+					t.resetString(conf.raster ? "开" : "关");
 					return true;
 				}
 				else
@@ -80,7 +80,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			menuItem
 		}
@@ -633,7 +633,7 @@ private:
 
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](TextMenuItem &, View &, Input::Event e)
 		{
 			if(system().hasContent())

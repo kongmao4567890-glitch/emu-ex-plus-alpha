@@ -114,7 +114,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 			{
 				if(idx == -1)
 				{
-					t.resetString("None");
+					t.resetString("无");
 					return true;
 				}
 				return false;
@@ -555,7 +555,7 @@ private:
 			{
 				if(idx == -1)
 				{
-					t.resetString("None");
+					t.resetString("无");
 					return true;
 				}
 				return false;
@@ -702,7 +702,7 @@ protected:
 				{
 					system().setMixerVolumeOption(type, -1);
 				}},
-			TextMenuItem{"Custom Value", attachParams(),
+			TextMenuItem{"自定义", attachParams(),
 				[this, type = (uint8_t)type, idx](Input::Event e)
 				{
 					pushAndShowNewCollectValueInputView<int>(attachParams(), e, "Input 0 to 100", "",
@@ -717,7 +717,7 @@ protected:
 							}
 							else
 							{
-								app().postErrorMessage("Value not in range");
+								app().postErrorMessage("值超出范围");
 								return false;
 							}
 						});
@@ -742,7 +742,7 @@ protected:
 	{
 		return
 		{
-			"Volume", attachParams(),
+			"音量", attachParams(),
 			1,
 			volumeLevelItem[idx],
 			{
@@ -775,7 +775,7 @@ protected:
 				{
 					system().setMixerPanOption(type, -1);
 				}},
-			TextMenuItem{"Custom Value", attachParams(),
+			TextMenuItem{"自定义", attachParams(),
 				[this, type = (uint8_t)type, idx](Input::Event e)
 				{
 					pushAndShowNewCollectValueInputView<int>(attachParams(), e, "Input 0 to 100", "",
@@ -790,7 +790,7 @@ protected:
 							}
 							else
 							{
-								app().postErrorMessage("Value not in range");
+								app().postErrorMessage("值超出范围");
 								return false;
 							}
 						});

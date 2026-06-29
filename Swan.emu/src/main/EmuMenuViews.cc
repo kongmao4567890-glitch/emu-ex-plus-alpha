@@ -50,7 +50,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e,
-				"Input name", system().userName,
+				"输入名称", system().userName,
 				[this](CollectTextInputView&, auto str_)
 				{
 					std::string_view str{str_};
@@ -181,7 +181,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	TextMenuItem rotationItem[3]
 	{
-		{"Auto",       attachParams(), setRotationDel(), {.id = WsRotation::Auto}},
+		{"自动",       attachParams(), setRotationDel(), {.id = WsRotation::Auto}},
 		{"Horizontal", attachParams(), setRotationDel(), {.id = WsRotation::Horizontal}},
 		{"Vertical",   attachParams(), setRotationDel(), {.id = WsRotation::Vertical}},
 	};
@@ -219,7 +219,7 @@ public:
 	ConsoleOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Console Options",
+			"主机选项",
 			attach,
 			menuItem
 		} {}
@@ -230,7 +230,7 @@ class CustomSystemActionsView : public SystemActionsView
 private:
 	TextMenuItem options
 	{
-		"Console Options", attachParams(),
+		"主机选项", attachParams(),
 		[this](Input::Event e) { pushAndShow(makeView<ConsoleOptionView>(), e); }
 	};
 
