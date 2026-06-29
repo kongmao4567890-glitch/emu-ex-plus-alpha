@@ -80,7 +80,7 @@ FS::PathLocation ApplicationContext::sharedStoragePathLocation() const
 FS::PathLocation AndroidApplicationContext::externalMediaPathLocation() const
 {
 	auto path = application().externalMediaPath(thisThreadJniEnv(), baseActivityObject());
-	return {path, "App Media Folder", "Media"};
+	return {path, "应用媒体文件夹", "Media"};
 }
 
 std::vector<FS::PathLocation> ApplicationContext::rootFileLocations() const

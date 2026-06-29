@@ -110,7 +110,7 @@ public:
 	auto deadzone() const { return config.deadzoneMM100x; }
 	bool setDiagonalSensitivity(Gfx::Renderer &, float newDiagonalSensitivity);
 	auto diagonalSensitivity() const { return config.diagonalSensitivity; }
-	std::string name(const InputManager &) const { return "D-Pad"; }
+	std::string name(const InputManager &) const { return "方向键"; }
 	void updateMeasurements(const Window &win);
 	void transposeKeysForPlayer(const InputManager &, int player);
 	void setAlpha(float alpha);

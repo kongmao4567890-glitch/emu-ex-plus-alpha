@@ -268,7 +268,7 @@ void XApplication::initInputSystem()
 
 	// setup device list
 	vkbDevice = &addInputDevice(ApplicationContext{static_cast<Application&>(*this)},
-		std::make_unique<Input::Device>(std::in_place_type<Input::XInputDevice>, Input::virtualDeviceFlags, "Virtual"));
+		std::make_unique<Input::Device>(std::in_place_type<Input::XInputDevice>, Input::virtualDeviceFlags, "虚拟设备"));
 	auto queryDevReply = XCB_REPLY(xcb_input_xi_query_device, xConn, XCB_INPUT_DEVICE_ALL);
 	if(queryDevReply)
 	{

@@ -471,7 +471,7 @@ void AndroidApplication::enumInputDevices(ApplicationContext ctx, JNIEnv* env, j
 	{
 		log.info("no \"Virtual\" device id found, adding one");
 		virtualDev = addAndroidInputDevice(ctx,
-			std::make_unique<Input::Device>(std::in_place_type<Input::AndroidInputDevice>, -1, Input::virtualDeviceFlags, "Virtual"),
+			std::make_unique<Input::Device>(std::in_place_type<Input::AndroidInputDevice>, -1, Input::virtualDeviceFlags, "虚拟设备"),
 			false);
 	}
 	if(notify) { onEvent(ctx, Input::DevicesEnumeratedEvent{}); }
