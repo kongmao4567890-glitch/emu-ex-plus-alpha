@@ -26,7 +26,7 @@ namespace EmuEx
 
 using namespace IG;
 
-const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2011-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nStella Team\nstella-emu.github.io"};
+const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2011-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nStella Team\nstella-emu.github.io\n\n编译者：九尾猫游戏解说"};
 const std::string_view AppMeta::configFilename{"2600emu.config"};
 const bool AppMeta::hasPALVideoSystem{true};
 const bool AppMeta::hasResetModes{true};

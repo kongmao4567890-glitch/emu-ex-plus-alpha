@@ -23,7 +23,7 @@ import std;
 namespace EmuEx
 {
 
-const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2011-2026\nRobert Broglia\nwww.explusalpha.com\n\n\nPortions (c) the\nGambatte Team\ngambatte.sourceforge.net"};
+const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2011-2026\nRobert Broglia\nwww.explusalpha.com\n\n\nPortions (c) the\nGambatte Team\ngambatte.sourceforge.net\n\n编译者：九尾猫游戏解说"};
 const std::string_view AppMeta::configFilename{"GbcEmu.config"};
 const bool AppMeta::hasCheats{true};
 const AspectRatioInfo AppMeta::aspectRatioInfo{"10:9 (Original)", {10, 9}};

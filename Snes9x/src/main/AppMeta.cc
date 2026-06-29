@@ -12,7 +12,7 @@ import std;
 namespace EmuEx
 {
 
-const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2011-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nSnes9x Team\nwww.snes9x.com"};
+const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2011-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nSnes9x Team\nwww.snes9x.com\n\n编译者：九尾猫游戏解说"};
 #ifdef SNES9X_VERSION_1_4
 const std::string_view AppMeta::configFilename{"Snes9x.config"};
 #else

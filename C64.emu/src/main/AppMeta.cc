@@ -23,7 +23,7 @@ import std;
 namespace EmuEx
 {
 
-const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2013-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nVice Team\nvice-emu.sourceforge.io"};
+const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2013-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nVice Team\nvice-emu.sourceforge.io\n\n编译者：九尾猫游戏解说"};
 const std::string_view AppMeta::configFilename{"C64Emu.config"};
 const bool AppMeta::hasPALVideoSystem{true};
 const bool AppMeta::hasResetModes{true};

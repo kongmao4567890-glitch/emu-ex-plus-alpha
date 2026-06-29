@@ -23,7 +23,7 @@ import std;
 namespace EmuEx
 {
 
-const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2012-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nVBA-m Team\nvba-m.com"};
+const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2012-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nVBA-m Team\nvba-m.com\n\n编译者：九尾猫游戏解说"};
 const std::string_view AppMeta::configFilename{"GbaEmu.config"};
 const bool AppMeta::hasCheats{true};
 const bool AppMeta::needsGlobalInstance{true};

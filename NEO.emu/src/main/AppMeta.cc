@@ -23,7 +23,7 @@ import std;
 namespace EmuEx
 {
 
-const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2012-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nGngeo Team\ncode.google.com/p/gngeo"};
+const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2012-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nGngeo Team\ncode.google.com/p/gngeo\n\n编译者：九尾猫游戏解说"};
 const std::string_view AppMeta::configFilename{"NeoEmu.config"};
 const bool AppMeta::handlesGenericIO{}; // TODO: need to re-factor GnGeo file loading code
 const bool AppMeta::canRenderRGBA8888{};

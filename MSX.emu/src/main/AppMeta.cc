@@ -28,7 +28,7 @@ import std;
 namespace EmuEx
 {
 
-const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2011-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nBlueMSX Team\nbluemsx.com"};
+const std::string_view AppMeta::creditsViewStr{CREDITS_INFO_STRING "(c) 2011-2026\nRobert Broglia\nwww.explusalpha.com\n\nPortions (c) the\nBlueMSX Team\nbluemsx.com\n\n编译者：九尾猫游戏解说"};
 const std::string_view AppMeta::configFilename{"MsxEmu.config"};
 const int AppMeta::forcedSoundRate{44100};
 const bool AppMeta::handlesGenericIO{}; // TODO: need to re-factor BlueMSX file loading code
