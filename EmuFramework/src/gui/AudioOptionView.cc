@@ -50,7 +50,7 @@ AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool
 		{"25%",  attach, {.id = 25}},
 		{"自定义", attach, [this](const Input::Event &e)
 			{
-				pushAndShowNewCollectValueRangeInputView<int, 0, 125>(attachParams(), e, "Input 0 to 125", "",
+				pushAndShowNewCollectValueRangeInputView<int, 0, 125>(attachParams(), e, "输入 0 到 125", "",
 					[this](CollectTextInputView &, auto val)
 					{
 						audio.setMaxVolume(val);
@@ -109,7 +109,7 @@ AudioOptionView::AudioOptionView(ViewAttachParams attach, EmuAudio& audio_, bool
 		[&]
 		{
 			decltype(audioRateItem) items;
-			items.emplace_back("Device Native", attach, [this](View &view)
+			items.emplace_back("设备原生", attach, [this](View &view)
 			{
 				audio.setRate(0);
 				audioRate.setSelected(MenuId{audio.rate()}, view);

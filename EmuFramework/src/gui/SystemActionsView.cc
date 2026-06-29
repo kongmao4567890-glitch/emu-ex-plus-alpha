@@ -29,7 +29,7 @@ constexpr SystemLogger log{"SystemActionsView"};
 
 static auto autoSaveName(EmuApp &app)
 {
-	return std::format("Autosave Slot ({})", app.autosaveManager.slotFullName());
+	return std::format("自动存档槽位 ({})", app.autosaveManager.slotFullName());
 }
 
 static std::string saveAutosaveName(EmuApp &app)
@@ -37,7 +37,7 @@ static std::string saveAutosaveName(EmuApp &app)
 	auto &autosaveManager = app.autosaveManager;
 	if(!autosaveManager.timerFrequency().count())
 		return "保存自动存档";
-	return std::format("Save Autosave State (Timer In {:%M:%S})",
+	return std::format("保存自动存档状态 (剩余 {:%M:%S})",
 		duration_cast<Seconds>(autosaveManager.saveTimer.nextFireDuration()));
 }
 
@@ -100,7 +100,7 @@ SystemActionsView::SystemActionsView(ViewAttachParams attach, bool customMenu):
 				app().postMessage("无已保存的状态");
 				return;
 			}
-			pushAndShowModal(makeView<YesNoAlertView>(std::format("Really load state from: {}?", saveTime),
+			pushAndShowModal(makeView<YesNoAlertView>(std::format("确定要从以下位置读取状态吗：{}？", saveTime),
 				YesNoAlertView::Delegates
 				{
 					.onYes = [this]
@@ -143,7 +143,7 @@ SystemActionsView::SystemActionsView(ViewAttachParams attach, bool customMenu):
 				[this](CollectTextInputView &, auto str)
 				{
 					appContext().addLauncherIcon(str, system().contentLocation());
-					app().postMessage(2, false, std::format("Added shortcut:\n{}", str));
+					app().postMessage(2, false, std::format("已添加快捷方式：\n{}", str));
 					return true;
 				});
 		}
@@ -161,7 +161,7 @@ SystemActionsView::SystemActionsView(ViewAttachParams attach, bool customMenu):
 				app().postMessage("保存路径无效");
 				return;
 			}
-			pushAndShowModal(makeView<YesNoAlertView>(std::format("Save screenshot to folder {}?", pathName),
+			pushAndShowModal(makeView<YesNoAlertView>(std::format("将截图保存到文件夹 {}？", pathName),
 				YesNoAlertView::Delegates
 				{
 					.onYes = [this]
@@ -180,7 +180,7 @@ SystemActionsView::SystemActionsView(ViewAttachParams attach, bool customMenu):
 			if(!app().hasSavedSessionOptions())
 				return;
 			pushAndShowModal(makeView<YesNoAlertView>(
-				"Reset saved options for the currently running system to defaults? Some options only take effect next time the system loads.",
+				"将当前运行系统的已保存选项重置为默认值？部分选项仅在下次加载系统时生效。",
 				YesNoAlertView::Delegates
 				{
 					.onYes = [this]

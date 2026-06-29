@@ -39,7 +39,7 @@ public:
 	CheatsView(ViewAttachParams attach):
 		TableView
 		{
-			"Cheats",
+			"金手指",
 			attach,
 			[this](ItemMessage msg) -> ItemReply
 			{
@@ -58,7 +58,7 @@ public:
 		},
 		edit
 		{
-			"Add/Edit", attach,
+			"添加/编辑", attach,
 			[this](const Input::Event& e)
 			{
 				auto editCheatsView = AppMeta::makeEditCheatsView(attachParams(), *this);
@@ -101,7 +101,7 @@ public:
 	BaseEditCheatsView(ViewAttachParams attach, CheatsView& cheatsView, TableView::ItemSourceDelegate itemSrc):
 		TableView
 		{
-			"Edit Cheats",
+			"编辑金手指",
 			attach,
 			itemSrc
 		},
@@ -146,12 +146,12 @@ protected:
 					return true;
 				onCheatsChanged();
 				view.dismiss();
-				pushAndShowNewCollectTextInputView(attachParams(), {}, "Input description", "",
+				pushAndShowNewCollectTextInputView(attachParams(), {}, "输入描述", "",
 					[this, &cheat = *cheatPtr](CollectTextInputView &view, const char *str)
 					{
 						if(!system().setCheatName(cheat, str))
 						{
-							app().postMessage(true, "A cheat with name already exists");
+							app().postMessage(true, "同名金手指已存在");
 							return true;
 						}
 						onCheatsChanged();
@@ -182,12 +182,12 @@ public:
 			[this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueInputView<const char*>(attachParams(), e,
-					"Input description", system().cheatName(*cheatPtr),
+					"输入描述", system().cheatName(*cheatPtr),
 					[this](CollectTextInputView&, auto str)
 					{
 						if(!system().setCheatName(*cheatPtr, str))
 						{
-							app().postMessage(true, "A cheat with name already exists");
+							app().postMessage(true, "同名金手指已存在");
 							return false;
 						}
 						name.compile(str);
@@ -199,10 +199,10 @@ public:
 		},
 		remove
 		{
-			"Delete", attach,
+			"删除", attach,
 			[this](const Input::Event &e)
 			{
-				pushAndShowModal(makeView<YesNoAlertView>("Really delete this cheat?",
+				pushAndShowModal(makeView<YesNoAlertView>("确定删除此金手指？",
 					YesNoAlertView::Delegates{.onYes = [this]{ removeCheat(); }}), e);
 			}
 		} {}

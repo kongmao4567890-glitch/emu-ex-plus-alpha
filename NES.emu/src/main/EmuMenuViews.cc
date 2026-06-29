@@ -56,9 +56,9 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	TextMenuItem inputPortsItem[4]
 	{
 		{"自动",          attachParams(), {.id = packInputEnums(SI_UNSET, SI_UNSET)}},
-		{"Gamepads",      attachParams(), {.id = packInputEnums(SI_GAMEPAD, SI_GAMEPAD)}},
-		{"Gun (2P, NES)", attachParams(), {.id = packInputEnums(SI_GAMEPAD, SI_ZAPPER)}},
-		{"Gun (1P, VS)",  attachParams(), {.id = packInputEnums(SI_ZAPPER, SI_GAMEPAD)}},
+		{"手柄",          attachParams(), {.id = packInputEnums(SI_GAMEPAD, SI_GAMEPAD)}},
+		{"光线枪（2P，NES）", attachParams(), {.id = packInputEnums(SI_GAMEPAD, SI_ZAPPER)}},
+		{"光线枪（1P，VS）", attachParams(), {.id = packInputEnums(SI_ZAPPER, SI_GAMEPAD)}},
 	};
 
 	MultiChoiceMenuItem inputPorts
@@ -80,7 +80,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem fcMic
 	{
-		"P2 Start As Microphone", attachParams(),
+		"P2 开始键作为麦克风", attachParams(),
 		replaceP2StartWithMicrophone,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -124,16 +124,15 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem compatibleFrameskip
 	{
-		"Frameskip Mode", attachParams(),
+		"跳帧模式", attachParams(),
 		(bool)system().optionCompatibleFrameskip,
-		"Fast", "Compatible",
+		"快速", "兼容",
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
 			if(!item.boolValue())
 			{
 				app().pushAndShowModalView(makeView<YesNoAlertView>(
-					"Use compatible mode if the current game has glitches when "
-					"fast-forwarding/frame-skipping, at the cost of increased CPU usage.",
+					"如果当前游戏在快进/跳帧时出现异常，请使用兼容模式（会增加 CPU 占用）。",
 					YesNoAlertView::Delegates
 					{
 						.onYes = [this, &item]
@@ -173,7 +172,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem visibleVideoLines
 	{
-		"Visible Lines", attachParams(),
+		"可见扫描线", attachParams(),
 		MenuId{packVideoLines(system().optionStartVideoLine, system().optionVisibleVideoLines)},
 		visibleVideoLinesItem,
 		{
@@ -192,7 +191,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem horizontalVideoCrop
 	{
-		"Crop 8 Pixels On Sides", attachParams(),
+		"两侧裁剪 8 像素", attachParams(),
 		(bool)system().optionHorizontalVideoCrop,
 		[this](BoolMenuItem &item)
 		{
@@ -204,11 +203,11 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 		}
 	};
 
-	TextHeadingMenuItem overclocking{"Overclocking", attachParams()};
+	TextHeadingMenuItem overclocking{"超频", attachParams()};
 
 	BoolMenuItem overclockingEnabled
 	{
-		"Enabled", attachParams(),
+	"启用", attachParams(),
 		overclock_enabled,
 		[this](BoolMenuItem &item)
 		{
@@ -219,11 +218,11 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	DualTextMenuItem extraLines
 	{
-		"Extra Lines Per Frame", std::to_string(postrenderscanlines), attachParams(),
+		"每帧额外扫描线", std::to_string(postrenderscanlines), attachParams(),
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueRangeInputView<int, 0, maxExtraLinesPerFrame>(attachParams(), e,
-				"Input 0 to 30000", std::to_string(postrenderscanlines),
+				"输入 0 到 30000", std::to_string(postrenderscanlines),
 				[this](CollectTextInputView&, auto val)
 				{
 					system().sessionOptionSet();
@@ -236,11 +235,11 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	DualTextMenuItem vblankMultipler
 	{
-		"Vertical Blank Line Multiplier", std::to_string(vblankscanlines), attachParams(),
+		"垂直空白行乘数", std::to_string(vblankscanlines), attachParams(),
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueRangeInputView<int, 0, maxVBlankMultiplier>(attachParams(), e,
-				"Input 0 to 16", std::to_string(vblankscanlines),
+				"输入 0 到 16", std::to_string(vblankscanlines),
 				[this](CollectTextInputView&, auto val)
 				{
 					system().sessionOptionSet();
@@ -284,7 +283,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	BoolMenuItem spriteLimit
 	{
-		"Sprite Limit", attachParams(),
+		"精灵数量限制", attachParams(),
 		(bool)system().optionSpriteLimit,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -303,7 +302,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem videoSystem
 	{
-		"Default Video System", attachParams(),
+		"默认视频系统", attachParams(),
 		system().optionDefaultVideoSystem.value(),
 		videoSystemItem
 	};
@@ -342,7 +341,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 		{"Classic (FBX)",       attachParams(), [this]() { setPalette(appContext(), classicPalPath); }},
 		{"Wavebeam",            attachParams(), [this]() { setPalette(appContext(), wavebeamPalPath); }},
 		{"Five Reality",        attachParams(), [this]() { setPalette(appContext(), fiveRealityPalPath); }},
-		{"Custom File", attachParams(), [this](Input::Event e)
+		{"自定义文件", attachParams(), [this](Input::Event e)
 			{
 				auto fsFilter = [](std::string_view name) { return endsWithAnyCaseless(name, ".pal"); };
 				auto fPicker = makeView<FilePicker>(FSPicker::Mode::FILE, fsFilter, e, false);
@@ -362,7 +361,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem defaultPal
 	{
-		"Default Palette", attachParams(),
+		"默认调色板", attachParams(),
 		[this]()
 		{
 			if(system().defaultPalettePath.empty()) return 0;
@@ -398,7 +397,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem visibleVideoLines
 	{
-		"Default Visible Lines", attachParams(),
+		"默认可见扫描线", attachParams(),
 		[this]()
 		{
 			switch(system().optionDefaultVisibleVideoLines)
@@ -422,7 +421,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	BoolMenuItem correctLineAspect
 	{
-		"Correct Line Aspect Ratio", attachParams(),
+		"修正扫描线宽高比", attachParams(),
 		(bool)system().optionCorrectLineAspect,
 		[this](BoolMenuItem &item)
 		{
@@ -457,20 +456,20 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 	TextMenuItem qualityItem[3]
 	{
 		{"普通", attachParams(), [this](){ setQuality(0); }},
-		{"High", attachParams(), [this]() { setQuality(1); }},
-		{"Highest", attachParams(), [this]() { setQuality(2); }}
+		{"高", attachParams(), [this]() { setQuality(1); }},
+		{"最高", attachParams(), [this]() { setQuality(2); }}
 	};
 
 	MultiChoiceMenuItem quality
 	{
-		"Emulation Quality", attachParams(),
+		"模拟质量", attachParams(),
 		system().optionSoundQuality.value(),
 		qualityItem
 	};
 
 	BoolMenuItem lowPassFilter
 	{
-		"Low Pass Filter", attachParams(),
+		"低通滤波器", attachParams(),
 		(bool)FSettings.lowpass,
 		[this](BoolMenuItem &item)
 		{
@@ -480,7 +479,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	BoolMenuItem swapDutyCycles
 	{
-		"Swap Duty Cycles", attachParams(),
+		"交换占空比周期", attachParams(),
 		swapDuty,
 		[this](BoolMenuItem &item)
 		{
@@ -488,11 +487,11 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 		}
 	};
 
-	TextHeadingMenuItem mixer{"Mixer", attachParams()};
+	TextHeadingMenuItem mixer{"混音器", attachParams()};
 
 	BoolMenuItem squareWave1
 	{
-		"Square Wave #1", attachParams(),
+		"方波 #1", attachParams(),
 		(bool)FSettings.Square1Volume,
 		[this](BoolMenuItem &item)
 		{
@@ -502,7 +501,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	BoolMenuItem squareWave2
 	{
-		"Square Wave #2", attachParams(),
+		"方波 #2", attachParams(),
 		(bool)FSettings.Square2Volume,
 		[this](BoolMenuItem &item)
 		{
@@ -512,7 +511,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	BoolMenuItem triangleWave1
 	{
-		"Triangle Wave", attachParams(),
+		"三角波", attachParams(),
 		(bool)FSettings.TriangleVolume,
 		[this](BoolMenuItem &item)
 		{
@@ -522,7 +521,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	BoolMenuItem noise
 	{
-		"Noise", attachParams(),
+		"噪声", attachParams(),
 		(bool)FSettings.NoiseVolume,
 		[this](BoolMenuItem &item)
 		{
@@ -581,7 +580,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		patchesMenuName(appContext(), system().patchesDir), attachParams(),
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<UserPathSelectView>("Patches", system().userPath(system().patchesDir),
+			pushAndShow(makeViewWithName<UserPathSelectView>("补丁", system().userPath(system().patchesDir),
 				[this](CStringView path)
 				{
 					NesSystem::log.info("set patches path:{}", path);
@@ -596,7 +595,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		palettesMenuName(appContext(), system().palettesDir), attachParams(),
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<UserPathSelectView>("Palettes", system().userPath(system().palettesDir),
+			pushAndShow(makeViewWithName<UserPathSelectView>("调色板", system().userPath(system().palettesDir),
 				[this](CStringView path)
 				{
 					NesSystem::log.info("set palettes path:{}", path);
@@ -611,7 +610,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		biosMenuEntryStr(system().fdsBiosPath), attachParams(),
 		[this](TextMenuItem &, View &, Input::Event e)
 		{
-			pushAndShow(makeViewWithName<DataFileSelectView<>>("Disk System BIOS",
+			pushAndShow(makeViewWithName<DataFileSelectView<>>("磁盘系统 BIOS",
 				app().validSearchPath(FS::dirnameUri(system().fdsBiosPath)),
 				[this](CStringView path, FS::file_type type)
 				{
@@ -625,7 +624,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 
 	std::string biosMenuEntryStr(CStringView path) const
 	{
-		return std::format("Disk System BIOS: {}", appContext().fileUriDisplayName(path));
+		return std::format("磁盘系统 BIOS：{}", appContext().fileUriDisplayName(path));
 	}
 
 public:
@@ -646,7 +645,7 @@ private:
 	TextMenuItem setSide[DISK_SIDES]
 	{
 		{
-			"Set Disk 1 Side A", attachParams(),
+			"设置磁盘 1 面 A", attachParams(),
 			[this](View &view, Input::Event e)
 			{
 				FCEU_FDSSetDisk(0, static_cast<NesSystemHolder&>(system()));
@@ -654,7 +653,7 @@ private:
 			}
 		},
 		{
-			"Set Disk 1 Side B", attachParams(),
+			"设置磁盘 1 面 B", attachParams(),
 			[this](View &view, Input::Event e)
 			{
 				FCEU_FDSSetDisk(1, static_cast<NesSystemHolder&>(system()));
@@ -662,7 +661,7 @@ private:
 			}
 		},
 		{
-			"Set Disk 2 Side A", attachParams(),
+			"设置磁盘 2 面 A", attachParams(),
 			[this](View &view, Input::Event e)
 			{
 				FCEU_FDSSetDisk(2, static_cast<NesSystemHolder&>(system()));
@@ -670,7 +669,7 @@ private:
 			}
 		},
 		{
-			"Set Disk 2 Side B", attachParams(),
+			"设置磁盘 2 面 B", attachParams(),
 			[this](View &view, Input::Event e)
 			{
 				FCEU_FDSSetDisk(3, static_cast<NesSystemHolder&>(system()));
@@ -681,7 +680,7 @@ private:
 
 	TextMenuItem insertEject
 	{
-		"Eject", attachParams(),
+		"弹出", attachParams(),
 		[](View& view)
 		{
 			if(FCEU_FDSInserted())
@@ -698,7 +697,7 @@ public:
 	FDSControlView(ViewAttachParams attach):
 		TableView
 		{
-			"FDS Control",
+			"FDS 控制",
 			attach,
 			items
 		}
@@ -725,9 +724,9 @@ private:
 		if(!isFDS)
 			return;
 		if(!FCEU_FDSInserted())
-			fdsControl.compile("FDS Control (No Disk)");
+			fdsControl.compile("FDS 控制（无磁盘）");
 		else
-			fdsControl.compile(std::format("FDS Control (Disk {}:{})", (FCEU_FDSCurrentSide() >> 1) + 1, (FCEU_FDSCurrentSide() & 1) ? 'B' : 'A'));
+			fdsControl.compile(std::format("FDS 控制（磁盘 {}:{}）", (FCEU_FDSCurrentSide() >> 1) + 1, (FCEU_FDSCurrentSide() & 1) ? 'B' : 'A'));
 	}
 
 	TextMenuItem options
@@ -758,7 +757,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	BoolMenuItem skipFdcAccess
 	{
-		"Fast-forward Disk IO", attachParams(),
+		"加速磁盘 IO", attachParams(),
 		system().fastForwardDuringFdsAccess,
 		[this](BoolMenuItem &item)
 		{
@@ -796,20 +795,20 @@ public:
 	EditCheatView(ViewAttachParams attach, Cheat& cheat, BaseEditCheatsView& editCheatsView):
 		BaseEditCheatView
 		{
-			"Edit Cheat",
+			"编辑金手指",
 			attach,
 			cheat,
 			editCheatsView
 		},
 		addGG
 		{
-			"Add Another Code", attach,
-			[this](const Input::Event& e) { addNewCheatCode("Input Game Genie code", e, 1); }
+			"添加其他代码", attach,
+			[this](const Input::Event& e) { addNewCheatCode("输入 Game Genie 代码", e, 1); }
 		},
 		addRAM
 		{
-			"Add Another Patch", attach,
-			[this](const Input::Event& e) { addNewCheatCode("Input RAM address hex", e, 0); }
+			"添加其他补丁", attach,
+			[this](const Input::Event& e) { addNewCheatCode("输入 RAM 十六进制地址", e, 0); }
 		}
 	{
 		loadItems();
@@ -820,11 +819,11 @@ public:
 		codes.clear();
 		system().forEachCheatCode(*cheatPtr, [this](CheatCode& c, std::string_view code)
 		{
-			codes.emplace_back("Code", code, attachParams(), [this, &c](const Input::Event& e)
+			codes.emplace_back("代码", code, attachParams(), [this, &c](const Input::Event& e)
 			{
 				if(c.type)
 				{
-					pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e, "Input Game Genie code", toGGString(c),
+					pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e, "输入 Game Genie 代码", toGGString(c),
 						[this, &c](CollectTextInputView&, auto str) { return modifyCheatCode(c, {str, 1}); });
 				}
 				else
@@ -876,13 +875,13 @@ public:
 		},
 		addGG
 		{
-			"Add Game Genie Code", attachParams(),
-			[this](const Input::Event& e) { addNewCheat("Input Game Genie code", e, 1); }
+			"添加 Game Genie 代码", attachParams(),
+			[this](const Input::Event& e) { addNewCheat("输入 Game Genie 代码", e, 1); }
 		},
 		addRAM
 		{
-			"Add Memory Patch", attachParams(),
-			[this](const Input::Event& e) { addNewCheat("Input RAM Address Hex", e, 0); }
+			"添加内存补丁", attachParams(),
+			[this](const Input::Event& e) { addNewCheat("输入 RAM 十六进制地址", e, 0); }
 		} {}
 
 private:
@@ -892,7 +891,7 @@ private:
 EditRamCheatView::EditRamCheatView(ViewAttachParams attach, Cheat& cheat_, CheatCode& code_, EditCheatView& editCheatView_):
 	TableView
 	{
-		"Edit Memory Patch",
+		"编辑内存补丁",
 		attach,
 		[this](ItemMessage msg) -> ItemReply
 		{
@@ -917,18 +916,18 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, Cheat& cheat_, Cheat
 	editCheatView{editCheatView_},
 	addr
 	{
-		"Address",
+		"地址",
 		std::format("{:x}", code_.addr),
 		attach,
 		[this](const Input::Event& e)
 		{
-			pushAndShowNewCollectValueInputView<const char*>(attachParams(), e, "Input 4-digit hex", std::format("{:x}", code.addr),
+			pushAndShowNewCollectValueInputView<const char*>(attachParams(), e, "输入 4 位十六进制", std::format("{:x}", code.addr),
 				[this](CollectTextInputView&, auto str)
 				{
 					unsigned a = parseHex(str);
 					if(a > 0xFFFF)
 					{
-						app().postMessage(true, "Invalid input");
+						app().postMessage(true, "无效输入");
 						return false;
 					}
 					code.addr = a;
@@ -942,18 +941,18 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, Cheat& cheat_, Cheat
 	},
 	value
 	{
-		"Value",
+		"数值",
 		std::format("{:x}", code_.val),
 		attach,
 		[this](const Input::Event& e)
 		{
-			pushAndShowNewCollectValueInputView<const char*>(attachParams(), e, "Input 2-digit hex", std::format("{:x}", code.val),
+			pushAndShowNewCollectValueInputView<const char*>(attachParams(), e, "输入 2 位十六进制", std::format("{:x}", code.val),
 				[this](CollectTextInputView&, auto str)
 				{
 					unsigned a = parseHex(str);
 					if(a > 0xFF)
 					{
-						app().postMessage(true, "Invalid value");
+						app().postMessage(true, "无效数值");
 						return false;
 					}
 					code.val = a;
@@ -967,12 +966,12 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, Cheat& cheat_, Cheat
 	},
 	comp
 	{
-		"Compare",
+		"比较",
 		codeCompareToString(code_.compare),
 		attach,
 		[this](const Input::Event& e)
 		{
-			pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e, "Input 2-digit hex or blank", codeCompareToString(code.compare),
+			pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e, "输入 2 位十六进制或留空", codeCompareToString(code.compare),
 				[this](CollectTextInputView &, const char *str)
 				{
 					if(strlen(str))
@@ -980,7 +979,7 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, Cheat& cheat_, Cheat
 						unsigned a = parseHex(str);
 						if(a > 0xFF)
 						{
-							app().postMessage(true, "Invalid value");
+							app().postMessage(true, "无效数值");
 							return true;
 						}
 						code.compare = a;
@@ -1003,7 +1002,7 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, Cheat& cheat_, Cheat
 		"删除", attach,
 		[this](const Input::Event& e)
 		{
-			pushAndShowModal(makeView<YesNoAlertView>("Really delete this patch?",
+			pushAndShowModal(makeView<YesNoAlertView>("确定删除此补丁？",
 				YesNoAlertView::Delegates{.onYes = [this]{ editCheatView.removeCheatCode(code); dismiss(); }}), e);
 		}
 	} {}

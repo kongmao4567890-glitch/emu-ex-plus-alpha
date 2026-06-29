@@ -120,7 +120,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 				};
 				if(saveMemoryHasContent())
 				{
-					pushAndShowModal(makeView<YesNoAlertView>("Really change save type? Existing data in .sav file may be lost so please make a backup before proceeding.",
+					pushAndShowModal(makeView<YesNoAlertView>("确定更改存档类型？.sav 文件中的现有数据可能会丢失，请先备份。",
 						YesNoAlertView::Delegates
 						{
 							.onYes = [this, optVal = item.id](const Input::Event &e)
@@ -219,7 +219,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 	using MainAppHelper::system;
 	using MainAppHelper::app;
 
-	TextHeadingMenuItem mixer{"Mixer", attachParams()};
+	TextHeadingMenuItem mixer{"混音器", attachParams()};
 
 	using VolumeChoiceItemArr = std::array<TextMenuItem, 3>;
 
@@ -269,7 +269,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 	{
 		return
 		{
-			gbVol ? "GB APU Volume" : "PCM Volume", attachParams(),
+			gbVol ? "GB APU 音量" : "PCM 音量", attachParams(),
 			MenuId{soundVolumeAsInt(gGba, gbVol)},
 			volumeLevelItem[gbVol ? 1 : 0],
 			{
@@ -305,10 +305,10 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 	{
 		channelEnableItem("PCM #1", 0x100),
 		channelEnableItem("PCM #2", 0x200),
-		channelEnableItem("Pulse #1", 0x1),
-		channelEnableItem("Pulse #2", 0x2),
-		channelEnableItem("Wave", 0x4),
-		channelEnableItem("Noise", 0x8),
+		channelEnableItem("脉冲 #1", 0x1),
+		channelEnableItem("脉冲 #2", 0x2),
+		channelEnableItem("波形", 0x4),
+		channelEnableItem("噪声", 0x8),
 	};
 
 	std::array<TextMenuItem, 2> filteringLevelItem
@@ -339,7 +339,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem filteringLevel
 	{
-		"Filtering Level", attachParams(),
+		"滤波级别", attachParams(),
 		MenuId{soundFilteringAsInt(gGba)},
 		filteringLevelItem,
 		{
@@ -353,7 +353,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	BoolMenuItem filtering
 	{
-		"Filtering", attachParams(),
+		"滤波", attachParams(),
 		soundGetInterpolation(gGba),
 		[this](BoolMenuItem &item)
 		{
@@ -386,7 +386,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	BoolMenuItem bios
 	{
-		"Default Use BIOS", attachParams(),
+		"默认使用 BIOS", attachParams(),
 		system().defaultUseBios,
 		[this](BoolMenuItem &item)
 		{
@@ -397,10 +397,10 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 	#ifdef IG_CONFIG_SENSORS
 	TextMenuItem lightSensorScaleItem[5]
 	{
-		{"Darkness",      attachParams(), {.id = 0}},
-		{"Indoor Light",  attachParams(), {.id = 100}},
-		{"Overcast Day",  attachParams(), {.id = 1000}},
-		{"Sunny Day",     attachParams(), {.id = 10000}},
+		{"黑暗",      attachParams(), {.id = 0}},
+		{"室内光",  attachParams(), {.id = 100}},
+		{"阴天",  attachParams(), {.id = 1000}},
+		{"晴天",     attachParams(), {.id = 10000}},
 		{"自定义",  attachParams(),
 			[this](Input::Event e)
 			{
@@ -419,7 +419,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem lightSensorScale
 	{
-		"Light Sensor Scale", attachParams(),
+		"光传感器比例", attachParams(),
 		MenuId{system().lightSensorScaleLux},
 		lightSensorScaleItem,
 		{
@@ -472,7 +472,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		patchesMenuName(appContext(), system().patchesDir), attachParams(),
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<UserPathSelectView>("Patches", system().userPath(system().patchesDir),
+			pushAndShow(makeViewWithName<UserPathSelectView>("补丁", system().userPath(system().patchesDir),
 				[this](CStringView path)
 				{
 					GbaSystem::log.info("set patches path:{}", path);
@@ -521,7 +521,7 @@ public:
 
 static auto cheatInputString(bool isGSv3)
 {
-	return isGSv3 ? "Input xxxxxxxx yyyyyyyy" : "Input xxxxxxxx yyyyyyyy (GS) or xxxxxxxx yyyy (AR)";
+	return isGSv3 ? "输入 xxxxxxxx yyyyyyyy" : "输入 xxxxxxxx yyyyyyyy (GS) 或 xxxxxxxx yyyy (AR)";
 }
 
 class EditCheatView : public BaseEditCheatView
@@ -530,19 +530,19 @@ public:
 	EditCheatView(ViewAttachParams attach, Cheat& cheat, BaseEditCheatsView& editCheatsView):
 		BaseEditCheatView
 		{
-			"Edit Cheat",
+			"编辑金手指",
 			attach,
 			cheat,
 			editCheatsView
 		},
 		addGS12CBCode
 		{
-			"Add Another GS v1-2/CB Code", attach,
+			"添加其他 GS v1-2/CB 代码", attach,
 			[this](const Input::Event& e) { addNewCheatCode(cheatInputString(false), e, 0); }
 		},
 		addGS3Code
 		{
-			"Add Another GS v3 Code", attach,
+			"添加其他 GS v3 代码", attach,
 			[this](const Input::Event& e) { addNewCheatCode(cheatInputString(true), e, 1); }
 		}
 	{
@@ -554,9 +554,9 @@ public:
 		codes.clear();
 		system().forEachCheatCode(*cheatPtr, [this](CheatCode& c, std::string_view code)
 		{
-			codes.emplace_back("Code", c.codestring, attachParams(), [this, &c](const Input::Event& e)
+			codes.emplace_back("代码", c.codestring, attachParams(), [this, &c](const Input::Event& e)
 			{
-				pushAndShowModal(makeView<YesNoAlertView>("Really delete this code?",
+				pushAndShowModal(makeView<YesNoAlertView>("确定删除此代码？",
 					YesNoAlertView::Delegates{.onYes = [this, &c]{ removeCheatCode(c); }}), e);
 			});
 			return true;
@@ -603,12 +603,12 @@ public:
 		},
 		addGS12CBCode
 		{
-			"Add Game Shark v1-2/Code Breaker Code", attach,
+			"添加 Game Shark v1-2/Code Breaker 代码", attach,
 			[this](const Input::Event& e) { addNewCheat(cheatInputString(false), e, 0); }
 		},
 		addGS3Code
 		{
-			"Add Game Shark v3 Code", attach,
+			"添加 Game Shark v3 代码", attach,
 			[this](const Input::Event& e) { addNewCheat(cheatInputString(true), e, 1); }
 		} {}
 

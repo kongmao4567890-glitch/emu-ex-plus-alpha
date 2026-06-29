@@ -90,8 +90,8 @@ public:
 			hasEmuContent ? 3u : 2u
 		}
 	{
-		item.emplace_back("Yes", attach, [this](){ appContext().exit(); });
-		item.emplace_back("No", attach, [](){});
+		item.emplace_back("是", attach, [this](){ appContext().exit(); });
+		item.emplace_back("否", attach, [](){});
 		if(hasEmuContent)
 		{
 			item.emplace_back("关闭菜单", attach, [this](){ app().showEmulation(); });

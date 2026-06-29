@@ -48,7 +48,7 @@ static void handledFailedBTAdapterInit(ViewT& view, [[maybe_unused]] ViewAttachP
 	{
 		if(!FS::exists("/var/lib/dpkg/info/ch.ringwald.btstack.list"))
 		{
-			view.pushAndShowModal(std::make_unique<YesNoAlertView>(attach, "BTstack not found, open Cydia and install?",
+			view.pushAndShowModal(std::make_unique<YesNoAlertView>(attach, "未找到 BTstack，是否打开 Cydia 安装？",
 				YesNoAlertView::Delegates
 				{
 					.onYes = [](View &v){ v.appContext().openURL("cydia://package/ch.ringwald.btstack"); }
@@ -142,7 +142,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 						onScanStatus(app(), status, arg);
 					}))
 				{
-					app().postMessage(4, false, "Starting Scan...\n(see website for device-specific help)");
+					app().postMessage(4, false, "开始扫描...\n（设备相关帮助请访问网站）");
 				}
 				else
 				{
@@ -164,7 +164,7 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 			auto devConnected = Bluetooth::devsConnected(appContext());
 			if(devConnected)
 			{
-				pushAndShowModal(makeView<YesNoAlertView>(std::format("Really disconnect {} Bluetooth device(s)?", devConnected),
+				pushAndShowModal(makeView<YesNoAlertView>(std::format("确定断开 {} 个蓝牙设备？", devConnected),
 					YesNoAlertView::Delegates{.onYes = [this]{ app().closeBluetoothConnections(); }}), e);
 			}
 		}
@@ -187,13 +187,13 @@ MainMenuView::MainMenuView(ViewAttachParams attach, bool customMenu):
 							{
 								app().postErrorMessage(Config::envIsLinux ? 8 : 2,
 									Config::envIsLinux ?
-										"Unable to register server, make sure this executable has cap_net_bind_service enabled and bluetoothd isn't running" :
+										"无法注册服务器，请确保此程序已启用 cap_net_bind_service 且 bluetoothd 未运行" :
 										"蓝牙设置失败");
 								break;
 							}
 							case BluetoothScanState::Complete:
 							{
-								app().postMessage(4, "Push the PS button on your controller\n(see website for pairing help)");
+								app().postMessage(4, "按下手柄上的 PS 按钮\n（配对帮助请访问网站）");
 								break;
 							}
 							default: onScanStatus(app(), status, arg);
@@ -242,7 +242,7 @@ static void onScanStatus(EmuApp &app, BluetoothScanState status, int arg)
 		{
 			if(Config::envIsIOS)
 			{
-				app.postErrorMessage("BTstack power on failed, make sure the iOS Bluetooth stack is not active");
+				app.postErrorMessage("BTstack 开启失败，请确保 iOS 蓝牙协议栈未激活");
 			}
 			break;
 		}
@@ -258,12 +258,12 @@ static void onScanStatus(EmuApp &app, BluetoothScanState status, int arg)
 		}
 		case BluetoothScanState::Processing:
 		{
-			app.postMessage(2, 0, std::format("Checking {} device(s)...", arg));
+			app.postMessage(2, 0, std::format("正在检查 {} 个设备...", arg));
 			break;
 		}
 		case BluetoothScanState::NameFailed:
 		{
-			app.postErrorMessage("Failed reading a device name");
+			app.postErrorMessage("读取设备名称失败");
 			break;
 		}
 		case BluetoothScanState::Complete:
@@ -271,7 +271,7 @@ static void onScanStatus(EmuApp &app, BluetoothScanState status, int arg)
 			int devs = Bluetooth::pendingDevs();
 			if(devs)
 			{
-				app.postMessage(2, 0, std::format("Connecting to {} device(s)...", devs));
+				app.postMessage(2, 0, std::format("正在连接 {} 个设备...", devs));
 				Bluetooth::connectPendingDevs(app.bluetoothAdapter);
 			}
 			else

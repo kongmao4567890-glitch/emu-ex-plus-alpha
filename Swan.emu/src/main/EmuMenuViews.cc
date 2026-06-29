@@ -31,13 +31,13 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 	using MainAppHelper::system;
 	using MainAppHelper::app;
 
-	TextHeadingMenuItem userProfile{"WonderSwan User Profile", attachParams()};
+	TextHeadingMenuItem userProfile{"WonderSwan 用户配置", attachParams()};
 
 	BoolMenuItem language
 	{
-		"Language", attachParams(),
+		"语言", attachParams(),
 		(bool)system().userProfile.languageIsEnglish,
-		"Japanese", "English",
+		"日语", "英语",
 		[this](BoolMenuItem &item)
 		{
 			system().userProfile.languageIsEnglish = item.flipBoolValue(*this);
@@ -46,7 +46,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	DualTextMenuItem name
 	{
-		"Name", system().userName, attachParams(),
+		"名称", system().userName, attachParams(),
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e,
@@ -56,7 +56,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 					std::string_view str{str_};
 					if(str.size() > system().userName.max_size())
 					{
-						app().postErrorMessage("Name is too long");
+						app().postErrorMessage("名称过长");
 						return false;
 					}
 					system().userName = str;
@@ -68,7 +68,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	DualTextMenuItem birthYear
 	{
-		"Birth Year", std::to_string(system().userProfile.birthYear), attachParams(),
+		"出生年份", std::to_string(system().userProfile.birthYear), attachParams(),
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueRangeInputView<int, 1, 9999>(attachParams(), e,
@@ -84,7 +84,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	DualTextMenuItem birthMonth
 	{
-		"Birth Month", std::to_string(system().userProfile.birthMonth), attachParams(),
+		"出生月份", std::to_string(system().userProfile.birthMonth), attachParams(),
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueRangeInputView<int, 1, 12>(attachParams(), e,
@@ -100,7 +100,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	DualTextMenuItem birthDay
 	{
-		"Birth Day", std::to_string(system().userProfile.birthDay), attachParams(),
+		"出生日期", std::to_string(system().userProfile.birthDay), attachParams(),
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueRangeInputView<int, 1, 31>(attachParams(), e,
@@ -128,7 +128,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem sex
 	{
-		"Sex", attachParams(),
+		"性别", attachParams(),
 		MenuId{(unsigned)system().userProfile.sex},
 		sexItem
 	};
@@ -149,7 +149,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem bloodType
 	{
-		"Blood Type", attachParams(),
+		"血型", attachParams(),
 		MenuId{(unsigned)system().userProfile.bloodType},
 		bloodTypeItem
 	};
@@ -182,22 +182,22 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	TextMenuItem rotationItem[3]
 	{
 		{"自动",       attachParams(), setRotationDel(), {.id = WsRotation::Auto}},
-		{"Horizontal", attachParams(), setRotationDel(), {.id = WsRotation::Horizontal}},
-		{"Vertical",   attachParams(), setRotationDel(), {.id = WsRotation::Vertical}},
+		{"水平", attachParams(), setRotationDel(), {.id = WsRotation::Horizontal}},
+		{"垂直",   attachParams(), setRotationDel(), {.id = WsRotation::Vertical}},
 	};
 
 	MultiChoiceMenuItem rotation
 	{
-		"Handheld Rotation", attachParams(),
+		"掌机旋转", attachParams(),
 		MenuId{system().rotation},
 		rotationItem
 	};
 
-	TextHeadingMenuItem vGamepad{"Virtual Gamepad", attachParams()};
+	TextHeadingMenuItem vGamepad{"虚拟手柄", attachParams()};
 
 	BoolMenuItem showVGamepadButtons
 	{
-		system().isRotated() ? "Show A/B" : "Show Y1-4", attachParams(),
+		system().isRotated() ? "显示 A/B" : "显示 Y1-4", attachParams(),
 		system().isRotated() ? system().showVGamepadABWhenVertical : system().showVGamepadYWhenHorizonal,
 		[this](BoolMenuItem &item)
 		{

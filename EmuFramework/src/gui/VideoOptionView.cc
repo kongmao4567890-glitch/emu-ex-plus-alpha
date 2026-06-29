@@ -47,7 +47,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 		[&]
 		{
 			decltype(textureBufferModeItem) items;
-			items.emplace_back("Auto (Set optimal mode)", attach, [this](View &view)
+			items.emplace_back("自动（设置最佳模式）", attach, [this](View &view)
 			{
 				app().textureBufferMode = Gfx::TextureBufferMode::DEFAULT;
 				auto defaultMode = renderer().evalTextureBufferMode();
@@ -100,7 +100,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 			aspectRatioItems.emplace_back("自定义", attach, [this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueInputView<std::pair<float, float>>(attachParams(), e,
-					"Input decimal or fraction", "",
+					"输入小数或分数", "",
 					[this](CollectTextInputView&, auto val)
 					{
 						float ratio = val.first / val.second;
@@ -143,8 +143,8 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 		{"100%",                  attach, {.id = 100}},
 		{"90%",                   attach, {.id = 90}},
 		{"80%",                   attach, {.id = 80}},
-		{"Integer-only",          attach, {.id = optionContentScaleIntegerOnly}},
-		{"Integer-only (Height)", attach, {.id = optionContentScaleIntegerOnlyY}},
+		{"仅整数",          attach, {.id = optionContentScaleIntegerOnly}},
+		{"仅整数（高度）", attach, {.id = optionContentScaleIntegerOnlyY}},
 		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
@@ -243,7 +243,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	{
 		"图像插值", attach,
 		videoLayer_.usingLinearFilter(),
-		"无", "Linear",
+		"无", "线性",
 		[this](BoolMenuItem &item)
 		{
 			videoLayer.setLinearFilter(item.flipBoolValue(*this));
@@ -255,9 +255,9 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 		{"关",         attach, {.id = ImageEffectId::DIRECT}},
 		{"hq2x",        attach, {.id = ImageEffectId::HQ2X}},
 		{"Scale2x",     attach, {.id = ImageEffectId::SCALE2X}},
-		{"Prescale 2x", attach, {.id = ImageEffectId::PRESCALE2X}},
-		{"Prescale 3x", attach, {.id = ImageEffectId::PRESCALE3X}},
-		{"Prescale 4x", attach, {.id = ImageEffectId::PRESCALE4X}},
+		{"预缩放 2倍", attach, {.id = ImageEffectId::PRESCALE2X}},
+		{"预缩放 3倍", attach, {.id = ImageEffectId::PRESCALE3X}},
+		{"预缩放 4倍", attach, {.id = ImageEffectId::PRESCALE4X}},
 	},
 	imgEffect
 	{
@@ -275,13 +275,13 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	overlayEffectItem
 	{
 		{"关",            attach, {.id = 0}},
-		{"Scanlines",      attach, {.id = ImageOverlayId::SCANLINES}},
-		{"Scanlines 2x",   attach, {.id = ImageOverlayId::SCANLINES_2}},
-		{"LCD Grid",       attach, {.id = ImageOverlayId::LCD}},
-		{"CRT Mask",       attach, {.id = ImageOverlayId::CRT_MASK}},
-		{"CRT Mask .5x",   attach, {.id = ImageOverlayId::CRT_MASK_2}},
-		{"CRT Grille",     attach, {.id = ImageOverlayId::CRT_GRILLE}},
-		{"CRT Grille .5x", attach, {.id = ImageOverlayId::CRT_GRILLE_2}}
+		{"扫描线",      attach, {.id = ImageOverlayId::SCANLINES}},
+		{"扫描线 2倍",   attach, {.id = ImageOverlayId::SCANLINES_2}},
+		{"LCD 网格",       attach, {.id = ImageOverlayId::LCD}},
+		{"CRT 遮罩",       attach, {.id = ImageOverlayId::CRT_MASK}},
+		{"CRT 遮罩 0.5倍",   attach, {.id = ImageOverlayId::CRT_MASK_2}},
+		{"CRT 栅格",     attach, {.id = ImageOverlayId::CRT_GRILLE}},
+		{"CRT 栅格 0.5倍", attach, {.id = ImageOverlayId::CRT_GRILLE_2}}
 	},
 	overlayEffect
 	{
@@ -305,7 +305,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
-				pushAndShowNewCollectValueRangeInputView<int, 0, 100>(attachParams(), e, "Input 0 to 100", "",
+				pushAndShowNewCollectValueRangeInputView<int, 0, 100>(attachParams(), e, "输入 0 到 100", "",
 					[this](CollectTextInputView &, auto val)
 					{
 						videoLayer.setOverlayIntensity(val / 100.f);
@@ -338,7 +338,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	imgEffectPixelFormatItem
 	{
-		{"Auto (Match display format)", attach, {.id = PixelFormatId::Unset}},
+		{"自动（匹配显示格式）", attach, {.id = PixelFormatId::Unset}},
 		{"RGBA8888",                    attach, {.id = PixelFormatId::RGBA8888}},
 		{"RGB565",                      attach, {.id = PixelFormatId::RGB565}},
 	},
@@ -431,7 +431,7 @@ VideoOptionView::VideoOptionView(ViewAttachParams attach, EmuVideoLayer &videoLa
 	},
 	renderPixelFormatItem
 	{
-		{"Auto (Match display format)", attach, {.id = PixelFormatId::Unset}},
+		{"自动（匹配显示格式）", attach, {.id = PixelFormatId::Unset}},
 		{"RGBA8888",                    attach, {.id = PixelFormatId::RGBA8888}},
 		{"RGB565",                      attach, {.id = PixelFormatId::RGB565}},
 	},
@@ -579,7 +579,7 @@ TextMenuItem::SelectDelegate VideoOptionView::setVideoBrightnessCustomDel(ImageC
 {
 	return [=, this](const Input::Event &e)
 	{
-		pushAndShowNewCollectValueRangeInputView<int, 0, 200>(attachParams(), e, "Input 0 to 200", "",
+		pushAndShowNewCollectValueRangeInputView<int, 0, 200>(attachParams(), e, "输入 0 到 200", "",
 			[=, this](CollectTextInputView &, auto val)
 			{
 				videoLayer.setBrightness(val / 100.f, ch);

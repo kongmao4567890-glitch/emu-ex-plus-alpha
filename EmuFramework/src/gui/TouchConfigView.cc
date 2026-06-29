@@ -71,7 +71,7 @@ public:
 			{"自定义", attach,
 				[this](const Input::Event &e)
 				{
-					pushAndShowNewCollectValueRangeInputView<float, 1, 3>(attachParams(), e, "Input 1.0 to 3.0", "",
+					pushAndShowNewCollectValueRangeInputView<float, 1, 3>(attachParams(), e, "输入 1.0 到 3.0", "",
 						[this](CollectTextInputView &, auto val)
 						{
 							int scaledIntVal = val * 100.0;
@@ -101,14 +101,14 @@ public:
 		diagonalSensitivityItems
 		{
 			{"无",             attach, {.id = 1000}},
-			{"33% (Low)",        attach, {.id = 667}},
-			{"43% (Medium-Low)", attach, {.id = 570}},
-			{"50% (Medium)",     attach, {.id = 500}},
-			{"60% (High)",       attach, {.id = 400}},
+			{"33%（低）",        attach, {.id = 667}},
+			{"43%（中低）", attach, {.id = 570}},
+			{"50%（中）",     attach, {.id = 500}},
+			{"60%（高）",       attach, {.id = 400}},
 			{"自定义", attach,
 				[this](const Input::Event &e)
 				{
-					pushAndShowNewCollectValueRangeInputView<float, 0, 99>(attachParams(), e, "Input 0 to 99.0", "",
+					pushAndShowNewCollectValueRangeInputView<float, 0, 99>(attachParams(), e, "输入 0 到 99.0", "",
 						[this](CollectTextInputView &, auto val)
 						{
 							val = 100. - val;
@@ -422,7 +422,7 @@ public:
 			{"自定义", attach,
 				[this](const Input::Event &e)
 				{
-					pushAndShowNewCollectValueRangeInputView<int, 0, 8>(attachParams(), e, "Input 0 to 8", "",
+					pushAndShowNewCollectValueRangeInputView<int, 0, 8>(attachParams(), e, "输入 0 到 8", "",
 						[this](CollectTextInputView &, auto val)
 						{
 							elem.buttonGroup()->setSpacing(val, window());
@@ -483,7 +483,7 @@ public:
 			{touchCtrlExtraBtnSizeMenuName[3], attach, {.id = touchCtrlExtraBtnSizeMenuVal[3]}},
 			{"自定义", attach, [this](const Input::Event &e)
 				{
-					pushAndShowNewCollectValueRangeInputView<int, 0, 30>(attachParams(), e, "Input 0 to 30", "",
+					pushAndShowNewCollectValueRangeInputView<int, 0, 30>(attachParams(), e, "输入 0 到 30", "",
 						[this](CollectTextInputView &, auto val)
 						{
 							elem.buttonGroup()->layout.xPadding = val;
@@ -524,7 +524,7 @@ public:
 			{touchCtrlExtraBtnSizeMenuName[3], attach, {.id = touchCtrlExtraBtnSizeMenuVal[3]}},
 			{"自定义", attach, [this](const Input::Event &e)
 				{
-					pushAndShowNewCollectValueRangeInputView<int, 0, 30>(attachParams(), e, "Input 0 to 30", "",
+					pushAndShowNewCollectValueRangeInputView<int, 0, 30>(attachParams(), e, "输入 0 到 30", "",
 						[this](CollectTextInputView &, auto val)
 						{
 							elem.buttonGroup()->layout.yPadding = val;
@@ -573,7 +573,7 @@ public:
 			"向此组添加按钮", attach,
 			[this](const Input::Event &e)
 			{
-				auto multiChoiceView = makeViewWithName<TextTableView>("Add Button", 16);
+				auto multiChoiceView = makeViewWithName<TextTableView>("添加按钮", 16);
 				auto &app = this->app();
 				addCategories(app, elem, [&](const KeyCategory &cat)
 				{

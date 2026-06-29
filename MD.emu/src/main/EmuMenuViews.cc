@@ -33,7 +33,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 {
 	BoolMenuItem sixButtonPad
 	{
-		"6-button Gamepad", attachParams(),
+		"6 键手柄", attachParams(),
 		(bool)system().option6BtnPad,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -58,18 +58,18 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	{
 		switch(system)
 		{
-			case SYSTEM_MENACER: return "Menacer";
-			case SYSTEM_JUSTIFIER: return "Justifier";
+			case SYSTEM_MENACER: return "Menacer 光枪";
+			case SYSTEM_JUSTIFIER: return "Justifier 光枪";
 		}
-		return "Gamepad";
+		return "手柄";
 	}
 
 	TextMenuItem inputPortsItem[4]
 	{
 		{"自动",      attachParams(), setInputPortsDel(-1, -1), {.id = -1}},
-		{"Gamepads",  attachParams(), setInputPortsDel(SYSTEM_MD_GAMEPAD, SYSTEM_MD_GAMEPAD), {.id = SYSTEM_MD_GAMEPAD}},
-		{"Menacer",   attachParams(), setInputPortsDel(SYSTEM_MD_GAMEPAD, SYSTEM_MENACER),    {.id = SYSTEM_MENACER}},
-		{"Justifier", attachParams(), setInputPortsDel(SYSTEM_MD_GAMEPAD, SYSTEM_JUSTIFIER),  {.id = SYSTEM_JUSTIFIER}},
+		{"手柄",     attachParams(), setInputPortsDel(SYSTEM_MD_GAMEPAD, SYSTEM_MD_GAMEPAD), {.id = SYSTEM_MD_GAMEPAD}},
+		{"Menacer 光枪", attachParams(), setInputPortsDel(SYSTEM_MD_GAMEPAD, SYSTEM_MENACER),    {.id = SYSTEM_MENACER}},
+		{"Justifier 光枪", attachParams(), setInputPortsDel(SYSTEM_MD_GAMEPAD, SYSTEM_JUSTIFIER),  {.id = SYSTEM_JUSTIFIER}},
 	};
 
 	MultiChoiceMenuItem inputPorts
@@ -106,7 +106,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem videoSystem
 	{
-		"Video System", attachParams(),
+		"视频系统", attachParams(),
 		system().optionVideoSystem.value(),
 		videoSystemItem,
 		{
@@ -132,14 +132,14 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	TextMenuItem regionItem[4]
 	{
 		{"自动",   attachParams(), [this](Input::Event e){ setRegion(0, e); }},
-		{"USA",    attachParams(), [this](Input::Event e){ setRegion(1, e); }},
-		{"Europe", attachParams(), [this](Input::Event e){ setRegion(2, e); }},
-		{"Japan",  attachParams(), [this](Input::Event e){ setRegion(3, e); }},
+		{"美国",   attachParams(), [this](Input::Event e){ setRegion(1, e); }},
+		{"欧洲", attachParams(), [this](Input::Event e){ setRegion(2, e); }},
+		{"日本",  attachParams(), [this](Input::Event e){ setRegion(3, e); }},
 	};
 
 	MultiChoiceMenuItem region
 	{
-		"Game Region", attachParams(),
+		"游戏区域", attachParams(),
 		std::min((int)config.region_detect, 4),
 		regionItem,
 		{
@@ -151,9 +151,9 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 					{
 						switch(region)
 						{
-							case REGION_USA: return "USA";
-							case REGION_EUROPE: return "Europe";
-							default: return "Japan";
+							case REGION_USA: return "美国";
+							case REGION_EUROPE: return "欧洲";
+							default: return "日本";
 						}
 					};
 					t.resetString(regionStr(region_code));
@@ -222,7 +222,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	BoolMenuItem smsFM
 	{
-		"MarkIII FM Sound Unit", attachParams(),
+		"MarkIII FM 音频单元", attachParams(),
 		(bool)system().optionSmsFM,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -246,14 +246,12 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	BoolMenuItem bigEndianSram
 	{
-		"Use Big-Endian SRAM", attachParams(),
+		"使用大端 SRAM", attachParams(),
 		(bool)system().optionBigEndianSram,
 		[this](BoolMenuItem &item, Input::Event e)
 		{
 			app().pushAndShowModalView(makeView<YesNoAlertView>(
-				"Warning, this changes the format of SRAM saves files. "
-				"Turn on to make them compatible with other emulators like Gens. "
-				"Any SRAM loaded with the incorrect setting will be corrupted.",
+				"警告：此选项会更改 SRAM 存档文件格式。开启后可与其他模拟器（如 Gens）兼容。使用错误设置加载的 SRAM 将会损坏。",
 				YesNoAlertView::Delegates{.onYes = [this]{ system().optionBigEndianSram = bigEndianSram.flipBoolValue(*this); }}), e);
 		}
 	};
@@ -289,9 +287,9 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 	#ifndef NO_SCD
 	static constexpr std::string_view biosHeadingStr[3]
 	{
-		"USA CD BIOS",
-		"Japan CD BIOS",
-		"Europe CD BIOS"
+		"美国 CD BIOS",
+		"日本 CD BIOS",
+		"欧洲 CD BIOS"
 	};
 
 	static int8_t regionCodeToIdx(uint8_t region)
@@ -361,14 +359,14 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 
 static auto codePromptString()
 {
-	return emuSystemIs16Bit() ? "Input xxxx-xxxx (GG) or xxxxxx:xxxx (AR) code"
-		: "Input xxx-xxx-xxx (GG) or xxxxxx:xx (AR) code";
+	return emuSystemIs16Bit() ? "输入 xxxx-xxxx (GG) 或 xxxxxx:xxxx (AR) 代码"
+		: "输入 xxx-xxx-xxx (GG) 或 xxxxxx:xx (AR) 代码";
 }
 
 static auto editCodePromptString()
 {
-	return emuSystemIs16Bit() ? "Input xxxx-xxxx (GG) or xxxxxx:xxxx (AR) code, or blank to delete"
-		: "Input xxx-xxx-xxx (GG) or xxxxxx:xx (AR) code, or blank to delete";
+	return emuSystemIs16Bit() ? "输入 xxxx-xxxx (GG) 或 xxxxxx:xxxx (AR) 代码，或留空删除"
+		: "输入 xxx-xxx-xxx (GG) 或 xxxxxx:xx (AR) 代码，或留空删除";
 }
 
 class EditCheatView : public BaseEditCheatView
@@ -377,14 +375,14 @@ public:
 	EditCheatView(ViewAttachParams attach, Cheat& cheat, BaseEditCheatsView& editCheatsView):
 		BaseEditCheatView
 		{
-			"Edit Cheat",
+			"编辑金手指",
 			attach,
 			cheat,
 			editCheatsView
 		},
 		addCode
 		{
-			"Add Another Code", attach,
+			"添加其他代码", attach,
 			[this](const Input::Event& e) { addNewCheatCode(codePromptString(), e); }
 		}
 	{
@@ -442,7 +440,7 @@ public:
 		},
 		addCode
 		{
-			"Add Game Genie / Action Replay Code", attach,
+			"添加 Game Genie / Action Replay 代码", attach,
 			[this](const Input::Event& e) { addNewCheat(codePromptString(), e); }
 		} {}
 

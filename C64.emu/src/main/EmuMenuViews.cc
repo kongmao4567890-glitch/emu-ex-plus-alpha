@@ -45,16 +45,16 @@ using MainAppHelper = EmuAppHelperBase<MainApp>;
 
 constexpr std::string_view driveMenuPrefix[4]
 {
-	"Disk 8",
-	"Disk 9",
-	"Disk 10",
-	"Disk 11",
+	"磁盘 8",
+	"磁盘 9",
+	"磁盘 10",
+	"磁盘 11",
 };
 
 constexpr std::string_view insertEjectMenuStr[]
 {
-	"Insert File",
-	"Eject"
+	"插入文件",
+	"弹出"
 };
 
 constexpr int defaultNTSCModel[]
@@ -106,7 +106,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	BoolMenuItem cropNormalBorders
 	{
-		"Crop Normal Borders", attachParams(),
+		"裁剪正常边框", attachParams(),
 		system().optionCropNormalBorders,
 		[this](BoolMenuItem& item)
 		{
@@ -121,14 +121,14 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 	TextMenuItem borderModeItem[4]
 	{
 		{"普通", attachParams(), {.id = VICII_NORMAL_BORDERS}},
-		{"Full",   attachParams(), {.id = VICII_FULL_BORDERS}},
-		{"Debug",  attachParams(), {.id = VICII_DEBUG_BORDERS}},
+		{"完整",   attachParams(), {.id = VICII_FULL_BORDERS}},
+		{"调试",  attachParams(), {.id = VICII_DEBUG_BORDERS}},
 		{"无",   attachParams(), {.id = VICII_NO_BORDERS}},
 	};
 
 	MultiChoiceMenuItem borderMode
 	{
-		"Borders", attachParams(),
+		"边框", attachParams(),
 		MenuId{system().borderMode()},
 		borderModeItem,
 		{
@@ -141,7 +141,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem defaultPalette
 	{
-		"Default Palette", attachParams(),
+		"默认调色板", attachParams(),
 		[this]() -> int
 		{
 			if(system().defaultPaletteName.empty())
@@ -152,7 +152,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 		paletteItem
 	};
 
-	TextHeadingMenuItem colorSettingsHeading{"Color Settings", attachParams()};
+	TextHeadingMenuItem colorSettingsHeading{"颜色设置", attachParams()};
 
 	template<int max = 200>
 	DualTextMenuItem::SelectDelegate colorSettingDel(ColorSetting setting)
@@ -174,11 +174,11 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	DualTextMenuItem colorSettings[5]
 	{
-		{"Saturation", system().colorSettingAsString(ColorSetting::Saturation), attachParams(), colorSettingDel(ColorSetting::Saturation)},
-		{"Contrast",   system().colorSettingAsString(ColorSetting::Contrast),   attachParams(), colorSettingDel(ColorSetting::Contrast)},
-		{"Brightness", system().colorSettingAsString(ColorSetting::Brightness), attachParams(), colorSettingDel(ColorSetting::Brightness)},
+		{"饱和度", system().colorSettingAsString(ColorSetting::Saturation), attachParams(), colorSettingDel(ColorSetting::Saturation)},
+		{"对比度",   system().colorSettingAsString(ColorSetting::Contrast),   attachParams(), colorSettingDel(ColorSetting::Contrast)},
+		{"亮度", system().colorSettingAsString(ColorSetting::Brightness), attachParams(), colorSettingDel(ColorSetting::Brightness)},
 		{"Gamma",      system().colorSettingAsString(ColorSetting::Gamma),      attachParams(), colorSettingDel<400>(ColorSetting::Gamma)},
-		{"Tint",       system().colorSettingAsString(ColorSetting::Tint),       attachParams(), colorSettingDel(ColorSetting::Tint)}
+		{"色调",       system().colorSettingAsString(ColorSetting::Tint),       attachParams(), colorSettingDel(ColorSetting::Tint)}
 	};
 
 public:
@@ -189,7 +189,7 @@ public:
 		item.emplace_back(&systemSpecificHeading);
 		item.emplace_back(&cropNormalBorders);
 		item.emplace_back(&borderMode);
-		paletteItem.emplace_back("Internal", attachParams(),
+		paletteItem.emplace_back("内部", attachParams(),
 			[this]()
 			{
 				system().defaultPaletteName.clear();
@@ -223,7 +223,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem sidEngine
 	{
-		"SID Engine", attachParams(),
+		"SID 引擎", attachParams(),
 		MenuId{system().sidEngine()},
 		sidEngineItem,
 		{
@@ -233,15 +233,15 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	TextMenuItem reSidSamplingItem[4]
 	{
-		{"Fast",            attachParams(), {.id = SID_RESID_SAMPLING_FAST}},
-		{"Interpolation",   attachParams(), {.id = SID_RESID_SAMPLING_INTERPOLATION}},
-		{"Resampling",      attachParams(), {.id = SID_RESID_SAMPLING_RESAMPLING}},
-		{"Fast Resampling", attachParams(), {.id = SID_RESID_SAMPLING_FAST_RESAMPLING}},
+		{"快速",            attachParams(), {.id = SID_RESID_SAMPLING_FAST}},
+		{"插值",   attachParams(), {.id = SID_RESID_SAMPLING_INTERPOLATION}},
+		{"重采样",      attachParams(), {.id = SID_RESID_SAMPLING_RESAMPLING}},
+		{"快速重采样", attachParams(), {.id = SID_RESID_SAMPLING_FAST_RESAMPLING}},
 	};
 
 	MultiChoiceMenuItem reSidSampling
 	{
-		"ReSID Sampling", attachParams(),
+		"ReSID 采样", attachParams(),
 		MenuId{system().reSidSampling()},
 		reSidSamplingItem,
 		{
@@ -266,14 +266,14 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem defaultModel
 	{
-		"Default Model", attachParams(),
+		"默认型号", attachParams(),
 		MenuId{system().defaultModel},
 		defaultModelItem
 	};
 
 	BoolMenuItem defaultTrueDriveEmu
 	{
-		"Default True Drive Emulation", attachParams(),
+		"默认真实磁盘驱动模拟", attachParams(),
 		system().defaultDriveTrueEmulation,
 		[this](BoolMenuItem &item)
 		{
@@ -290,7 +290,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem joystickMode
 	{
-		"Default Main Joystick Mode", attachParams(),
+		"默认主摇杆模式", attachParams(),
 		MenuId{system().defaultJoystickMode},
 		joystickModeItems,
 		{
@@ -339,7 +339,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		sysPathMenuEntryStr(system().sysFilePath[0]), attachParams(),
 		[this](const Input::Event& e)
 		{
-			auto view = makeViewWithName<DataFolderSelectView>("VICE System Files",
+			auto view = makeViewWithName<DataFolderSelectView>("VICE 系统文件",
 				app().validSearchPath(system().sysFilePath[0]),
 				[this](CStringView path, FS::file_type type)
 				{
@@ -371,18 +371,18 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 
 	TextMenuItem downloadSystemFiles
 	{
-		"Download VICE System Files", attachParams(),
+		"下载 VICE 系统文件", attachParams(),
 		[this](const Input::Event& e)
 		{
 			pushAndShowModal(makeView<YesNoAlertView>(
-				"Open the C64.emu setup page? From there, download C64.emu.zip to your device and select it as an archive in the previous menu.",
+				"打开 C64.emu 设置页面？从那里下载 C64.emu.zip 到设备并在上一个菜单中选择它作为压缩文件。",
 				YesNoAlertView::Delegates{.onYes = [this]{ appContext().openURL("https://www.explusalpha.com/contents/c64-emu"); }}), e);
 		}
 	};
 
 	std::string sysPathMenuEntryStr(CStringView path)
 	{
-		return std::format("VICE System Files: {}", appContext().fileUriDisplayName(path));
+		return std::format("VICE 系统文件：{}", appContext().fileUriDisplayName(path));
 	}
 
 public:
@@ -400,7 +400,7 @@ public:
 	DatasetteControlsView(ViewAttachParams attach):
 		TableView
 		{
-			"Datasette Controls",
+			"数据带控制",
 			attach,
 			menuItem
 		}
@@ -409,7 +409,7 @@ public:
 private:
 	TextMenuItem stop
 	{
-		"Stop", attachParams(),
+		"停止", attachParams(),
 		[this]()
 		{
 			system().enterCPUTrap();
@@ -420,7 +420,7 @@ private:
 
 	TextMenuItem start
 	{
-		"Start", attachParams(),
+		"开始", attachParams(),
 		[this]()
 		{
 			system().enterCPUTrap();
@@ -431,7 +431,7 @@ private:
 
 	TextMenuItem forward
 	{
-		"Forward", attachParams(),
+		"快进", attachParams(),
 		[this]()
 		{
 			system().enterCPUTrap();
@@ -442,7 +442,7 @@ private:
 
 	TextMenuItem rewind
 	{
-		"Rewind", attachParams(),
+		"倒带", attachParams(),
 		[this]()
 		{
 			system().enterCPUTrap();
@@ -453,7 +453,7 @@ private:
 
 	TextMenuItem record
 	{
-		"Record", attachParams(),
+		"录制", attachParams(),
 		[this]()
 		{
 			system().enterCPUTrap();
@@ -477,7 +477,7 @@ private:
 
 	TextMenuItem resetCounter
 	{
-		"Reset Counter", attachParams(),
+		"重置计数器", attachParams(),
 		[this](View& view)
 		{
 			system().enterCPUTrap();
@@ -507,7 +507,7 @@ private:
 
 	void updateTapeCounter()
 	{
-		tapeCounter.setName(std::format("Tape Counter: {}", EmuEx::tapeCounter));
+		tapeCounter.setName(std::format("磁带计数器: {}", EmuEx::tapeCounter));
 	}
 
 	void onShow() final
@@ -731,7 +731,7 @@ private:
 
 	MultiChoiceMenuItem drive8Type
 	{
-		"Drive 8 Type", attachParams(),
+		"驱动器 8 类型", attachParams(),
 		MenuId{system().driveType(8)},
 		driveTypeItem,
 		{
@@ -745,7 +745,7 @@ private:
 
 	MultiChoiceMenuItem drive9Type
 	{
-		"Drive 9 Type", attachParams(),
+		"驱动器 9 类型", attachParams(),
 		MenuId{system().driveType(9)},
 		driveTypeItem,
 		{
@@ -759,7 +759,7 @@ private:
 
 	MultiChoiceMenuItem drive10Type
 	{
-		"Drive 10 Type", attachParams(),
+		"驱动器 10 类型", attachParams(),
 		MenuId{system().driveType(10)},
 		driveTypeItem,
 		{
@@ -773,7 +773,7 @@ private:
 
 	MultiChoiceMenuItem drive11Type
 	{
-		"Drive 11 Type", attachParams(),
+		"驱动器 11 类型", attachParams(),
 		MenuId{system().driveType(11)},
 		driveTypeItem,
 		{
@@ -785,7 +785,7 @@ private:
 		}
 	};
 
-	TextHeadingMenuItem mediaOptions{"Media Options", attachParams()};
+	TextHeadingMenuItem mediaOptions{"媒体选项", attachParams()};
 
 	StaticArrayList<MenuItem*, 12> item;
 
@@ -793,7 +793,7 @@ public:
 	C64IOControlView(ViewAttachParams attach):
 		TableView
 		{
-			"System & Media",
+			"系统与媒体",
 			attach,
 			item
 		},
@@ -910,7 +910,7 @@ public:
 	Vic20MemoryExpansionsView(ViewAttachParams attach):
 		TableView
 		{
-			"Memory Expansions",
+			"内存扩展",
 			attach,
 			menuItem
 		}
@@ -923,7 +923,7 @@ class MachineOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem model
 	{
-		"Model", attachParams(),
+		"型号", attachParams(),
 		MenuId{system().model()},
 		modelItem
 	};
@@ -939,7 +939,7 @@ class MachineOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem autostartWarp
 	{
-		"Autostart Fast-forward", attachParams(),
+		"自动启动快进", attachParams(),
 		system().autostartWarp(),
 		[this](BoolMenuItem& item)
 		{
@@ -950,7 +950,7 @@ class MachineOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem autostartTDE
 	{
-		"Autostart Handles TDE", attachParams(),
+		"自动启动处理 TDE", attachParams(),
 		system().autostartTDE(),
 		[this](BoolMenuItem& item)
 		{
@@ -961,7 +961,7 @@ class MachineOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem autostartBasicLoad
 	{
-		"Load To BASIC Start (Disk)", attachParams(),
+		"加载到 BASIC 起始位置（磁盘）", attachParams(),
 		bool(system().intResource("AutostartBasicLoad")),
 		[this](BoolMenuItem& item)
 		{
@@ -972,7 +972,7 @@ class MachineOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem trueDriveEmu
 	{
-		"True Drive Emulation (TDE)", attachParams(),
+		"真实磁盘驱动模拟 (TDE)", attachParams(),
 		system().driveTrueEmulation(),
 		[this](BoolMenuItem& item)
 		{
@@ -988,7 +988,7 @@ class MachineOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem palette
 	{
-		"Palette", attachParams(),
+		"调色板", attachParams(),
 		[this]() -> int
 		{
 			if(!system().usingExternalPalette())
@@ -999,7 +999,7 @@ class MachineOptionView : public TableView, public MainAppHelper
 		paletteItem
 	};
 
-	TextHeadingMenuItem cartHeader{"Cartridges", attachParams()};
+	TextHeadingMenuItem cartHeader{"卡带", attachParams()};
 
 	TextMenuItem reuItem[9]
 	{
@@ -1016,7 +1016,7 @@ class MachineOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem reu
 	{
-		"Ram Expansion Module", attachParams(),
+		"RAM 扩展模块", attachParams(),
 		MenuId{system().intResource("REU") ? system().intResource("REUsize") : 0},
 		reuItem,
 		{
@@ -1034,7 +1034,7 @@ public:
 	MachineOptionView(ViewAttachParams attach):
 		TableView
 		{
-			"Machine Options",
+			"机器选项",
 			attach,
 			menuItem
 		},
@@ -1067,7 +1067,7 @@ public:
 		menuItem.emplace_back(&autostartBasicLoad);
 		menuItem.emplace_back(&autostartWarp);
 		menuItem.emplace_back(&videoHeader);
-		paletteItem.emplace_back("Internal", attachParams(),
+		paletteItem.emplace_back("内部", attachParams(),
 			[this]()
 			{
 				system().sessionOptionSet();
@@ -1100,7 +1100,7 @@ class CustomSystemActionsView : public SystemActionsView, public MainAppHelper
 
 	TextMenuItem c64IOControl
 	{
-		"Media Control", attachParams(),
+		"媒体控制", attachParams(),
 		[this](TextMenuItem& item, const Input::Event& e)
 		{
 			if(!item.active())
@@ -1123,19 +1123,19 @@ class CustomSystemActionsView : public SystemActionsView, public MainAppHelper
 
 	TextMenuItem relaunchContent
 	{
-		"Relaunch Content", attachParams(),
+		"重新启动内容", attachParams(),
 		[this](TextMenuItem& item, const Input::Event& e)
 		{
 			if(!item.active())
 				return;
 			auto multiChoiceView = makeViewWithName<TextTableView>(item, 5);
-			multiChoiceView->appendItem("Same Settings",
+			multiChoiceView->appendItem("相同设置",
 				[this]()
 				{
 					app().reloadSystem();
 					app().showEmulation();
 				});
-			multiChoiceView->appendItem("NTSC w/ True Drive Emu",
+			multiChoiceView->appendItem("NTSC（带真实磁盘驱动模拟）",
 				[this]()
 				{
 					system().sessionOptionSet();
@@ -1153,7 +1153,7 @@ class CustomSystemActionsView : public SystemActionsView, public MainAppHelper
 					system().setModel(defaultNTSCModel[std::to_underlying(system().currSystem)]);
 					app().showEmulation();
 				});
-			multiChoiceView->appendItem("PAL w/ True Drive Emu",
+			multiChoiceView->appendItem("PAL（带真实磁盘驱动模拟）",
 				[this]()
 				{
 					system().sessionOptionSet();
@@ -1185,7 +1185,7 @@ class CustomSystemActionsView : public SystemActionsView, public MainAppHelper
 
 	MultiChoiceMenuItem joystickMode
 	{
-		"Main Joystick Mode", attachParams(),
+		"主摇杆模式", attachParams(),
 		MenuId{system().effectiveJoystickMode},
 		joystickModeItems,
 		{
@@ -1201,7 +1201,7 @@ class CustomSystemActionsView : public SystemActionsView, public MainAppHelper
 
 	BoolMenuItem warpMode
 	{
-		"Warp Mode", attachParams(),
+		"加速模式", attachParams(),
 		(bool)*system().plugin.warp_mode_enabled,
 		[this](BoolMenuItem& item)
 		{
@@ -1211,7 +1211,7 @@ class CustomSystemActionsView : public SystemActionsView, public MainAppHelper
 
 	BoolMenuItem autostartOnLaunch
 	{
-		"Autostart On Launch", attachParams(),
+		"启动时自动运行", attachParams(),
 		system().optionAutostartOnLaunch,
 		[this](BoolMenuItem& item)
 		{
@@ -1266,7 +1266,7 @@ class CustomMainMenuView : public MainMenuView, public MainAppHelper
 					{
 						system().optionViceSystem = ViceSystem(i);
 						view.dismiss(false);
-						app().pushAndShowModalView(makeView<YesNoAlertView>("Changing systems needs app restart, exit now?",
+						app().pushAndShowModalView(makeView<YesNoAlertView>("更改系统需要重启应用，是否退出？",
 							YesNoAlertView::Delegates{.onYes = [this]{ appContext().exit(); }}), e);
 					});
 			}
@@ -1279,17 +1279,17 @@ class CustomMainMenuView : public MainMenuView, public MainAppHelper
 
 	TextMenuItem startWithBlankDisk
 	{
-		"Start System With Blank Disk", attachParams(),
+		"以空白磁盘启动系统", attachParams(),
 		[this](TextMenuItem& item, const Input::Event& e)
 		{
-			pushAndShowNewCollectTextInputView(attachParams(), e, "Input Disk Name", "",
+			pushAndShowNewCollectTextInputView(attachParams(), e, "输入磁盘名称", "",
 				[this](CollectTextInputView &view, const char *str)
 				{
 					if(str)
 					{
 						if(!strlen(str))
 						{
-							app().postMessage(true, "Name can't be blank");
+							app().postMessage(true, "名称不能为空");
 							return true;
 						}
 						newMediaName = str;
@@ -1308,7 +1308,7 @@ class CustomMainMenuView : public MainMenuView, public MainAppHelper
 								}
 								if(appContext().fileUriExists(newMediaPath))
 								{
-									app().pushAndShowModalView(makeView<YesNoAlertView>("Disk image already exists, overwrite?",
+									app().pushAndShowModalView(makeView<YesNoAlertView>("磁盘映像已存在，是否覆盖？",
 										YesNoAlertView::Delegates
 										{
 											.onYes = [this](const Input::Event& e)
@@ -1322,7 +1322,7 @@ class CustomMainMenuView : public MainMenuView, public MainAppHelper
 							});
 						view.dismiss(false);
 						app().pushAndShowModalView(std::move(fPicker));
-						app().postMessage("Set directory to save disk");
+						app().postMessage("设置磁盘保存目录");
 					}
 					else
 					{
@@ -1348,7 +1348,7 @@ class CustomMainMenuView : public MainMenuView, public MainAppHelper
 			format<FS::FileString>("{},dsk", diskName).data(),
 			DISK_IMAGE_TYPE_D64) == -1)
 		{
-			app().postMessage(true, "Error creating disk image");
+			app().postMessage(true, "创建磁盘映像出错");
 			return;
 		}
 		launchMedia(diskPath, e);
@@ -1356,10 +1356,10 @@ class CustomMainMenuView : public MainMenuView, public MainAppHelper
 
 	TextMenuItem startWithBlankTape
 	{
-		"Start System With Blank Tape", attachParams(),
+		"以空白磁带启动系统", attachParams(),
 		[this](TextMenuItem& item, const Input::Event& e)
 		{
-			pushAndShowNewCollectTextInputView(attachParams(), e, "Input Tape Name", "",
+			pushAndShowNewCollectTextInputView(attachParams(), e, "输入磁带名称", "",
 				[this](CollectTextInputView &view, const char *str)
 				{
 					if(str)
@@ -1385,7 +1385,7 @@ class CustomMainMenuView : public MainMenuView, public MainAppHelper
 								}
 								if(appContext().fileUriExists(newMediaPath))
 								{
-									app().pushAndShowModalView(makeView<YesNoAlertView>("Tape image already exists, overwrite?",
+									app().pushAndShowModalView(makeView<YesNoAlertView>("磁带映像已存在，是否覆盖？",
 										YesNoAlertView::Delegates
 										{
 											.onYes = [this](const Input::Event& e)
@@ -1414,7 +1414,7 @@ class CustomMainMenuView : public MainMenuView, public MainAppHelper
 	{
 		if(system().plugin.cbmimage_create_image(tapePath, DISK_IMAGE_TYPE_TAP) < 0)
 		{
-			app().postMessage(true, "Error creating tape image");
+			app().postMessage(true, "创建磁带映像出错");
 			return;
 		}
 		launchMedia(tapePath, e);
@@ -1422,7 +1422,7 @@ class CustomMainMenuView : public MainMenuView, public MainAppHelper
 
 	TextMenuItem loadNoAutostart
 	{
-		"Open Content (No Autostart)", attachParams(),
+		"打开内容（不自动启动）", attachParams(),
 		[this](const Input::Event& e)
 		{
 			pushAndShow(FilePicker::forLoading(attachParams(), e, false, {SYSTEM_FLAG_NO_AUTOSTART}), e, false);

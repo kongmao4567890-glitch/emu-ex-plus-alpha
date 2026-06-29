@@ -20,7 +20,7 @@
 namespace IG
 {
 
-const char *copyright = "Imagine is Copyright 2010-2026 Robert Broglia";
+const char *copyright = "Imagine 版权所有 2010-2026 Robert Broglia\n汉化编译：九尾猫游戏解说";
 static SystemLogger log{"App"};
 
 BaseApplication::BaseApplication(ApplicationContext ctx)

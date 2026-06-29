@@ -36,7 +36,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem resampler
 	{
-		"Resampler", attachParams(),
+		"重采样器", attachParams(),
 		system().optionAudioResampler.value(),
 		resamplerItem
 	};
@@ -73,31 +73,31 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	TextMenuItem gbPaletteItem[13]
 	{
-		{"Original",   attachParams(), setGbPaletteDel(), {.id = 0}},
-		{"Brown",      attachParams(), setGbPaletteDel(), {.id = 1}},
+		{"原始",   attachParams(), setGbPaletteDel(), {.id = 0}},
+		{"棕色",      attachParams(), setGbPaletteDel(), {.id = 1}},
 		{"红色",        attachParams(), setGbPaletteDel(), {.id = 2}},
-		{"Dark Brown", attachParams(), setGbPaletteDel(), {.id = 3}},
-		{"Pastel",     attachParams(), setGbPaletteDel(), {.id = 4}},
-		{"Orange",     attachParams(), setGbPaletteDel(), {.id = 5}},
-		{"Yellow",     attachParams(), setGbPaletteDel(), {.id = 6}},
+		{"深棕", attachParams(), setGbPaletteDel(), {.id = 3}},
+		{"柔和",     attachParams(), setGbPaletteDel(), {.id = 4}},
+		{"橙色",     attachParams(), setGbPaletteDel(), {.id = 5}},
+		{"黄色",     attachParams(), setGbPaletteDel(), {.id = 6}},
 		{"蓝色",       attachParams(), setGbPaletteDel(), {.id = 7}},
-		{"Dark Blue",  attachParams(), setGbPaletteDel(), {.id = 8}},
-		{"Gray",       attachParams(), setGbPaletteDel(), {.id = 9}},
+		{"深蓝",  attachParams(), setGbPaletteDel(), {.id = 8}},
+		{"灰色",       attachParams(), setGbPaletteDel(), {.id = 9}},
 		{"绿色",      attachParams(), setGbPaletteDel(), {.id = 10}},
-		{"Dark Green", attachParams(), setGbPaletteDel(), {.id = 11}},
+		{"深绿", attachParams(), setGbPaletteDel(), {.id = 11}},
 		{"Reverse",    attachParams(), setGbPaletteDel(), {.id = 12}},
 	};
 
 	MultiChoiceMenuItem gbPalette
 	{
-		"GB Palette", attachParams(),
+		"GB 调色板", attachParams(),
 		MenuId{system().optionGBPal},
 		gbPaletteItem
 	};
 
 	BoolMenuItem fullSaturation
 	{
-		"Saturated GBC Colors", attachParams(),
+		"饱和 GBC 颜色", attachParams(),
 		(bool)system().optionFullGbcSaturation,
 		[this](BoolMenuItem &item)
 		{
@@ -123,7 +123,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 {
 	BoolMenuItem useBuiltinGBPalette
 	{
-		"Use Built-in GB Palettes", attachParams(),
+		"使用内置 GB 调色板", attachParams(),
 		(bool)system().optionUseBuiltinGBPalette,
 		[this](BoolMenuItem &item)
 		{
@@ -135,7 +135,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem reportAsGba
 	{
-		"Report Hardware as GBA", attachParams(),
+		"报告硬件为 GBA", attachParams(),
 		system().optionReportAsGba,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -217,15 +217,15 @@ public:
 	EditCheatView(ViewAttachParams attach, Cheat& cheat, BaseEditCheatsView& editCheatsView):
 		BaseEditCheatView
 		{
-			"Edit Cheat",
+			"编辑金手指",
 			attach,
 			cheat,
 			editCheatsView
 		},
 		addGGGS
 		{
-			"Add Another Code", attach,
-			[this](const Input::Event& e) { addNewCheatCode("Input xxxxxxxx (GS) or xxx-xxx-xxx (GG) code", e); }
+			"添加其他代码", attach,
+			[this](const Input::Event& e) { addNewCheatCode("输入 xxxxxxxx (GS) 或 xxx-xxx-xxx (GG) 代码", e); }
 		}
 	{
 		loadItems();
@@ -239,7 +239,7 @@ public:
 			codes.emplace_back("Code", c, attachParams(), [this, &c](const Input::Event& e)
 			{
 				pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e,
-					"Input xxxxxxxx (GS) or xxx-xxx-xxx (GG) code, or blank to delete", c,
+					"输入 xxxxxxxx (GS) 或 xxx-xxx-xxx (GG) 代码，或留空删除", c,
 					[this, &c](CollectTextInputView&, auto str) { return modifyCheatCode(c, {str}); });
 			});
 		};
@@ -283,7 +283,7 @@ public:
 		},
 		addGGGS
 		{
-			"Add Game Genie / GameShark Code", attach,
+			"添加 Game Genie / GameShark 代码", attach,
 			[this](const Input::Event& e) { addNewCheat("Input xxxxxxxx (GS) or xxx-xxx-xxx (GG) code", e); }
 		} {}
 

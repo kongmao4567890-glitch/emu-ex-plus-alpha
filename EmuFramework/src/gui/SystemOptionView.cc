@@ -32,7 +32,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 		{"15min", attach, {.id = 15}},
 		{"自定义", attach, [this](const Input::Event &e)
 			{
-				pushAndShowNewCollectValueRangeInputView<int, 0, maxAutosaveSaveFreq.count()>(attachParams(), e, "Input 0 to 720", "",
+				pushAndShowNewCollectValueRangeInputView<int, 0, maxAutosaveSaveFreq.count()>(attachParams(), e, "输入 0 到 720", "",
 					[this](CollectTextInputView &, auto val)
 					{
 						app().autosaveManager.saveTimer.frequency = Minutes{val};
@@ -105,7 +105,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
-				pushAndShowNewCollectValueRangeInputView<float, 1, 20>(attachParams(), e, "Input above 1.0 to 20.0", "",
+				pushAndShowNewCollectValueRangeInputView<float, 1, 20>(attachParams(), e, "输入 1.0 到 20.0", "",
 					[this](CollectTextInputView &, auto val)
 					{
 						auto valAsInt = std::round(val * 100.f);
@@ -139,7 +139,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
-				pushAndShowNewCollectValueInputView<float>(attachParams(), e, "Input 0.05 up to 1.0", "",
+				pushAndShowNewCollectValueInputView<float>(attachParams(), e, "输入 0.05 到 1.0", "",
 					[this](CollectTextInputView &, auto val)
 					{
 						auto valAsInt = std::round(val * 100.f);
@@ -181,7 +181,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 		{"自定义", attach, [this](const Input::Event &e)
 			{
 				pushAndShowNewCollectValueRangeInputView<int, 0, 50000>(attachParams(), e,
-					"Input 0 to 50000", std::to_string(app().rewindManager.maxStates),
+					"输入 0 到 50000", std::to_string(app().rewindManager.maxStates),
 					[this](CollectTextInputView &, auto val)
 					{
 						app().rewindManager.updateMaxStates(val);
@@ -217,7 +217,7 @@ SystemOptionView::SystemOptionView(ViewAttachParams attach, bool customMenu):
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueRangeInputView<int, 1, 60>(attachParams(), e,
-				"Input 1 to 60", std::to_string(app().rewindManager.saveTimer.frequency.count()),
+				"输入 1 到 60", std::to_string(app().rewindManager.saveTimer.frequency.count()),
 				[this](CollectTextInputView &, auto val)
 				{
 					app().rewindManager.saveTimer.frequency = Seconds{val};

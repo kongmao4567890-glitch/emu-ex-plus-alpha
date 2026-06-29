@@ -24,15 +24,15 @@ namespace EmuEx
 using namespace IG;
 using MainAppHelper = EmuAppHelperBase<MainApp>;
 
-constexpr std::string_view pceFastText{"pce_fast (Default for general use)"};
-constexpr std::string_view pceText{"pce (Better accuracy, higher power usage)"};
-constexpr std::string_view changeEmuCoreText{"Really change emulation core? Note that save states from different cores aren't compatible."};
+constexpr std::string_view pceFastText{"pce_fast（默认，通用）"};
+constexpr std::string_view pceText{"pce（更高精度，更高功耗）"};
+constexpr std::string_view changeEmuCoreText{"确定更改模拟核心？注意不同核心的即时存档不兼容。"};
 
 class ConsoleOptionView : public TableView, public MainAppHelper
 {
 	BoolMenuItem sixButtonPad
 	{
-		"6-button Gamepad", attachParams(),
+		"6 键手柄", attachParams(),
 		(bool)system().option6BtnPad,
 		[this](BoolMenuItem &item, const Input::Event &e)
 		{
@@ -67,7 +67,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem visibleVideoLines
 	{
-		"Visible Lines", attachParams(),
+		"可见扫描线", attachParams(),
 		[this]()
 		{
 			switch(system().visibleLines.first)
@@ -96,7 +96,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem emuCore
 	{
-		"Emulation Core", attachParams(),
+		"模拟核心", attachParams(),
 		MenuId{system().core},
 		emuCoreItems,
 		{
@@ -210,7 +210,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	BoolMenuItem spriteLimit
 	{
-		"Sprite Limit", attachParams(),
+		"精灵数量限制", attachParams(),
 		!system().noSpriteLimit,
 		[this](BoolMenuItem &item) { system().setNoSpriteLimit(!item.flipBoolValue(*this)); }
 	};
@@ -226,7 +226,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem visibleVideoLines
 	{
-		"Default Visible Lines", attachParams(),
+		"默认可见扫描线", attachParams(),
 		[this]()
 		{
 			switch(system().defaultVisibleLines.first)
@@ -248,7 +248,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	BoolMenuItem correctLineAspect
 	{
-		"Correct Line Aspect Ratio", attachParams(),
+		"修正扫描线宽高比", attachParams(),
 		system().correctLineAspect,
 		[this](BoolMenuItem &item)
 		{
@@ -282,7 +282,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem cdSpeed
 	{
-		"CD Access Speed", attachParams(),
+		"CD 访问速度", attachParams(),
 		MenuId{system().cdSpeed},
 		cdSpeedItem
 	};
@@ -301,7 +301,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem emuCore
 	{
-		"Emulation Core", attachParams(),
+		"模拟核心", attachParams(),
 		MenuId{system().defaultCore},
 		emuCoreItems,
 		{
@@ -351,7 +351,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 	using MainAppHelper::system;
 	using MainAppHelper::app;
 
-	TextHeadingMenuItem mixer{"Mixer", attachParams()};
+	TextHeadingMenuItem mixer{"混音器", attachParams()};
 
 	struct VolumeTypeDesc
 	{
@@ -363,8 +363,8 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 	{
 		switch(type)
 		{
-			case VolumeType::CDDA: return {"CD-DA Volume", 0};
-			case VolumeType::ADPCM: return {"ADPCM Volume", 1};
+			case VolumeType::CDDA: return {"CD-DA 音量", 0};
+			case VolumeType::ADPCM: return {"ADPCM 音量", 1};
 		}
 		unreachable();
 	}
@@ -437,7 +437,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	BoolMenuItem adpcmFilter
 	{
-		"ADPCM Low-pass Filter", attachParams(),
+		"ADPCM 低通滤波器", attachParams(),
 		system().adpcmFilter,
 		[this](BoolMenuItem &item) { system().setAdpcmFilter(item.flipBoolValue(*this)); }
 	};

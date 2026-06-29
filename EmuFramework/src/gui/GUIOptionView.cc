@@ -21,10 +21,10 @@ namespace EmuEx
 {
 
 static constexpr bool USE_MOBILE_ORIENTATION_NAMES = Config::envIsAndroid || Config::envIsIOS;
-static const char *landscapeName = USE_MOBILE_ORIENTATION_NAMES ? "Landscape" : "90° Left";
-static const char *landscape2Name = USE_MOBILE_ORIENTATION_NAMES ? "Landscape 2" : "90° Right";
-static const char *portraitName = USE_MOBILE_ORIENTATION_NAMES ? "Portrait" : "标准";
-static const char *portrait2Name = USE_MOBILE_ORIENTATION_NAMES ? "Portrait 2" : "Upside Down";
+static const char *landscapeName = USE_MOBILE_ORIENTATION_NAMES ? "横屏" : "90° Left";
+static const char *landscape2Name = USE_MOBILE_ORIENTATION_NAMES ? "横屏 2" : "90° Right";
+static const char *portraitName = USE_MOBILE_ORIENTATION_NAMES ? "竖屏" : "标准";
+static const char *portrait2Name = USE_MOBILE_ORIENTATION_NAMES ? "竖屏 2" : "Upside Down";
 
 GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 	TableView{"界面选项", attach, item},
@@ -51,7 +51,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 		{"自定义", attach,
 			[this](const Input::Event &e)
 			{
-				pushAndShowNewCollectValueRangeInputView<float, 2, 10>(attachParams(), e, "Input 2.0 to 10.0", "",
+				pushAndShowNewCollectValueRangeInputView<float, 2, 10>(attachParams(), e, "输入 2.0 到 10.0", "",
 					[this](CollectTextInputView &, auto val)
 					{
 						int scaledIntVal = val * 1000.0;
@@ -207,7 +207,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValueRangeInputView<int, 1, 100>(attachParams(), e,
-				"Input 1 to 100", std::to_string(app().recentContent.maxRecentContent),
+				"输入 1 到 100", std::to_string(app().recentContent.maxRecentContent),
 				[this](CollectTextInputView &, auto val)
 				{
 					app().recentContent.maxRecentContent = val;
@@ -269,7 +269,7 @@ GUIOptionView::GUIOptionView(ViewAttachParams attach, bool customMenu):
 		[this](const Input::Event &e)
 		{
 			pushAndShowNewCollectValuePairRangeInputView<int, 320, 8192, 240, 8192>(attachParams(), e,
-				"Input Width & Height", "",
+				"输入宽度和高度", "",
 				[this](CollectTextInputView &, auto val)
 				{
 					app().emuWindow().setSize({val.first, val.second});

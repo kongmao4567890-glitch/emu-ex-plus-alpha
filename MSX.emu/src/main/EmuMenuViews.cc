@@ -143,14 +143,14 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem msxMachine
 	{
-		"Default MSX Machine", attachParams(), 0,
+		"默认 MSX 机型", attachParams(), 0,
 		machineItems,
 		machineItemConfig<MachineType::msx>()
 	};
 
 	MultiChoiceMenuItem colecoMachine
 	{
-		"Default Coleco Machine", attachParams(), 0,
+		"默认 Coleco 机型", attachParams(), 0,
 		machineItems,
 		machineItemConfig<MachineType::coleco>()
 	};
@@ -169,7 +169,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	BoolMenuItem skipFdcAccess
 	{
-		"Fast-forward Disk IO", attachParams(),
+		"加速磁盘 IO", attachParams(),
 		system().optionSkipFdcAccess,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -255,7 +255,7 @@ public:
 	}
 };
 
-static const char *insertEjectDiskMenuStr[] {"Insert File", "Eject"};
+static const char *insertEjectDiskMenuStr[] {"插入文件", "弹出"};
 
 class MsxIOControlView : public TableView, public MainAppHelper
 {
@@ -309,7 +309,7 @@ public:
 			return;
 		if(hdName[slot].size())
 		{
-			auto multiChoiceView = makeViewWithName<TextTableView>("Hard Drive", std::size(insertEjectDiskMenuStr));
+			auto multiChoiceView = makeViewWithName<TextTableView>("硬盘", std::size(insertEjectDiskMenuStr));
 			multiChoiceView->appendItem(insertEjectDiskMenuStr[0],
 				[this, slot](View &view, Input::Event e)
 				{
@@ -372,40 +372,40 @@ public:
 
 	void onSelectROM(Input::Event e, uint8_t slot)
 	{
-		auto multiChoiceView = makeViewWithName<TextTableView>("ROM Cartridge Slot", 5);
-		multiChoiceView->appendItem("Insert File",
+		auto multiChoiceView = makeViewWithName<TextTableView>("ROM 卡带插槽", 5);
+		multiChoiceView->appendItem("插入文件",
 			[this, slot](View &view, Input::Event e)
 			{
 				addROMFilePickerView(e, slot, true);
 				postDraw();
 			});
-		multiChoiceView->appendItem("Eject",
+		multiChoiceView->appendItem("弹出",
 			[this, slot](View &view, Input::Event e)
 			{
 				boardChangeCartridge(slot, ROM_UNKNOWN, 0, 0);
 				onROMMediaChange("", slot);
 				view.dismiss();
 			});
-		multiChoiceView->appendItem("Insert SCC",
+		multiChoiceView->appendItem("插入 SCC",
 			[this, slot](View &view, Input::Event e)
 			{
 				boardChangeCartridge(slot, ROM_SCC, "", 0);
 				onROMMediaChange("SCC", slot);
 				view.dismiss();
 			});
-		multiChoiceView->appendItem("Insert SCC+",
+		multiChoiceView->appendItem("插入 SCC+",
 			[this, slot](View &view, Input::Event e)
 			{
 				boardChangeCartridge(slot, ROM_SCCPLUS, "", 0);
 				onROMMediaChange("SCC+", slot);
 				view.dismiss();
 			});
-		multiChoiceView->appendItem("Insert Sunrise IDE",
+		multiChoiceView->appendItem("插入 Sunrise IDE",
 			[this, slot](View &view, Input::Event e)
 			{
 				if(!boardChangeCartridge(slot, ROM_SUNRISEIDE, "Sunrise IDE", 0))
 				{
-					app().postMessage(true, "Error loading Sunrise IDE device");
+					app().postMessage(true, "加载 Sunrise IDE 设备出错");
 				}
 				else
 					onROMMediaChange("Sunrise IDE", slot);
@@ -456,7 +456,7 @@ public:
 	{
 		if(system().diskName[slot].size())
 		{
-			auto multiChoiceView = makeViewWithName<TextTableView>("Disk Drive", std::size(insertEjectDiskMenuStr));
+			auto multiChoiceView = makeViewWithName<TextTableView>("磁盘驱动器", std::size(insertEjectDiskMenuStr));
 			multiChoiceView->appendItem(insertEjectDiskMenuStr[0],
 				[this, slot](Input::Event e)
 				{
@@ -490,7 +490,7 @@ public:
 	MsxIOControlView(ViewAttachParams attach):
 		TableView
 		{
-			"IO Control",
+			"IO 控制",
 			attach,
 			item
 		}
@@ -528,7 +528,7 @@ class CustomSystemActionsView : public SystemActionsView, public MainAppHelper
 private:
 	TextMenuItem msxIOControl
 	{
-		"ROM/Disk Control", attachParams(),
+		"ROM/磁盘控制", attachParams(),
 		[this](TextMenuItem &item, View &, Input::Event e)
 		{
 			if(item.active())
@@ -547,7 +547,7 @@ private:
 
 	MultiChoiceMenuItem msxMachine
 	{
-		"Machine Type", attachParams(),
+		"机型", attachParams(),
 		0,
 		machineItems,
 		{
@@ -580,7 +580,7 @@ private:
 			machineItems.emplace_back(name, attachParams(),
 			[this, name = name.data()](Input::Event e)
 			{
-				app().pushAndShowModalView(makeView<YesNoAlertView>("Change machine type and reset emulation?",
+				app().pushAndShowModalView(makeView<YesNoAlertView>("更改机型并重置模拟？",
 					YesNoAlertView::Delegates
 					{
 						.onYes = [this, name]
@@ -647,7 +647,7 @@ public:
 	SoundMixerView(ViewAttachParams attach):
 		TableView
 		{
-			"Sound Mixer",
+			"声音混音器",
 			attach,
 			menuItem
 		}
@@ -671,7 +671,7 @@ protected:
 	{
 		return
 		{
-			"Output", attachParams(),
+			"输出", attachParams(),
 			system().mixerEnableOption(type),
 			[this, type](BoolMenuItem &item, View &, Input::Event)
 			{
@@ -697,7 +697,7 @@ protected:
 	{
 		return
 		{
-			TextMenuItem{"Default Value", attachParams(),
+			TextMenuItem{"默认值", attachParams(),
 				[this, type]()
 				{
 					system().setMixerVolumeOption(type, -1);
@@ -705,7 +705,7 @@ protected:
 			TextMenuItem{"自定义", attachParams(),
 				[this, type = (uint8_t)type, idx](Input::Event e)
 				{
-					pushAndShowNewCollectValueInputView<int>(attachParams(), e, "Input 0 to 100", "",
+					pushAndShowNewCollectValueInputView<int>(attachParams(), e, "输入 0 到 100", "",
 						[this, type, idx](CollectTextInputView&, auto val)
 						{
 							if(val >= 0 && val <= 100)
@@ -770,7 +770,7 @@ protected:
 	{
 		return
 		{
-			TextMenuItem{"Default Value", attachParams(),
+			TextMenuItem{"默认值", attachParams(),
 				[this, type]()
 				{
 					system().setMixerPanOption(type, -1);
@@ -778,7 +778,7 @@ protected:
 			TextMenuItem{"自定义", attachParams(),
 				[this, type = (uint8_t)type, idx](Input::Event e)
 				{
-					pushAndShowNewCollectValueInputView<int>(attachParams(), e, "Input 0 to 100", "",
+					pushAndShowNewCollectValueInputView<int>(attachParams(), e, "输入 0 到 100", "",
 						[this, type, idx](CollectTextInputView&, auto val)
 						{
 							if(val >= 0 && val <= 100)
@@ -815,7 +815,7 @@ protected:
 	{
 		return
 		{
-			"Pan", attachParams(),
+			"声像", attachParams(),
 			1,
 			panLevelItem[idx],
 			{

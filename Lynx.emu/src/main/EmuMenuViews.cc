@@ -73,14 +73,14 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	TextMenuItem rotationItem[4]
 	{
 		{"自动",           attachParams(), setRotationDel(), {.id = LynxRotation::Auto}},
-		{"Horizontal",     attachParams(), setRotationDel(), {.id = LynxRotation::Horizontal}},
-		{"Vertical Left",  attachParams(), setRotationDel(), {.id = LynxRotation::VerticalLeft}},
-		{"Vertical Right", attachParams(), setRotationDel(), {.id = LynxRotation::VerticalRight}},
+		{"水平",     attachParams(), setRotationDel(), {.id = LynxRotation::Horizontal}},
+		{"垂直向左",  attachParams(), setRotationDel(), {.id = LynxRotation::VerticalLeft}},
+		{"垂直向右", attachParams(), setRotationDel(), {.id = LynxRotation::VerticalRight}},
 	};
 
 	MultiChoiceMenuItem rotation
 	{
-		"Handheld Rotation", attachParams(),
+		"掌机旋转", attachParams(),
 		MenuId{system().rotation},
 		rotationItem
 	};
@@ -124,7 +124,7 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	BoolMenuItem lowpassFilter
 	{
-		"Low-pass Filter", attachParams(),
+		"低通滤波器", attachParams(),
 		system().lowpassFilter,
 		[this](BoolMenuItem &item) { system().setLowpassFilter(item.flipBoolValue(*this)); }
 	};

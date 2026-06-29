@@ -43,14 +43,14 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 
 	TextMenuItem resampleQualityItem[3]
 	{
-		{"Low",   attachParams(), setResampleQualityDel(), {.id = AudioSettings::ResamplingQuality::nearestNeighbour}},
-		{"High",  attachParams(), setResampleQualityDel(), {.id = AudioSettings::ResamplingQuality::lanczos_2}},
-		{"Ultra", attachParams(), setResampleQualityDel(), {.id = AudioSettings::ResamplingQuality::lanczos_3}},
+		{"低",   attachParams(), setResampleQualityDel(), {.id = AudioSettings::ResamplingQuality::nearestNeighbour}},
+		{"高",  attachParams(), setResampleQualityDel(), {.id = AudioSettings::ResamplingQuality::lanczos_2}},
+		{"超高", attachParams(), setResampleQualityDel(), {.id = AudioSettings::ResamplingQuality::lanczos_3}},
 	};
 
 	MultiChoiceMenuItem resampleQuality
 	{
-		"Resampling Quality", attachParams(),
+		"重采样质量", attachParams(),
 		MenuId{system().optionAudioResampleQuality.value()},
 		resampleQualityItem
 	};
@@ -77,7 +77,7 @@ class CustomVideoOptionView : public VideoOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem tvPhosphorBlend
 	{
-		"TV Phosphor Blending", attachParams(),
+		"电视荧光粉混合", attachParams(),
 		MenuId{system().optionTVPhosphorBlend},
 		tvPhosphorBlendItem
 	};
@@ -111,7 +111,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem tvPhosphor
 	{
-		"Simulate TV Phosphor", attachParams(),
+		"模拟电视荧光粉", attachParams(),
 		MenuId{system().optionTVPhosphor},
 		tvPhosphorItem,
 		{
@@ -142,7 +142,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem videoSystem
 	{
-		"Video System", attachParams(),
+		"视频系统", attachParams(),
 		MenuId{system().optionVideoSystem},
 		videoSystemItem,
 		{
@@ -182,9 +182,9 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	TextMenuItem inputPortsItem[5]
 	{
 		{"自动",            attachParams(), setInputPortsDel(), {.id = Controller::Type::Unknown}},
-		{"Joystick",        attachParams(), setInputPortsDel(), {.id = Controller::Type::Joystick}},
+		{"摇杆",        attachParams(), setInputPortsDel(), {.id = Controller::Type::Joystick}},
 		{"Paddles",         attachParams(), setInputPortsDel(), {.id = Controller::Type::Paddles}},
-		{"Genesis Gamepad", attachParams(), setInputPortsDel(), {.id = Controller::Type::Genesis}},
+		{"Genesis 手柄", attachParams(), setInputPortsDel(), {.id = Controller::Type::Genesis}},
 		{"Booster Grip",    attachParams(), setInputPortsDel(), {.id = Controller::Type::BoosterGrip}},
 	};
 
@@ -223,14 +223,14 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	TextMenuItem aPaddleRegionItem[4]
 	{
 		{"关",        attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::OFF}},
-		{"Left Half",  attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::LEFT}},
-		{"Right Half", attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::RIGHT}},
-		{"Full",       attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::FULL}},
+		{"左半部分",  attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::LEFT}},
+		{"右半部分", attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::RIGHT}},
+		{"完整",       attachParams(), setAPaddleRegionDel(), {.id = PaddleRegionMode::FULL}},
 	};
 
 	MultiChoiceMenuItem aPaddleRegion
 	{
-		"Analog Paddle Region", attachParams(),
+		"模拟拨盘区域", attachParams(),
 		MenuId{system().optionPaddleAnalogRegion},
 		aPaddleRegionItem
 	};
@@ -273,7 +273,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem dPaddleSensitivity
 	{
-		"Digital Paddle Sensitivity", attachParams(),
+		"数字拨盘灵敏度", attachParams(),
 		MenuId{system().optionPaddleDigitalSensitivity},
 		dPaddleSensitivityItem,
 		{
@@ -316,7 +316,7 @@ class VCSSwitchesView : public TableView, public MainAppHelper
 {
 	BoolMenuItem diff1
 	{
-		"Left (P1) Difficulty", attachParams(),
+		"左 (P1) 难度", attachParams(),
 		system().p1DiffB,
 		"A", "B",
 		[this](BoolMenuItem& item)
@@ -327,7 +327,7 @@ class VCSSwitchesView : public TableView, public MainAppHelper
 
 	BoolMenuItem diff2
 	{
-		"Right (P2) Difficulty", attachParams(),
+		"右 (P2) 难度", attachParams(),
 		system().p2DiffB,
 		"A", "B",
 		[this](BoolMenuItem& item)
@@ -338,7 +338,7 @@ class VCSSwitchesView : public TableView, public MainAppHelper
 
 	BoolMenuItem color
 	{
-		"Color", attachParams(),
+		"颜色", attachParams(),
 		system().vcsColor,
 		[this](BoolMenuItem& item)
 		{
@@ -357,7 +357,7 @@ public:
 	VCSSwitchesView(ViewAttachParams attach):
 		TableView
 		{
-			"Switches",
+			"开关",
 			attach,
 			menuItem
 		}
@@ -377,7 +377,7 @@ class CustomSystemActionsView : public SystemActionsView
 private:
 	TextMenuItem switches
 	{
-		"Console Switches", attachParams(),
+		"主机开关", attachParams(),
 		[this](const Input::Event &e)
 		{
 			if(system().hasContent())

@@ -54,7 +54,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem timer
 	{
-		"Emulate Timer", attachParams(),
+		"模拟计时器", attachParams(),
 		std::min((int)system().optionTimerInt, 2),
 		timerItem,
 		{
@@ -102,15 +102,15 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	TextMenuItem regionItem[4]
 	{
-		{"Japan",  attachParams(), setRegionDel(), {.id = CTY_JAPAN}},
-		{"Europe", attachParams(), setRegionDel(), {.id = CTY_EUROPE}},
-		{"USA",    attachParams(), setRegionDel(), {.id = CTY_USA}},
-		{"Asia",   attachParams(), setRegionDel(), {.id = CTY_ASIA}},
+		{"日本",  attachParams(), setRegionDel(), {.id = CTY_JAPAN}},
+		{"欧洲", attachParams(), setRegionDel(), {.id = CTY_EUROPE}},
+		{"美国",    attachParams(), setRegionDel(), {.id = CTY_USA}},
+		{"亚洲",   attachParams(), setRegionDel(), {.id = CTY_ASIA}},
 	};
 
 	MultiChoiceMenuItem region
 	{
-		"MVS Region", attachParams(),
+		"MVS 区域", attachParams(),
 		std::min((int)conf.country, 3),
 		regionItem
 	};
@@ -137,14 +137,14 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	MultiChoiceMenuItem bios
 	{
-		"BIOS Type", attachParams(),
+		"BIOS 类型", attachParams(),
 		MenuId{conf.system},
 		biosItem
 	};
 
 	BoolMenuItem createAndUseCache
 	{
-		"Make/Use Cache Files", attachParams(),
+		"创建/使用缓存文件", attachParams(),
 		(bool)system().optionCreateAndUseCache,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -154,7 +154,7 @@ class CustomSystemOptionView : public SystemOptionView, public MainAppHelper
 
 	BoolMenuItem strictROMChecking
 	{
-		"Strict ROM Checking", attachParams(),
+		"严格 ROM 校验", attachParams(),
 		(bool)system().optionStrictROMChecking,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -179,7 +179,7 @@ class EmuGUIOptionView : public GUIOptionView, public MainAppHelper
 
 	BoolMenuItem listAll
 	{
-		"List All Games", attachParams(),
+		"列出所有游戏", attachParams(),
 		(bool)system().optionListAllGames,
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
@@ -488,7 +488,7 @@ public:
 	GameListView(ViewAttachParams attach):
 		TableView
 		{
-			"Game List",
+			"游戏列表",
 			attach,
 			item
 		}
@@ -532,7 +532,7 @@ public:
 						if(entry.bugs)
 						{
 							app().pushAndShowModalView(makeView<YesNoAlertView>(
-								"This game doesn't yet work properly, load anyway?",
+								"此游戏尚未正常工作，是否仍然加载？",
 								YesNoAlertView::Delegates{.onYes = [this, &entry](Input::Event e){ loadGame(entry, e); }}), e);
 						}
 						else
@@ -542,7 +542,7 @@ public:
 					}
 					else
 					{
-						app().postMessage(3, 1, std::format("{} not present", entry.name));
+						app().postMessage(3, 1, std::format("{} 不存在", entry.name));
 					}
 					return true;
 				});
@@ -567,16 +567,16 @@ class UnibiosSwitchesView : public TableView
 
 	MultiChoiceMenuItem region
 	{
-		"Region", attachParams(),
+		"区域", attachParams(),
 		(int)memory.memcard[3] & 0x3,
 		regionItem
 	};
 
 	BoolMenuItem system
 	{
-		"Mode", attachParams(),
+		"模式", attachParams(),
 		bool(memory.memcard[2] & 0x80),
-		"Console (AES)", "Arcade (MVS)",
+		"家用机 (AES)", "街机 (MVS)",
 		[this](BoolMenuItem &item, View &, Input::Event e)
 		{
 			bool on = item.flipBoolValue(*this);
@@ -595,7 +595,7 @@ public:
 	UnibiosSwitchesView(ViewAttachParams attach):
 		TableView
 		{
-			"Unibios Switches",
+			"Unibios 开关",
 			attach,
 			items
 		}
@@ -625,7 +625,7 @@ private:
 				}
 				else
 				{
-					app().postMessage("Only used with Unibios");
+					app().postMessage("仅在使用 Unibios 时有效");
 				}
 			}
 		}
@@ -664,13 +664,13 @@ class CustomMainMenuView : public MainMenuView
 private:
 	TextMenuItem gameList
 	{
-		"Open Content From List", attachParams(),
+		"从列表打开内容", attachParams(),
 		[this](TextMenuItem &, View &, Input::Event e)
 		{
 			auto gameListMenu = makeView<GameListView>();
 			if(!gameListMenu->games())
 			{
-				app().postMessage(6, true, "No content found, use \"Open Content\" command to browse to a folder with ROM archives.");
+				app().postMessage(6, true, "未找到内容，请使用\u201c打开内容\u201d命令浏览到包含 ROM 压缩包的文件夹。");
 				return;
 			}
 			pushAndShow(std::move(gameListMenu), e);

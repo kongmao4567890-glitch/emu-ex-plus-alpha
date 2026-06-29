@@ -35,15 +35,15 @@ class CustomAudioOptionView : public AudioOptionView, public MainAppHelper
 	TextMenuItem dspInterpolationItem[5]
 	{
 		{"无",     attachParams(), [this](){ setDSPInterpolation(0); }},
-		{"Linear",   attachParams(), [this](){ setDSPInterpolation(1); }},
-		{"Gaussian", attachParams(), [this](){ setDSPInterpolation(2); }},
-		{"Cubic",    attachParams(), [this](){ setDSPInterpolation(3); }},
+		{"线性",     attachParams(), [this](){ setDSPInterpolation(1); }},
+		{"高斯",     attachParams(), [this](){ setDSPInterpolation(2); }},
+		{"三次",     attachParams(), [this](){ setDSPInterpolation(3); }},
 		{"Sinc",     attachParams(), [this](){ setDSPInterpolation(4); }},
 	};
 
 	MultiChoiceMenuItem dspInterpolation
 	{
-		"DSP Interpolation", attachParams(),
+		"DSP 插值", attachParams(),
 		system().optionAudioDSPInterpolation.value(),
 		dspInterpolationItem
 	};
@@ -74,12 +74,12 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	TextMenuItem inputPortsItem[HAS_NSRT ? 5 : 4]
 	{
 		#ifndef SNES9X_VERSION_1_4
-		{"Auto (NSRT)", attachParams(), setInputPortsDel(), {.id = SNES_AUTO_INPUT}},
+		{"自动 (NSRT)", attachParams(), setInputPortsDel(), {.id = SNES_AUTO_INPUT}},
 		#endif
-		{"Gamepads",    attachParams(), setInputPortsDel(), {.id = SNES_JOYPAD}},
-		{"Superscope",  attachParams(), setInputPortsDel(), {.id = SNES_SUPERSCOPE}},
-		{"Justifier",   attachParams(), setInputPortsDel(), {.id = SNES_JUSTIFIER}},
-		{"Mouse",       attachParams(), setInputPortsDel(), {.id = SNES_MOUSE_SWAPPED}},
+		{"手柄",        attachParams(), setInputPortsDel(), {.id = SNES_JOYPAD}},
+		{"超级范围枪",  attachParams(), setInputPortsDel(), {.id = SNES_SUPERSCOPE}},
+		{"Justifier 光枪", attachParams(), setInputPortsDel(), {.id = SNES_JUSTIFIER}},
+		{"鼠标",       attachParams(), setInputPortsDel(), {.id = SNES_MOUSE_SWAPPED}},
 	};
 
 	MultiChoiceMenuItem inputPorts
@@ -126,7 +126,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem allowExtendedLines
 	{
-		"Allow Overscan Mode", attachParams(),
+		"允许过扫描模式", attachParams(),
 		(bool)system().optionAllowExtendedVideoLines,
 		[this](BoolMenuItem &item)
 		{
@@ -143,7 +143,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem deinterlaceMode
 	{
-		"Deinterlace Mode", attachParams(),
+		"去隔行模式", attachParams(),
 		MenuId{system().deinterlaceMode},
 		deinterlaceModeItems,
 		{
@@ -156,11 +156,11 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 	};
 
 	#ifndef SNES9X_VERSION_1_4
-	TextHeadingMenuItem emulationHacks{"Emulation Hacks", attachParams()};
+	TextHeadingMenuItem emulationHacks{"模拟优化", attachParams()};
 
 	BoolMenuItem blockInvalidVRAMAccess
 	{
-		"Allow Invalid VRAM Access", attachParams(),
+		"允许无效 VRAM 访问", attachParams(),
 		(bool)!system().optionBlockInvalidVRAMAccess,
 		[this](BoolMenuItem &item)
 		{
@@ -172,7 +172,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	BoolMenuItem separateEchoBuffer
 	{
-		"Separate Echo Buffer From Ram", attachParams(),
+		"将回声缓冲区从 RAM 分离", attachParams(),
 		(bool)system().optionSeparateEchoBuffer,
 		[this](BoolMenuItem &item)
 		{
@@ -195,7 +195,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 		{"自定义", attachParams(),
 			[this](Input::Event e)
 			{
-				pushAndShowNewCollectValueInputView<int>(attachParams(), e, "Input 5 to 250", "",
+				pushAndShowNewCollectValueInputView<int>(attachParams(), e, "输入 5 到 250", "",
 					[this](CollectTextInputView&, auto val)
 					{
 						if(system().optionSuperFXClockMultiplier.isValid(val))
@@ -218,7 +218,7 @@ class ConsoleOptionView : public TableView, public MainAppHelper
 
 	MultiChoiceMenuItem superFXClock
 	{
-		"SuperFX Clock Multiplier", attachParams(),
+		"SuperFX 时钟倍率", attachParams(),
 		[this]()
 		{
 			if(system().optionSuperFXClockMultiplier == 100)
@@ -312,7 +312,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		patchesMenuName(appContext(), system().patchesDir), attachParams(),
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<UserPathSelectView>("Patches", system().userPath(system().patchesDir),
+			pushAndShow(makeViewWithName<UserPathSelectView>("补丁", system().userPath(system().patchesDir),
 				[this](CStringView path)
 				{
 					Snes9xSystem::log.info("set patches path:{}", path);
@@ -324,7 +324,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 
 	static std::string satMenuName(ApplicationContext ctx, std::string_view userPath)
 	{
-		return std::format("Satellaview Files: {}", userPathToDisplayName(ctx, userPath));
+		return std::format("Satellaview 文件: {}", userPathToDisplayName(ctx, userPath));
 	}
 
 	TextMenuItem satPath
@@ -332,7 +332,7 @@ class CustomFilePathOptionView : public FilePathOptionView, public MainAppHelper
 		satMenuName(appContext(), system().satDir), attachParams(),
 		[this](const Input::Event &e)
 		{
-			pushAndShow(makeViewWithName<UserPathSelectView>("Satellaview Files", system().userPath(system().satDir),
+			pushAndShow(makeViewWithName<UserPathSelectView>("Satellaview 文件", system().userPath(system().satDir),
 				[this](CStringView path)
 				{
 					Snes9xSystem::log.info("set satellaview files path:{}", path);
@@ -418,7 +418,7 @@ public:
 	EditCheatView(ViewAttachParams attach, Cheat& cheat, BaseEditCheatsView& editCheatsView):
 		BaseEditCheatView
 		{
-			"Edit Cheat",
+			"编辑金手指",
 			attach,
 			cheat,
 			editCheatsView
@@ -426,8 +426,8 @@ public:
 		#ifndef SNES9X_VERSION_1_4
 		,addCode
 		{
-			"Add Another Code", attach,
-			[this](const Input::Event& e) { addNewCheatCode("Input xxxx-xxxx (GG), xxxxxxxx (AR), GF code, or blank", e); }
+			"添加其他代码", attach,
+			[this](const Input::Event& e) { addNewCheatCode("输入 xxxx-xxxx (GG)、xxxxxxxx (AR)、GF 代码或留空", e); }
 		}
 		#endif
 	{
@@ -489,8 +489,8 @@ public:
 		},
 		addCode
 		{
-			"Add Game Genie/Action Replay/Gold Finger Code", attach,
-			[this](const Input::Event& e) { addNewCheat("Input xxxx-xxxx (GG), xxxxxxxx (AR), or GF code", e); }
+			"添加 Game Genie/Action Replay/Gold Finger 代码", attach,
+			[this](const Input::Event& e) { addNewCheat("输入 xxxx-xxxx (GG)、xxxxxxxx (AR) 或 GF 代码", e); }
 		} {}
 
 private:
@@ -500,7 +500,7 @@ private:
 EditRamCheatView::EditRamCheatView(ViewAttachParams attach, CheatCode& code_, EditCheatView& editCheatView_):
 	TableView
 	{
-		"Edit Memory Patch",
+		"编辑内存补丁",
 		attach,
 		[this](ItemMessage msg) -> ItemReply
 		{
@@ -525,18 +525,18 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, CheatCode& code_, Ed
 	editCheatView{editCheatView_},
 	addr
 	{
-		"Address",
+		"地址",
 		std::format("{:x}", code_.address),
 		attach,
 		[this](const Input::Event& e)
 		{
-			pushAndShowNewCollectValueInputView<const char*>(attachParams(), e, "Input 6-digit hex", std::format("{:x}", code.address),
+			pushAndShowNewCollectValueInputView<const char*>(attachParams(), e, "输入 6 位十六进制", std::format("{:x}", code.address),
 				[this](CollectTextInputView&, auto str)
 				{
 					unsigned a = parseHex(str);
 					if(a > 0xFFFFFF)
 					{
-						app().postMessage(true, "value must be <= FFFFFF");
+						app().postMessage(true, "数值必须 <= FFFFFF");
 						return false;
 					}
 					setCheatAddress(code, a);
@@ -549,18 +549,18 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, CheatCode& code_, Ed
 	},
 	value
 	{
-		"Value",
+		"数值",
 		std::format("{:x}", code_.byte),
 		attach,
 		[this](const Input::Event& e)
 		{
-			pushAndShowNewCollectValueInputView<const char*>(attachParams(), e, "Input 2-digit hex", std::format("{:x}", code.byte),
+			pushAndShowNewCollectValueInputView<const char*>(attachParams(), e, "输入 2 位十六进制", std::format("{:x}", code.byte),
 				[this](CollectTextInputView&, auto str)
 				{
 					unsigned a = parseHex(str);
 					if(a > 0xFF)
 					{
-						app().postMessage(true, "value must be <= FF");
+						app().postMessage(true, "数值必须 <= FF");
 						return false;
 					}
 					setCheatValue(code, a);
@@ -574,15 +574,15 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, CheatCode& code_, Ed
 	conditional
 	{
 		#ifndef SNES9X_VERSION_1_4
-		"Conditional Value",
+		"条件值",
 		#else
-		"Saved Value",
+		"保存值",
 		#endif
 		codeConditionalToString(code_),
 		attach,
 		[this](const Input::Event& e)
 		{
-			pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e, "Input 2-digit hex or blank", codeConditionalToString(code),
+			pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e, "输入 2 位十六进制或留空", codeConditionalToString(code),
 				[this](CollectTextInputView &, const char *str)
 				{
 					int a = -1;
@@ -591,7 +591,7 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, CheatCode& code_, Ed
 						a = parseHex(str);
 						if(a > 0xFF)
 						{
-							app().postMessage(true, "value must be <= FF");
+							app().postMessage(true, "数值必须 <= FF");
 							return true;
 						}
 					}
@@ -608,7 +608,7 @@ EditRamCheatView::EditRamCheatView(ViewAttachParams attach, CheatCode& code_, Ed
 		"删除", attach,
 		[this](const Input::Event& e)
 		{
-			pushAndShowModal(makeView<YesNoAlertView>("Really delete this patch?",
+			pushAndShowModal(makeView<YesNoAlertView>("确定删除此补丁？",
 				YesNoAlertView::Delegates{.onYes = [this]{ editCheatView.removeCheatCode(code); dismiss(); }}), e);
 		}
 	} {}
