@@ -29,7 +29,7 @@ unsigned parseHex(const char* str) { return strtoul(str, nullptr, 16); }
 static unsigned hexDigitCount(const char* str)
 {
 	unsigned count = 0;
-	while(std::isxdigit(static_cast<unsigned char>(*str))) { count++; str++; }
+	while(::isxdigit(static_cast<unsigned char>(*str))) { count++; str++; }
 	return count;
 }
 
@@ -233,9 +233,9 @@ int SaturnSystem::batchAddCheats(EmuApp& app, const char* text)
 	{
 		std::string_view lineStr{line};
 		// Trim whitespace
-		while(!lineStr.empty() && std::isspace(static_cast<unsigned char>(lineStr.front())))
+		while(!lineStr.empty() && ::isspace(static_cast<unsigned char>(lineStr.front())))
 			lineStr.remove_prefix(1);
-		while(!lineStr.empty() && std::isspace(static_cast<unsigned char>(lineStr.back())))
+		while(!lineStr.empty() && ::isspace(static_cast<unsigned char>(lineStr.back())))
 			lineStr.remove_suffix(1);
 		if(lineStr.empty()) continue;
 		// Find pipe separator
@@ -252,9 +252,9 @@ int SaturnSystem::batchAddCheats(EmuApp& app, const char* text)
 			name = "金手指 " + std::to_string(cheats.size() + 1);
 		}
 		// Trim code
-		while(!code.empty() && std::isspace(static_cast<unsigned char>(code.front())))
+		while(!code.empty() && ::isspace(static_cast<unsigned char>(code.front())))
 			code.erase(code.begin());
-		while(!code.empty() && std::isspace(static_cast<unsigned char>(code.back())))
+		while(!code.empty() && ::isspace(static_cast<unsigned char>(code.back())))
 			code.pop_back();
 		if(code.empty()) continue;
 		auto* cheatPtr = newCheat(app, name.c_str(), {code.c_str(), 0});
