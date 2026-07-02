@@ -629,6 +629,128 @@ public:
 	}
 };
 
+class EditCheatView: public BaseEditCheatView
+{
+public:
+	EditCheatView(ViewAttachParams attach, Cheat& cheat, BaseEditCheatsView& editCheatsView):
+		BaseEditCheatView
+		{
+			"编辑金手指",
+			attach,
+			cheat,
+			editCheatsView
+		},
+		addCode
+		{
+			"添加其他代码", attach,
+			[this](const Input::Event& e) { addNewCheatCode("输入 地址:数值[:比较值]", e); }
+		}
+	{
+		loadItems();
+	}
+
+	void loadItems()
+	{
+		codes.clear();
+		system().forEachCheatCode(*cheatPtr, [this](CheatCode& c, std::string_view code)
+		{
+			codes.emplace_back("代码", code, attachParams(), [this, &c](const Input::Event& e)
+			{
+				auto codeStr = std::format("{:X}:{:X}", c.addr, c.val);
+				if(c.compare >= 0)
+					codeStr += std::format(":{:X}", c.compare);
+				pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e,
+					"输入 地址:数值[:比较值]", codeStr.c_str(),
+					[this, &c](CollectTextInputView&, auto str) { return modifyCheatCode(c, {str, 0}); });
+			});
+			return true;
+		});
+		items.clear();
+		items.emplace_back(&name);
+		for(auto& c: codes)
+		{
+			items.emplace_back(&c);
+		}
+		items.emplace_back(&addCode);
+		items.emplace_back(&remove);
+	}
+
+private:
+	TextMenuItem addCode;
+};
+
+class EditCheatsView: public BaseEditCheatsView
+{
+public:
+	EditCheatsView(ViewAttachParams attach, CheatsView& cheatsView):
+		BaseEditCheatsView
+		{
+			attach,
+			cheatsView,
+			[this](ItemMessage msg) -> ItemReply
+			{
+				return msg.visit(overloaded
+				{
+					[&](const ItemsMessage&) -> ItemReply { return 2 + cheats.size(); },
+					[&](const GetItemMessage& m) -> ItemReply
+					{
+						switch(m.idx)
+						{
+							case 0: return &addCheat;
+							case 1: return &batchAdd;
+							default: return &cheats[m.idx - 2];
+						}
+					},
+				});
+			}
+		},
+		addCheat
+		{
+			"添加金手指", attachParams(),
+			[this](const Input::Event& e) { addNewCheat("输入 地址:数值[:比较值]", e); }
+		},
+		batchAdd
+		{
+			"批量添加金手指", attachParams(),
+			[this](const Input::Event& e)
+			{
+				pushAndShowNewCollectTextInputView(attachParams(), e,
+					"每行一个，格式：名称|地址:数值[:比较值]", "",
+					[this](CollectTextInputView& view, const char* str)
+					{
+						auto& sys = static_cast<SaturnSystem&>(system());
+						int count = sys.batchAddCheats(app(), str);
+						if(count > 0)
+						{
+							auto msg = std::format("成功添加 {} 个金手指", count);
+							app().postMessage(false, msg.c_str());
+							onCheatsChanged();
+							view.dismiss();
+							return false;
+						}
+						else
+						{
+							app().postMessage(true, "未添加任何金手指，请检查格式");
+							return true;
+						}
+					});
+			}
+		} {}
+
+private:
+	TextMenuItem addCheat, batchAdd;
+};
+
+std::unique_ptr<View> AppMeta::makeEditCheatsView(ViewAttachParams attach, CheatsView& view)
+{
+	return std::make_unique<EditCheatsView>(attach, view);
+}
+
+std::unique_ptr<View> AppMeta::makeEditCheatView(ViewAttachParams attach, Cheat& c, BaseEditCheatsView& baseView)
+{
+	return std::make_unique<EditCheatView>(attach, c, baseView);
+}
+
 std::unique_ptr<View> EmuApp::makeCustomView(ViewAttachParams attach, ViewID id)
 {
 	switch(id)

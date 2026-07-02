@@ -9,6 +9,7 @@ target_sources(saturnemu PRIVATE
 	main/options.cc
 	main/input.cc
 	main/EmuMenuViews.cc
+	main/Cheats.cc
 	ss/ak93c45.cpp
 	ss/cdb.cpp
 	ss/scu_dsp_gen.cpp

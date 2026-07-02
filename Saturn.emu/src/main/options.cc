@@ -86,6 +86,38 @@ bool SaturnSystem::readConfig(ConfigType type, MapIO &io, unsigned key)
 			case CFGKEY_SHOW_H_OVERSCAN: return readOptionValue(io, showHOverscan);
 			case CFGKEY_DEINTERLACE_MODE: return readOptionValue(io, deinterlaceMode);
 			case CFGKEY_WIDESCREEN_MODE: return readOptionValue(io, widescreenMode);
+			case CFGKEY_CHEATS_PATH: return readStringOptionValue(io, cheatsPath);
+			case CFGKEY_CHEATS:
+			{
+				uint32_t count{};
+				if(!io.read(count)) return false;
+				cheats.clear();
+				for(uint32_t i = 0; i < count; i++)
+				{
+					uint32_t nameLen{};
+					if(!io.read(nameLen)) return false;
+					Cheat c;
+					c.name.resize(nameLen);
+					if(!io.read(c.name.data(), nameLen)) return false;
+					uint8_t enabled{};
+					if(!io.read(enabled)) return false;
+					c.enabled = enabled;
+					uint32_t codeCount{};
+					if(!io.read(codeCount)) return false;
+					for(uint32_t j = 0; j < codeCount; j++)
+					{
+						CheatCode code;
+						if(!io.read(code.addr)) return false;
+						if(!io.read(code.val)) return false;
+						if(!io.read(code.compare)) return false;
+						if(!io.read(code.length)) return false;
+						c.codes.emplace_back(code);
+					}
+					cheats.emplace_back(std::move(c));
+				}
+				syncCheats();
+				return true;
+			}
 		}
 	}
 	return false;
@@ -116,6 +148,32 @@ void SaturnSystem::writeConfig(ConfigType type, FileIO &io)
 		writeOptionValueIfNotDefault(io, CFGKEY_SHOW_H_OVERSCAN, showHOverscan, defaultShowHOverscan);
 		writeOptionValueIfNotDefault(io, CFGKEY_DEINTERLACE_MODE, deinterlaceMode, DeinterlaceMode::Bob);
 		writeOptionValueIfNotDefault(io, CFGKEY_WIDESCREEN_MODE, widescreenMode, WidescreenMode::Auto);
+		if(!cheatsPath.empty())
+			writeStringOptionValue(io, CFGKEY_CHEATS_PATH, cheatsPath);
+		if(!cheats.empty())
+		{
+			MapIO cheatsIO;
+			uint32_t count = cheats.size();
+			cheatsIO.write(count);
+			for(auto& c: cheats)
+			{
+				uint32_t nameLen = c.name.size();
+				cheatsIO.write(nameLen);
+				cheatsIO.write(c.name.data(), nameLen);
+				uint8_t enabled = c.enabled;
+				cheatsIO.write(enabled);
+				uint32_t codeCount = c.codes.size();
+				cheatsIO.write(codeCount);
+				for(auto& code: c.codes)
+				{
+					cheatsIO.write(code.addr);
+					cheatsIO.write(code.val);
+					cheatsIO.write(code.compare);
+					cheatsIO.write(code.length);
+				}
+			}
+			writeConfigOption(io, CFGKEY_CHEATS, cheatsIO);
+		}
 	}
 }
 
@@ -185,7 +243,7 @@ bool MDFN_GetSettingB(const char *name_)
 	std::string_view name{name_};
 	auto &sys = static_cast<SaturnSystem&>(gSystem());
 	if("cheats" == name)
-		return false;
+		return true;
 	if(name.ends_with(".disable_softreset"))
 		return false;
 	if("filesys.untrusted_fip_check" == name)

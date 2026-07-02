@@ -32,6 +32,7 @@ const bool AppMeta::hasRectangularPixels{true};
 const bool AppMeta::hasPALVideoSystem{true};
 const bool AppMeta::canRenderRGB565{};
 const bool AppMeta::stateSizeChangesAtRuntime{true};
+const bool AppMeta::hasCheats{true};
 const int AppMeta::maxPlayers{12};
 const bool AppMeta::needsGlobalInstance{true};
 const NameFilterFunc AppMeta::defaultFsFilter{hasCDExtension};
