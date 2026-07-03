@@ -588,14 +588,15 @@ public:
 			{
 				return msg.visit(overloaded
 				{
-					[&](const ItemsMessage &m) -> ItemReply { return 2 + cheats.size(); },
+					[&](const ItemsMessage &m) -> ItemReply { return 3 + cheats.size(); },
 					[&](const GetItemMessage &m) -> ItemReply
 					{
 						switch(m.idx)
 						{
 							case 0: return &addGS12CBCode;
 							case 1: return &addGS3Code;
-							default: return &cheats[m.idx - 2];
+							case 2: return &batchAdd;
+							default: return &cheats[m.idx - 3];
 						}
 					},
 				});
@@ -610,10 +611,38 @@ public:
 		{
 			"添加 Game Shark v3 代码", attach,
 			[this](const Input::Event& e) { addNewCheat(cheatInputString(true), e, 1); }
-		} {}
+		},
+		batchAdd
+		{
+			"批量添加金手指", attachParams(),
+			[this](const Input::Event& e)
+			{
+				pushAndShowNewCollectTextInputView(attachParams(), e,
+					"格式：名称| 换行 代码（每行一个，GS格式 xxxxxxxx yyyyyyyy）", "",
+					[this](CollectTextInputView& view, const char* str)
+					{
+						auto& sys = static_cast<GbaSystem&>(system());
+						int count = sys.batchAddCheats(app(), str);
+						if(count > 0)
+						{
+							auto msg = std::format("成功添加 {} 个金手指", count);
+							app().postMessage(false, msg.c_str());
+							onCheatsChanged();
+							view.dismiss();
+							return false;
+						}
+						else
+						{
+							app().postMessage(true, "未添加任何金手指，请检查格式");
+							return true;
+						}
+					});
+			}
+		} {};
 
 private:
-		TextMenuItem addGS12CBCode, addGS3Code;
+	TextMenuItem addGS12CBCode, addGS3Code;
+	TextMenuItem batchAdd;
 };
 
 std::unique_ptr<View> EmuApp::makeCustomView(ViewAttachParams attach, ViewID id)

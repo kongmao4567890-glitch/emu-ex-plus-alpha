@@ -860,14 +860,15 @@ public:
 			{
 				return msg.visit(overloaded
 				{
-					[&](const ItemsMessage &m) -> ItemReply { return 2 + ::cheats.size(); },
+					[&](const ItemsMessage &m) -> ItemReply { return 3 + ::cheats.size(); },
 					[&](const GetItemMessage &m) -> ItemReply
 					{
 						switch(m.idx)
 						{
 							case 0: return &addGG;
 							case 1: return &addRAM;
-							default: return &cheats[m.idx - 2];
+							case 2: return &batchAdd;
+							default: return &cheats[m.idx - 3];
 						}
 					},
 				});
@@ -882,10 +883,38 @@ public:
 		{
 			"添加内存补丁", attachParams(),
 			[this](const Input::Event& e) { addNewCheat("输入 RAM 十六进制地址", e, 0); }
+		},
+		batchAdd
+		{
+			"批量添加金手指", attachParams(),
+			[this](const Input::Event& e)
+			{
+				pushAndShowNewCollectTextInputView(attachParams(), e,
+					"格式：名称| 换行 代码（每行一个，支持 GG 或 地址:数值）", "",
+					[this](CollectTextInputView& view, const char* str)
+					{
+						auto& sys = static_cast<NesSystem&>(system());
+						int count = sys.batchAddCheats(app(), str);
+						if(count > 0)
+						{
+							auto msg = std::format("成功添加 {} 个金手指", count);
+							app().postMessage(false, msg.c_str());
+							onCheatsChanged();
+							view.dismiss();
+							return false;
+						}
+						else
+						{
+							app().postMessage(true, "未添加任何金手指，请检查格式");
+							return true;
+						}
+					});
+			}
 		} {}
 
 private:
 	TextMenuItem addGG, addRAM;
+	TextMenuItem batchAdd;
 };
 
 EditRamCheatView::EditRamCheatView(ViewAttachParams attach, Cheat& cheat_, CheatCode& code_, EditCheatView& editCheatView_):

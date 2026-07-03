@@ -475,13 +475,14 @@ public:
 			{
 				return msg.visit(overloaded
 				{
-					[&](const ItemsMessage&) -> ItemReply { return 1 + cheats.size(); },
+					[&](const ItemsMessage&) -> ItemReply { return 2 + cheats.size(); },
 					[&](const GetItemMessage& m) -> ItemReply
 					{
 						switch(m.idx)
 						{
 							case 0: return &addCode;
-							default: return &cheats[m.idx - 1];
+							case 1: return &batchAdd;
+							default: return &cheats[m.idx - 2];
 						}
 					},
 				});
@@ -491,10 +492,38 @@ public:
 		{
 			"添加 Game Genie/Action Replay/Gold Finger 代码", attach,
 			[this](const Input::Event& e) { addNewCheat("输入 xxxx-xxxx (GG)、xxxxxxxx (AR) 或 GF 代码", e); }
+		},
+		batchAdd
+		{
+			"批量添加金手指", attachParams(),
+			[this](const Input::Event& e)
+			{
+				pushAndShowNewCollectTextInputView(attachParams(), e,
+					"格式：名称| 换行 代码（每行一个，支持 GG/AR/GF）", "",
+					[this](CollectTextInputView& view, const char* str)
+					{
+						auto& sys = static_cast<Snes9xSystem&>(system());
+						int count = sys.batchAddCheats(app(), str);
+						if(count > 0)
+						{
+							auto msg = std::format("成功添加 {} 个金手指", count);
+							app().postMessage(false, msg.c_str());
+							onCheatsChanged();
+							view.dismiss();
+							return false;
+						}
+						else
+						{
+							app().postMessage(true, "未添加任何金手指，请检查格式");
+							return true;
+						}
+					});
+			}
 		} {}
 
 private:
 	TextMenuItem addCode;
+	TextMenuItem batchAdd;
 };
 
 EditRamCheatView::EditRamCheatView(ViewAttachParams attach, CheatCode& code_, EditCheatView& editCheatView_):

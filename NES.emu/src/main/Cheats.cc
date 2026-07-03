@@ -179,4 +179,77 @@ void NesSystem::forEachCheatCode(Cheat& cheat, DelegateFunc<bool(CheatCode&, std
 	}
 }
 
+int NesSystem::batchAddCheats(EmuApp& app, const char* text)
+{
+	int count = 0;
+	std::string_view input{text};
+	std::string pendingName;
+	Cheat* currentCheat = nullptr;
+	auto lines = std::views::split(input, '\n');
+	for(auto line: lines)
+	{
+		std::string_view lineStr{line};
+		while(!lineStr.empty() && ::isspace(static_cast<unsigned char>(lineStr.front())))
+			lineStr.remove_prefix(1);
+		while(!lineStr.empty() && ::isspace(static_cast<unsigned char>(lineStr.back())))
+			lineStr.remove_suffix(1);
+		if(lineStr.empty()) continue;
+		if(lineStr.back() == '|')
+		{
+			pendingName = std::string{lineStr.substr(0, lineStr.size() - 1)};
+			if(pendingName.empty())
+				pendingName = "金手指 " + std::to_string(count + 1);
+			currentCheat = nullptr;
+			continue;
+		}
+		auto pipePos = lineStr.find('|');
+		std::string name, code;
+		if(pipePos != std::string_view::npos)
+		{
+			name = std::string{lineStr.substr(0, pipePos)};
+			code = std::string{lineStr.substr(pipePos + 1)};
+			if(name.empty())
+				name = "金手指 " + std::to_string(count + 1);
+			pendingName.clear();
+			currentCheat = nullptr;
+		}
+		else
+		{
+			code = std::string{lineStr};
+		}
+		while(!code.empty() && ::isspace(static_cast<unsigned char>(code.front())))
+			code.erase(code.begin());
+		while(!code.empty() && ::isspace(static_cast<unsigned char>(code.back())))
+			code.pop_back();
+		if(code.empty()) continue;
+		unsigned flags = isValidGGCodeLen(code.c_str()) ? 1 : 0;
+		if(!name.empty())
+		{
+			currentCheat = newCheat(app, name.c_str(), {code.c_str(), flags});
+			if(currentCheat) count++;
+		}
+		else if(!pendingName.empty())
+		{
+			currentCheat = newCheat(app, pendingName.c_str(), {code.c_str(), flags});
+			if(currentCheat) count++;
+			pendingName.clear();
+		}
+		else if(currentCheat)
+		{
+			auto* cPtr = currentCheat;
+			addCheatCode(app, cPtr, {code.c_str(), flags});
+		}
+		else
+		{
+			std::string defName = "金手指 " + std::to_string(count + 1);
+			currentCheat = newCheat(app, defName.c_str(), {code.c_str(), flags});
+			if(currentCheat) count++;
+		}
+	}
+	for(auto& c: cheats)
+		static_cast<Cheat&>(c).status = 1;
+	syncCheats();
+	return count;
+}
+
 }
