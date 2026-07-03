@@ -108,42 +108,51 @@ bool SaturnSystem::isCheatEnabled(const Cheat& c) const { return c.enabled; }
 
 bool SaturnSystem::addCheatCode(EmuApp& app, Cheat*& cheatPtr, CheatCodeDesc desc)
 {
-	// Parse format: address:value[:compare]
+	// Parse format: "address value [compare]" (space-separated, hex)
 	const char* str = desc.str;
 	if(!str || !*str)
 	{
 		app.postMessage(true, "无效输入");
 		return false;
 	}
-	// Find colon separator
-	const char* colon = std::strchr(str, ':');
-	if(!colon)
+	// Skip leading whitespace
+	while(*str && ::isspace(static_cast<unsigned char>(*str))) str++;
+	if(!*str)
 	{
-		app.postMessage(true, "格式错误，请使用 地址:数值");
+		app.postMessage(true, "无效输入");
 		return false;
 	}
-	std::string addrStr(str, colon - str);
-	auto addr = parseHex(addrStr.c_str());
-	if(addr > 0xFFFFFFFF)
+	// Find first whitespace (separator between address and value)
+	const char* p = str;
+	while(*p && !::isspace(static_cast<unsigned char>(*p))) p++;
+	if(!*p)
 	{
-		app.postMessage(true, "地址超出范围");
+		app.postMessage(true, "格式错误，请使用 地址 数值");
 		return false;
 	}
-	const char* valStart = colon + 1;
-	const char* secondColon = std::strchr(valStart, ':');
-	std::string valStr;
-	if(secondColon)
-		valStr.assign(valStart, secondColon - valStart);
-	else
-		valStr.assign(valStart);
+	std::string addrStr(str, p - str);
+	auto addr = static_cast<uint32_t>(strtoul(addrStr.c_str(), nullptr, 16));
+	// Skip whitespace
+	while(*p && ::isspace(static_cast<unsigned char>(*p))) p++;
+	if(!*p)
+	{
+		app.postMessage(true, "格式错误，请使用 地址 数值");
+		return false;
+	}
+	// Find end of value (next whitespace or end)
+	const char* valStart = p;
+	while(*p && !::isspace(static_cast<unsigned char>(*p))) p++;
+	std::string valStr(valStart, p - valStart);
 	auto valDigits = hexDigitCount(valStr.c_str());
 	auto val = strtoull(valStr.c_str(), nullptr, 16);
 	auto length = byteLengthFromHexDigits(valDigits);
+	// Optional compare value
 	int64_t compare = -1;
-	if(secondColon)
+	while(*p && ::isspace(static_cast<unsigned char>(*p))) p++;
+	if(*p)
 	{
-		std::string compStr(secondColon + 1);
-		compare = strtoull(compStr.c_str(), nullptr, 16);
+		std::string compStr(p);
+		compare = static_cast<int64_t>(strtoull(compStr.c_str(), nullptr, 16));
 	}
 	cheatPtr->codes.emplace_back(addr, val, compare, length);
 	syncCheats();
@@ -155,28 +164,38 @@ bool SaturnSystem::modifyCheatCode(EmuApp& app, Cheat& cheat, CheatCode& c, Chea
 	const char* str = desc.str;
 	if(!str || !*str)
 		return false;
-	const char* colon = std::strchr(str, ':');
-	if(!colon)
+	// Skip leading whitespace
+	while(*str && ::isspace(static_cast<unsigned char>(*str))) str++;
+	if(!*str) return false;
+	// Find first whitespace
+	const char* p = str;
+	while(*p && !::isspace(static_cast<unsigned char>(*p))) p++;
+	if(!*p)
 	{
-		app.postMessage(true, "格式错误，请使用 地址:数值");
+		app.postMessage(true, "格式错误，请使用 地址 数值");
 		return false;
 	}
-	std::string addrStr(str, colon - str);
-	c.addr = parseHex(addrStr.c_str());
-	const char* valStart = colon + 1;
-	const char* secondColon = std::strchr(valStart, ':');
-	std::string valStr;
-	if(secondColon)
-		valStr.assign(valStart, secondColon - valStart);
-	else
-		valStr.assign(valStart);
+	std::string addrStr(str, p - str);
+	c.addr = static_cast<uint32_t>(strtoul(addrStr.c_str(), nullptr, 16));
+	// Skip whitespace
+	while(*p && ::isspace(static_cast<unsigned char>(*p))) p++;
+	if(!*p)
+	{
+		app.postMessage(true, "格式错误，请使用 地址 数值");
+		return false;
+	}
+	const char* valStart = p;
+	while(*p && !::isspace(static_cast<unsigned char>(*p))) p++;
+	std::string valStr(valStart, p - valStart);
 	auto valDigits = hexDigitCount(valStr.c_str());
 	c.val = strtoull(valStr.c_str(), nullptr, 16);
 	c.length = byteLengthFromHexDigits(valDigits);
-	if(secondColon)
+	// Optional compare value
+	while(*p && ::isspace(static_cast<unsigned char>(*p))) p++;
+	if(*p)
 	{
-		std::string compStr(secondColon + 1);
-		c.compare = strtoull(compStr.c_str(), nullptr, 16);
+		std::string compStr(p);
+		c.compare = static_cast<int64_t>(strtoull(compStr.c_str(), nullptr, 16));
 	}
 	else
 	{
@@ -216,18 +235,26 @@ void SaturnSystem::forEachCheatCode(Cheat& cheat, DelegateFunc<bool(CheatCode&, 
 {
 	for(auto& c: cheat.codes)
 	{
-		std::string code = std::format("{:X}:{:X}", c.addr, c.val);
+		std::string code = std::format("{:X} {:X}", c.addr, c.val);
 		if(c.compare >= 0)
-			code += std::format(":{:X}", c.compare);
+			code += std::format(" {:X}", c.compare);
 		del(c, std::string_view{code});
 	}
 }
 
-// Batch add: parse multiple cheat lines in format "name|address:value[:compare]"
+// Batch add: parse grouped cheat text
+// Format:
+//   name|
+//   address value
+//   address value
+//   name2|
+//   address value
+// Or without name: each "address value" line creates a new cheat
 int SaturnSystem::batchAddCheats(EmuApp& app, const char* text)
 {
 	int count = 0;
 	std::string_view input{text};
+	Cheat* currentCheat = nullptr;
 	auto lines = std::views::split(input, '\n');
 	for(auto line: lines)
 	{
@@ -238,32 +265,46 @@ int SaturnSystem::batchAddCheats(EmuApp& app, const char* text)
 		while(!lineStr.empty() && ::isspace(static_cast<unsigned char>(lineStr.back())))
 			lineStr.remove_suffix(1);
 		if(lineStr.empty()) continue;
-		// Find pipe separator
+		// Check if line is a cheat name (ends with |)
+		if(lineStr.back() == '|')
+		{
+			std::string name{lineStr.substr(0, lineStr.size() - 1)};
+			if(name.empty())
+				name = "金手指 " + std::to_string(cheats.size() + 1);
+			currentCheat = &cheats.emplace_back(name);
+			count++;
+			continue;
+		}
+		// Check if line has name|code format (inline)
 		auto pipePos = lineStr.find('|');
-		std::string name, code;
 		if(pipePos != std::string_view::npos)
 		{
-			name = std::string{lineStr.substr(0, pipePos)};
-			code = std::string{lineStr.substr(pipePos + 1)};
+			std::string name{lineStr.substr(0, pipePos)};
+			std::string code{lineStr.substr(pipePos + 1)};
+			if(name.empty())
+				name = "金手指 " + std::to_string(cheats.size() + 1);
+			currentCheat = &cheats.emplace_back(name);
+			count++;
+			if(!code.empty())
+			{
+				auto* cPtr = currentCheat;
+				addCheatCode(app, cPtr, {code.c_str(), 0});
+			}
+			continue;
 		}
-		else
+		// This line is a code for the current cheat
+		if(!currentCheat)
 		{
-			code = std::string{lineStr};
-			name = "金手指 " + std::to_string(cheats.size() + 1);
-		}
-		// Trim code
-		while(!code.empty() && ::isspace(static_cast<unsigned char>(code.front())))
-			code.erase(code.begin());
-		while(!code.empty() && ::isspace(static_cast<unsigned char>(code.back())))
-			code.pop_back();
-		if(code.empty()) continue;
-		auto* cheatPtr = newCheat(app, name.c_str(), {code.c_str(), 0});
-		if(cheatPtr)
-		{
-			cheatPtr->enabled = true;
+			// No cheat created yet, create a default one
+			currentCheat = &cheats.emplace_back("金手指 " + std::to_string(cheats.size() + 1));
 			count++;
 		}
+		auto* cPtr = currentCheat;
+		addCheatCode(app, cPtr, {std::string{lineStr}.c_str(), 0});
 	}
+	// Enable all newly added cheats
+	for(auto& c: cheats)
+		c.enabled = true;
 	syncCheats();
 	return count;
 }

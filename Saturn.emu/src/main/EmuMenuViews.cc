@@ -641,10 +641,10 @@ public:
 			editCheatsView
 		},
 		addCode
-		{
-			"添加其他代码", attach,
-			[this](const Input::Event& e) { addNewCheatCode("输入 地址:数值[:比较值]", e); }
-		}
+	{
+		"添加其他代码", attach,
+		[this](const Input::Event& e) { addNewCheatCode("输入 地址 数值", e); }
+	}
 	{
 		loadItems();
 	}
@@ -656,11 +656,11 @@ public:
 		{
 			codes.emplace_back("代码", code, attachParams(), [this, &c](const Input::Event& e)
 			{
-				auto codeStr = std::format("{:X}:{:X}", c.addr, c.val);
+				auto codeStr = std::format("{:X} {:X}", c.addr, c.val);
 				if(c.compare >= 0)
-					codeStr += std::format(":{:X}", c.compare);
+					codeStr += std::format(" {:X}", c.compare);
 				pushAndShowNewCollectValueInputView<const char*, ScanValueMode::AllowBlank>(attachParams(), e,
-					"输入 地址:数值[:比较值]", codeStr.c_str(),
+					"输入 地址 数值", codeStr.c_str(),
 					[this, &c](CollectTextInputView&, auto str) { return modifyCheatCode(c, {str, 0}); });
 			});
 			return true;
@@ -705,17 +705,17 @@ public:
 			}
 		},
 		addCheat
+	{
+		"添加金手指", attachParams(),
+		[this](const Input::Event& e) { addNewCheat("输入 地址 数值", e); }
+	},
+	batchAdd
+	{
+		"批量添加金手指", attachParams(),
+		[this](const Input::Event& e)
 		{
-			"添加金手指", attachParams(),
-			[this](const Input::Event& e) { addNewCheat("输入 地址:数值[:比较值]", e); }
-		},
-		batchAdd
-		{
-			"批量添加金手指", attachParams(),
-			[this](const Input::Event& e)
-			{
-				pushAndShowNewCollectTextInputView(attachParams(), e,
-					"每行一个，格式：名称|地址:数值[:比较值]", "",
+			pushAndShowNewCollectTextInputView(attachParams(), e,
+				"格式：名称| 换行 地址 数值（每行一个代码）", "",
 					[this](CollectTextInputView& view, const char* str)
 					{
 						auto& sys = static_cast<SaturnSystem&>(system());
