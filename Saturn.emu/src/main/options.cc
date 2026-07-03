@@ -89,29 +89,23 @@ bool SaturnSystem::readConfig(ConfigType type, MapIO &io, unsigned key)
 			case CFGKEY_CHEATS_PATH: return readStringOptionValue(io, cheatsPath);
 			case CFGKEY_CHEATS:
 			{
-				uint32_t count{};
-				if(!io.read(count)) return false;
+				uint32_t count = io.get<uint32_t>();
 				cheats.clear();
 				for(uint32_t i = 0; i < count; i++)
 				{
-					uint32_t nameLen{};
-					if(!io.read(nameLen)) return false;
+					uint32_t nameLen = io.get<uint32_t>();
 					Cheat c;
 					c.name.resize(nameLen);
-					if(!io.read(c.name.data(), nameLen)) return false;
-					uint8_t enabled{};
-					if(!io.read(enabled)) return false;
-					c.enabled = enabled;
-					uint32_t codeCount{};
-					if(!io.read(codeCount)) return false;
+					io.read(c.name.data(), nameLen);
+					c.enabled = io.get<uint8_t>();
+					uint32_t codeCount = io.get<uint32_t>();
 					for(uint32_t j = 0; j < codeCount; j++)
 					{
-						CheatCode code;
-						if(!io.read(code.addr)) return false;
-						if(!io.read(code.val)) return false;
-						if(!io.read(code.compare)) return false;
-						if(!io.read(code.length)) return false;
-						c.codes.emplace_back(code);
+						uint32_t addr = io.get<uint32_t>();
+						uint64_t val = io.get<uint64_t>();
+						int64_t compare = io.get<int64_t>();
+						unsigned length = io.get<unsigned>();
+						c.codes.emplace_back(addr, val, compare, length);
 					}
 					cheats.emplace_back(std::move(c));
 				}
@@ -152,27 +146,31 @@ void SaturnSystem::writeConfig(ConfigType type, FileIO &io)
 			writeStringOptionValue(io, CFGKEY_CHEATS_PATH, cheatsPath);
 		if(!cheats.empty())
 		{
-			MapIO cheatsIO;
-			uint32_t count = cheats.size();
-			cheatsIO.write(count);
+			uint16_t totalSize = sizeof(uint32_t);
+			for(auto& c: cheats)
+			{
+				totalSize += sizeof(uint32_t) + c.name.size() + sizeof(uint8_t) + sizeof(uint32_t);
+				totalSize += c.codes.size() * (sizeof(uint32_t) + sizeof(uint64_t) + sizeof(int64_t) + sizeof(unsigned));
+			}
+			writeOptionValueHeader(io, CFGKEY_CHEATS, totalSize);
+			io.put(static_cast<uint32_t>(cheats.size()));
 			for(auto& c: cheats)
 			{
 				uint32_t nameLen = c.name.size();
-				cheatsIO.write(nameLen);
-				cheatsIO.write(c.name.data(), nameLen);
+				io.put(nameLen);
+				io.write(c.name.data(), nameLen);
 				uint8_t enabled = c.enabled;
-				cheatsIO.write(enabled);
+				io.put(enabled);
 				uint32_t codeCount = c.codes.size();
-				cheatsIO.write(codeCount);
+				io.put(codeCount);
 				for(auto& code: c.codes)
 				{
-					cheatsIO.write(code.addr);
-					cheatsIO.write(code.val);
-					cheatsIO.write(code.compare);
-					cheatsIO.write(code.length);
+					io.put(code.addr);
+					io.put(code.val);
+					io.put(code.compare);
+					io.put(code.length);
 				}
 			}
-			writeConfigOption(io, CFGKEY_CHEATS, cheatsIO);
 		}
 	}
 }
