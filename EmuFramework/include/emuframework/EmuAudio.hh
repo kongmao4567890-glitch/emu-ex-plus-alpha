@@ -95,7 +95,6 @@ protected:
 	RingBuffer<uint8_t, RingBufferConf{.mirrored = true}> rBuff;
 	SteadyClockTimePoint lastUnderrunTime{};
 	double speedMultiplier{1.};
-	double resamplePhase{}; // phase accumulator for pitch-preserving resample during alt-speed
 	size_t targetBufferFillBytes{};
 	size_t bufferIncrementBytes{};
 	int defaultRate;
