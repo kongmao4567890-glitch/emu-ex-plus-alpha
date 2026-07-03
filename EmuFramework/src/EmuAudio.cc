@@ -81,6 +81,52 @@ bool EmuAudio::shouldStartAudioWrites(size_t bytesToWrite) const
 }
 
 template<typename T>
+static void linearInterpResample(T * __restrict__ dest, size_t destFrames, const T * __restrict__ src, size_t srcFrames, double &phase)
+{
+	if(!destFrames || !srcFrames)
+		return;
+	double ratio = (double)srcFrames / (double)destFrames;
+	for(auto i: iotaCount(destFrames))
+	{
+		double srcPos = phase + (double)i * ratio;
+		size_t idx0 = (size_t)srcPos;
+		double frac = srcPos - (double)idx0;
+		if(idx0 >= srcFrames - 1)
+		{
+			dest[i] = src[srcFrames - 1];
+		}
+		else
+		{
+			const T &s0 = src[idx0];
+			const T &s1 = src[idx0 + 1];
+			dest[i] = s0 + (T)((s1 - s0) * frac);
+		}
+	}
+	// advance phase for next call
+	phase = (phase + (double)destFrames * ratio) - (double)srcFrames;
+	if(phase < 0.) phase = 0.;
+}
+
+static void linearInterpResample(void *dest, size_t destFrames, const void *src, size_t srcFrames, Audio::Format format, double &phase)
+{
+	if(format.channels == 1)
+	{
+		if(format.sample.isFloat())
+			linearInterpResample((uint32_t*)dest, destFrames, (uint32_t*)src, srcFrames, phase);
+		else
+			linearInterpResample((uint16_t*)dest, destFrames, (uint16_t*)src, srcFrames, phase);
+	}
+	else
+	{
+		assume(format.channels == 2);
+		if(format.sample.isFloat())
+			linearInterpResample((uint64_t*)dest, destFrames, (uint64_t*)src, srcFrames, phase);
+		else
+			linearInterpResample((uint32_t*)dest, destFrames, (uint32_t*)src, srcFrames, phase);
+	}
+}
+
+template<typename T>
 static void simpleResample(T * __restrict__ dest, size_t destFrames, const T * __restrict__ src, size_t srcFrames)
 {
 	if(!destFrames)
@@ -224,6 +270,7 @@ void EmuAudio::stop()
 {
 	stopAudioStats();
 	audioWriteState = AudioWriteState::BUFFER;
+	resamplePhase = 0.;
 	if(audioStream)
 		audioStream.close();
 	rBuff.clear();
@@ -242,6 +289,7 @@ void EmuAudio::flush()
 		return;
 	stopAudioStats();
 	audioWriteState = AudioWriteState::BUFFER;
+	resamplePhase = 0.;
 	if(audioStream)
 		audioStream.flush();
 	rBuff.clear();
@@ -273,6 +321,9 @@ void EmuAudio::writeFrames(const void *samples, size_t framesToWrite)
 	const size_t sampleFrames = framesToWrite;
 	if(speedMultiplier != 1.) [[unlikely]]
 	{
+		// Reduce output frames to match real-time playback rate (prevents buffer overrun),
+		// but use linear interpolation to preserve normal pitch instead of nearest-neighbor
+		// compression which would speed up and raise the pitch of the audio
 		framesToWrite = std::ceil((double)framesToWrite / speedMultiplier);
 		framesToWrite = std::max(framesToWrite, 1zu);
 	}
@@ -281,7 +332,12 @@ void EmuAudio::writeFrames(const void *samples, size_t framesToWrite)
 		auto span = rBuff.beginWrite(bytes);
 		if(bytes <= span.size())
 		{
-			if(sampleFrames != framesToWrite)
+			if(speedMultiplier != 1.) [[unlikely]]
+			{
+				// Linear interpolation resampling preserves normal pitch
+				linearInterpResample(span.data(), framesToWrite, samples, sampleFrames, inputFormat, resamplePhase);
+			}
+			else if(sampleFrames != framesToWrite)
 			{
 				simpleResample(span.data(), framesToWrite, samples, sampleFrames, inputFormat);
 			}
@@ -297,7 +353,10 @@ void EmuAudio::writeFrames(const void *samples, size_t framesToWrite)
 			audioStats.overruns++;
 			#endif
 			auto freeFrames = inputFormat.bytesToFrames(span.size());
-			simpleResample(span.data(), freeFrames, samples, sampleFrames, inputFormat);
+			if(speedMultiplier != 1.) [[unlikely]]
+				linearInterpResample(span.data(), freeFrames, samples, sampleFrames, inputFormat, resamplePhase);
+			else
+				simpleResample(span.data(), freeFrames, samples, sampleFrames, inputFormat);
 		}
 		rBuff.endWrite(span);
 	}
@@ -343,6 +402,7 @@ void EmuAudio::setSpeedMultiplier(double speed)
 	if(speedMultiplier == speed)
 		return;
 	speedMultiplier = speed;
+	resamplePhase = 0.; // reset phase when speed changes
 	log.info("set speed multiplier:{}", speed);
 	updateVolume();
 	updateAddBuffersOnUnderrun();

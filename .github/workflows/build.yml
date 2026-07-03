@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: ["NES.emu", "Snes9x", "MD.emu", "GBA.emu", "Saturn.emu"]
+        image: ["NES.emu", "Snes9x", "MD.emu", "GBA.emu", "Saturn.emu", "GBC.emu", "PCE.emu"]
     steps:
     - name: Install build dependencies
       run: |
