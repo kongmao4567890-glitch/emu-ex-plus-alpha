@@ -27,7 +27,7 @@ using namespace IG;
 
 [[maybe_unused]] constexpr SystemLogger log{"RomPreviewView"};
 
-// Preview speed: run 3 emulated frames per screen frame (~3x speed at 60fps)
+// Run 3 emulated frames per screen frame (~3x speed at 60fps)
 static constexpr int previewSpeed = 3;
 
 RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
@@ -54,49 +54,50 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 	},
 	playItem
 	{
-		"\xe5\xbc\x80\xe5\xa7\x8b\xe6\xb8\xb8\xe6\x88\x8f", attachParams(),
-		[this](const Input::Event& e)
-		{
-			stopPreview();
-			app().launchSystem(e);
-		}
+		"\xe5\xbc\x80\xe5\xa7\x8b\xe6\xb8\xb8\xe6\x88\x8f", attach,
+		[](const Input::Event&) {}
 	},
 	backItem
 	{
-		"\xe8\xbf\x94\xe5\x9b\x9e", attachParams(),
-		[this](const Input::Event&)
-		{
-			stopPreview();
-			app().closeSystem();
-			dismiss();
-		}
+		"\xe8\xbf\x94\xe5\x9b\x9e", attach,
+		[](const Input::Event&) {}
 	},
-	launchEvent{e},
 	bgQuads{attach.rendererTask, {.size = 1}}
-{
-	auto &app = this->app();
-	auto &sys = system();
-	if(sys.hasContent())
-	{
-		app.setRenderPixelFormat(app.windowPixelFormat());
-	}
-}
+{}
 
 RomPreviewView::~RomPreviewView()
 {
 	stopPreview();
 }
 
-void RomPreviewView::onShow()
+void RomPreviewView::onAddedToController(ViewController *vc, const Input::Event &e)
 {
-	TableView::onShow();
+	TableView::onAddedToController(vc, e);
 	startPreview();
 }
 
-void RomPreviewView::onHide()
+void RomPreviewView::onShow()
 {
-	TableView::onHide();
-	stopPreview();
+	TableView::onShow();
+}
+
+bool RomPreviewView::inputEvent(const Input::Event &e, ViewInputEventParams params)
+{
+	auto &app = this->app();
+	if(e.keyEvent() && e.keyEvent()->pushed(Input::DefaultKey::CONFIRM) && selected == 0)
+	{
+		stopPreview();
+		app.launchSystem(e);
+		return true;
+	}
+	if(e.keyEvent() && e.keyEvent()->pushed(Input::DefaultKey::CANCEL))
+	{
+		stopPreview();
+		app.closeSystem();
+		dismiss();
+		return true;
+	}
+	return TableView::inputEvent(e, params);
 }
 
 void RomPreviewView::startPreview()
@@ -107,6 +108,9 @@ void RomPreviewView::startPreview()
 	auto &sys = system();
 	if(!sys.hasContent())
 		return;
+	log.info("starting ROM preview at {}x speed", previewSpeed);
+	// Put system in ACTIVE state so runFrame works correctly
+	sys.start(app);
 	isRunning = true;
 	onFrameDel =
 		[this](FrameParams)
@@ -135,11 +139,11 @@ void RomPreviewView::stopPreview()
 		app.emuWindow().removeOnFrame(onFrameDel);
 		onFrameDel = {};
 	}
-}
-
-void RomPreviewView::prepareDraw()
-{
-	TableView::prepareDraw();
+	auto &sys = system();
+	if(sys.hasContent())
+	{
+		sys.pause(this->app());
+	}
 }
 
 void RomPreviewView::place()
@@ -147,7 +151,7 @@ void RomPreviewView::place()
 	TableView::place();
 	auto &app = this->app();
 	auto &sys = system();
-	if(sys.hasContent())
+	if(sys.hasContent() && app.video.hasRendererTask())
 	{
 		app.videoLayer.place({}, displayRect(), nullptr, sys);
 	}
@@ -158,7 +162,7 @@ void RomPreviewView::draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawPara
 {
 	auto &app = this->app();
 	auto &sys = system();
-	if(sys.hasContent())
+	if(sys.hasContent() && app.video.hasRendererTask())
 	{
 		app.videoLayer.draw(cmds);
 	}
