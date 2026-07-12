@@ -50,14 +50,11 @@ private:
 	OnFrameDelegate onFrameDel{};
 	bool isRunning{};
 	bool hasContent{};
-	size_t pendingLoadIdx{};
-	bool hasPendingLoad{};
 
 	void startPreview();
 	void stopPreview();
 	void scanDirectory(ViewAttachParams attach);
 	void loadRom(size_t idx, const Input::Event &e);
-	void doLoadRom(size_t idx);
 };
 
 }

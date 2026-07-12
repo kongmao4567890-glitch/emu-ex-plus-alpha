@@ -203,37 +203,28 @@ void RomPreviewView::scanDirectory(ViewAttachParams attach)
 
 void RomPreviewView::loadRom(size_t idx, const Input::Event &)
 {
-	// 延迟到下一帧执行，避免在TableView输入事件处理中修改视图栈导致崩溃
-	pendingLoadIdx = idx;
-	hasPendingLoad = true;
-	log.info("deferred loading ROM index {}", idx);
-	app().emuWindow().addOnFrame(
-		[this](FrameParams) -> bool
-		{
-			if(!hasPendingLoad)
-				return false;
-			hasPendingLoad = false;
-			doLoadRom(pendingLoadIdx);
-			return false; // 一次性回调，执行后自动移除
-		});
-}
-
-void RomPreviewView::doLoadRom(size_t idx)
-{
 	stopPreview();
 	hasContent = false;
 	auto &app = this->app();
+	auto &sys = system();
 	auto path = romPaths[idx];
 	auto name = romNames[idx];
-	log.info("loading ROM: {}", path);
-	app.createSystemWithMedia(IO{}, path, name, appContext().defaultInputEvent(), {}, app.attachParams(),
-		[this](const Input::Event &)
-		{
-			auto &app = this->app();
-			app.recentContent.add(system());
-			hasContent = true;
-			startPreview();
-		});
+	log.info("loading ROM synchronously: {}", path);
+	// 同步加载ROM，绕过createSystemWithMedia的LoadProgressView和后台线程
+	// 避免在输入事件回调中修改视图栈导致崩溃
+	try
+	{
+		sys.createWithMedia(IO{}, path, name, {}, {});
+		app.recentContent.add(sys);
+		app.onSystemCreated();
+		hasContent = true;
+		startPreview();
+	}
+	catch(std::exception &ex)
+	{
+		log.error("failed to load ROM: {}", ex.what());
+		app.postErrorMessage(4, ex.what());
+	}
 }
 
 void RomPreviewView::place()
