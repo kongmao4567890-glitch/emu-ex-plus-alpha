@@ -50,6 +50,7 @@ target_sources(
 	gui/PlaceVControlsView.cc
 	gui/PlaceVideoView.cc
 	gui/RecentContentView.cc
+	gui/RomPreviewView.cc
 	gui/StateSlotView.cc
 	gui/SystemActionsView.cc
 	gui/SystemOptionView.cc

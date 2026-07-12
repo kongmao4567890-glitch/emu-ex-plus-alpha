@@ -23,6 +23,7 @@
 #include <emuframework/GUIOptionView.hh>
 #include <emuframework/FilePathOptionView.hh>
 #include <emuframework/FilePicker.hh>
+#include <emuframework/RomPreviewView.hh>
 #include <emuframework/Option.hh>
 #include "gui/AutosaveSlotView.hh"
 #include "WindowData.hh"
@@ -360,6 +361,8 @@ void EmuApp::mainInitCommon(ApplicationInitParams initParams, ApplicationContext
 			}
 			winData.viewController.placeElements();
 			winData.viewController.pushAndShow(makeView(viewAttach, ViewID::MAIN_MENU));
+			if(AppMeta::hasRomPreview)
+				winData.viewController.pushAndShow(std::make_unique<RomPreviewView>(viewAttach, ctx.defaultInputEvent()));
 			configureSecondaryScreens();
 			video.setRendererTask(renderer.task());
 			video.setTextureBufferMode(system(), textureBufferMode);
