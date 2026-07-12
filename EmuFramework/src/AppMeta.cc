@@ -29,6 +29,7 @@ namespace EmuEx
 [[gnu::weak]] const bool AppMeta::handlesArchiveFiles{};
 [[gnu::weak]] const bool AppMeta::handlesGenericIO{true};
 [[gnu::weak]] const bool AppMeta::hasCheats{};
+[[gnu::weak]] const bool AppMeta::hasRomPreview{};
 [[gnu::weak]] const bool AppMeta::stateSizeChangesAtRuntime{};
 [[gnu::weak]] const bool AppMeta::hasSound{true};
 [[gnu::weak]] const int AppMeta::forcedSoundRate{};

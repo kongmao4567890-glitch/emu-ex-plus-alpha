@@ -49,6 +49,7 @@ struct AppMeta
 	static const bool handlesArchiveFiles;
 	static const bool handlesGenericIO;
 	static const bool hasCheats;
+	static const bool hasRomPreview;
 	static const bool hasSound;
 	static const int forcedSoundRate;
 	static const Audio::SampleFormat audioSampleFormat;

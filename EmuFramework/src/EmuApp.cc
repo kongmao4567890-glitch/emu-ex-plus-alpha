@@ -23,6 +23,7 @@
 #include <emuframework/GUIOptionView.hh>
 #include <emuframework/FilePathOptionView.hh>
 #include <emuframework/FilePicker.hh>
+#include <emuframework/RomPreviewView.hh>
 #include <emuframework/Option.hh>
 #include "gui/AutosaveSlotView.hh"
 #include "WindowData.hh"
@@ -592,7 +593,14 @@ void EmuApp::onSelectFileFromPicker(IO io, CStringView path, std::string_view di
 		[this](const Input::Event &e)
 		{
 			recentContent.add(system());
-			launchSystem(e);
+			if constexpr(AppMeta::hasRomPreview)
+			{
+				viewController().pushAndShow(std::make_unique<RomPreviewView>(attachParams(), e), e);
+			}
+			else
+			{
+				launchSystem(e);
+			}
 		});
 }
 
