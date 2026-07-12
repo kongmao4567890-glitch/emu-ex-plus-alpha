@@ -203,22 +203,21 @@ void RomPreviewView::scanDirectory(ViewAttachParams attach)
 void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 {
 	// 只注册帧回调，不在输入事件回调中做任何视图栈操作
-	// handleTableInput返回后，下一帧才真正执行加载
-	auto path = romPaths[idx];
-	auto name = romNames[idx];
-	auto ctx = appContext();
+	// lambda只捕获this+idx（16字节，恰好等于DelegateFunc存储大小）
+	// 不能捕获string（32字节*2=64字节，远超16字节DelegateFunc限制）
 	app().emuWindow().addOnFrame(
-		[ctx, path = std::move(path), name = std::move(name)](FrameParams) -> bool
+		[this, idx](FrameParams) -> bool
 		{
-			auto &app = EmuApp::get(ctx);
-			app.createSystemWithMedia(IO{}, path, name, ctx.defaultInputEvent(), {}, app.attachParams(),
-				[ctx](const Input::Event &)
+			auto &app = this->app();
+			auto path = romPaths[idx];
+			auto name = romNames[idx];
+			app.createSystemWithMedia(IO{}, path, name, appContext().defaultInputEvent(), {}, app.attachParams(),
+				[this](const Input::Event &)
 				{
-					auto &app = EmuApp::get(ctx);
+					auto &app = this->app();
 					app.recentContent.add(app.system());
-					// pop旧视图，推入新的带预览的RomPreviewView
 					app.viewController().popToRoot();
-					app.viewController().pushAndShow(std::make_unique<RomPreviewView>(app.attachParams(), ctx.defaultInputEvent()), ctx.defaultInputEvent());
+					app.viewController().pushAndShow(std::make_unique<RomPreviewView>(app.attachParams(), appContext().defaultInputEvent()), appContext().defaultInputEvent());
 				});
 			return false; // 一次性回调
 		});
