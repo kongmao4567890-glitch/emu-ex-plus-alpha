@@ -177,16 +177,21 @@ void RomPreviewView::scanDirectory(ViewAttachParams attach)
 
 	// Create menu items for each ROM
 	romItems.reserve(roms.size());
+	romPaths.reserve(roms.size());
+	romNames.reserve(roms.size());
 	for(auto &rom : roms)
 	{
+		romPaths.push_back(std::string{rom.path});
+		romNames.push_back(rom.name);
+		auto idx = romPaths.size() - 1;
 		romItems.emplace_back(
 			rom.name, attach,
-			[this, path = rom.path, name = rom.name](const Input::Event &e)
+			[this, idx](const Input::Event &e)
 			{
 				stopPreview();
 				auto &appRef = app();
-				auto pathCopy = path;
-				auto nameCopy = name;
+				auto pathCopy = romPaths[idx];
+				auto nameCopy = romNames[idx];
 				dismiss();
 				appRef.onSelectFileFromPicker(IO{}, pathCopy, nameCopy, e, {}, appRef.attachParams());
 			}

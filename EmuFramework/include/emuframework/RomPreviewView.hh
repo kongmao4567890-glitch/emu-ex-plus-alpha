@@ -42,6 +42,8 @@ private:
 	TextMenuItem playItem;
 	TextMenuItem backItem;
 	std::vector<TextMenuItem> romItems;
+	std::vector<std::string> romPaths;
+	std::vector<std::string> romNames;
 	Gfx::IQuads bgQuads;
 	OnFrameDelegate onFrameDel{};
 	bool isRunning{};
