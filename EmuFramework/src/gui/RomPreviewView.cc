@@ -87,7 +87,6 @@ RomPreviewView::~RomPreviewView()
 void RomPreviewView::onAddedToController(ViewController *vc, const Input::Event &e)
 {
 	TableView::onAddedToController(vc, e);
-	// 如果已有内容加载（如从FilePicker进入），直接开始预览
 	if(system().hasContent())
 	{
 		hasContent = true;
@@ -201,35 +200,39 @@ void RomPreviewView::scanDirectory(ViewAttachParams attach)
 	log.info("found {} ROMs in {}", roms.size(), dir);
 }
 
-void RomPreviewView::loadRom(size_t idx, const Input::Event &)
+void RomPreviewView::loadRom(size_t idx, const Input::Event &e)
+{
+	// 延迟到下一帧执行，避免在TableView输入事件回调中修改视图栈导致UAF
+	// 崩溃原因：createSystemWithMedia → pushAndShowModalView → loadRom的TableView被popAndShow
+	// → handleTableInput返回时 this 已悬空
+	app().emuWindow().addOnFrame(
+		[this, idx](FrameParams) -> bool
+		{
+			doLoadRom(idx);
+			return false; // 一次性回调
+		});
+}
+
+void RomPreviewView::doLoadRom(size_t idx)
 {
 	stopPreview();
-	hasContent = false;
 	auto &app = this->app();
-	auto &sys = system();
 	auto path = romPaths[idx];
 	auto name = romNames[idx];
-	log.info("loading ROM synchronously: {}", path);
-	// 同步加载ROM，绕过createSystemWithMedia的LoadProgressView和后台线程
-	// 避免在输入事件回调中修改视图栈导致崩溃
-	try
-	{
-		sys.createWithMedia(IO{}, path, name, {}, {});
-		app.recentContent.add(sys);
-		app.onSystemCreated();
-		hasContent = true;
-		startPreview();
-	}
-	catch(std::exception &ex)
-	{
-		log.error("failed to load ROM: {}", ex.what());
-		app.postErrorMessage(4, ex.what());
-	}
+	log.info("loading ROM via createSystemWithMedia: {}", path);
+	app.createSystemWithMedia(IO{}, path, name, appContext().defaultInputEvent(), {}, app.attachParams(),
+		[this](const Input::Event &)
+		{
+			// 加载完成后LoadProgressView已自动popModalViews，回到本视图
+			auto &app = this->app();
+			app.recentContent.add(system());
+			hasContent = true;
+			startPreview();
+		});
 }
 
 void RomPreviewView::place()
 {
-	// 分屏布局：上方40%预览窗口，下方60%游戏列表
 	auto fullRect = viewRect();
 	auto previewHeight = fullRect.ySize() * 40 / 100;
 	auto previewRect = WindowRect{{fullRect.x, fullRect.y}, {fullRect.x2, fullRect.y + previewHeight}};
@@ -256,25 +259,21 @@ void RomPreviewView::draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawPara
 	using namespace Gfx;
 	auto &basicEffect = cmds.basicEffect();
 
-	// 上方：黑色背景
 	cmds.set(BlendMode::OFF);
 	basicEffect.disableTexture(cmds);
 	cmds.setColor({.0, .0, .0, 1.});
 	cmds.drawQuad(bgQuads, 0);
 
-	// 上方：绘制游戏预览画面
 	if(hasContent && sys.hasContent() && app.video.hasRendererTask())
 	{
 		app.videoLayer.draw(cmds);
 	}
 
-	// 下方：半透明黑色背景
 	cmds.set(BlendMode::OFF);
 	basicEffect.disableTexture(cmds);
 	cmds.setColor({.0, .0, .0, .7});
 	cmds.drawQuad(bgQuads, 1);
 
-	// 下方：绘制游戏列表
 	TableView::draw(cmds, {});
 }
 
