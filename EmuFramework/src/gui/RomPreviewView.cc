@@ -191,7 +191,7 @@ void RomPreviewView::scanDirectory(ViewAttachParams attach)
 		auto idx = romPaths.size() - 1;
 		romItems.emplace_back(
 			rom.name, attach,
-			[this, idx](const Input::Event &e)
+			[this, idx]([[maybe_unused]] const Input::Event &e)
 			{
 				loadRom(idx, e);
 			}
@@ -202,32 +202,25 @@ void RomPreviewView::scanDirectory(ViewAttachParams attach)
 
 void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 {
-	// 延迟到下一帧执行，避免在TableView输入事件回调中修改视图栈导致UAF
-	// 崩溃原因：createSystemWithMedia → pushAndShowModalView → loadRom的TableView被popAndShow
-	// → handleTableInput返回时 this 已悬空
-	app().emuWindow().addOnFrame(
-		[this, idx](FrameParams) -> bool
-		{
-			doLoadRom(idx);
-			return false; // 一次性回调
-		});
-}
-
-void RomPreviewView::doLoadRom(size_t idx)
-{
-	stopPreview();
-	auto &app = this->app();
+	// 只注册帧回调，不在输入事件回调中做任何视图栈操作
+	// handleTableInput返回后，下一帧才真正执行加载
 	auto path = romPaths[idx];
 	auto name = romNames[idx];
-	log.info("loading ROM via createSystemWithMedia: {}", path);
-	app.createSystemWithMedia(IO{}, path, name, appContext().defaultInputEvent(), {}, app.attachParams(),
-		[this](const Input::Event &)
+	auto ctx = appContext();
+	app().emuWindow().addOnFrame(
+		[ctx, path = std::move(path), name = std::move(name)](FrameParams) -> bool
 		{
-			// 加载完成后LoadProgressView已自动popModalViews，回到本视图
-			auto &app = this->app();
-			app.recentContent.add(system());
-			hasContent = true;
-			startPreview();
+			auto &app = EmuApp::get(ctx);
+			app.createSystemWithMedia(IO{}, path, name, ctx.defaultInputEvent(), {}, app.attachParams(),
+				[ctx](const Input::Event &)
+				{
+					auto &app = EmuApp::get(ctx);
+					app.recentContent.add(app.system());
+					// pop旧视图，推入新的带预览的RomPreviewView
+					app.viewController().popToRoot();
+					app.viewController().pushAndShow(std::make_unique<RomPreviewView>(app.attachParams(), ctx.defaultInputEvent()), ctx.defaultInputEvent());
+				});
+			return false; // 一次性回调
 		});
 }
 

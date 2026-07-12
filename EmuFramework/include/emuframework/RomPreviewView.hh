@@ -55,7 +55,6 @@ private:
 	void stopPreview();
 	void scanDirectory(ViewAttachParams attach);
 	void loadRom(size_t idx, const Input::Event &e);
-	void doLoadRom(size_t idx);
 };
 
 }
