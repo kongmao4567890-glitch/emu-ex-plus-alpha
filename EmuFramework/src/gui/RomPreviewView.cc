@@ -1,11 +1,11 @@
 /*  This file is part of EmuFramework.
 
-	EmuFramework is free software: you can redistribute it and/or modify
+	Imagine is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
 
-	EmuFramework is distributed in the hope that it will be useful,
+	Imagine is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
@@ -18,23 +18,19 @@
 #include <emuframework/EmuSystem.hh>
 #include <emuframework/EmuVideo.hh>
 #include <emuframework/EmuVideoLayer.hh>
-#ifdef IG_USE_MODULES
-import emuex;
 import imagine;
-import std;
-#else
-#include <imagine/gui/AlertView.hh>
-#endif
 
 namespace EmuEx
 {
 
-constexpr SystemLogger log{"RomPreviewView"};
+using namespace IG;
+
+[[maybe_unused]] constexpr SystemLogger log{"RomPreviewView"};
 
 RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 	TableView
 	{
-		"ROM预览",
+		"ROM Preview",
 		attach,
 		[this](ItemMessage msg) -> ItemReply
 		{
@@ -55,20 +51,18 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 	},
 	playItem
 	{
-		"开始游戏", attachParams(),
+		"\xe5\xbc\x80\xe5\xa7\x8b\xe6\xb8\xb8\xe6\x88\x8f", attachParams(),
 		[this](const Input::Event& e)
 		{
-			auto &app = this->app();
-			app.launchSystem(e);
+			app().launchSystem(e);
 		}
 	},
 	backItem
 	{
-		"返回", attachParams(),
+		"\xe8\xbf\x94\xe5\x9b\x9e", attachParams(),
 		[this](const Input::Event& e)
 		{
-			auto &app = this->app();
-			app.closeSystem();
+			app().closeSystem();
 			dismiss();
 		}
 	},
@@ -87,7 +81,7 @@ void RomPreviewView::runPreviewFrames()
 	app.setRenderPixelFormat(app.windowPixelFormat());
 	// Run frames to get past boot screen (about 2 seconds of NES)
 	constexpr int previewFrames = 120;
-	for(auto i: iotaCount(previewFrames))
+	for([[maybe_unused]] auto i: iotaCount(previewFrames))
 	{
 		sys.runFrame({}, &app.video, nullptr);
 	}
