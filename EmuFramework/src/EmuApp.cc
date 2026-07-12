@@ -362,7 +362,33 @@ void EmuApp::mainInitCommon(ApplicationInitParams initParams, ApplicationContext
 			winData.viewController.placeElements();
 			winData.viewController.pushAndShow(makeView(viewAttach, ViewID::MAIN_MENU));
 			if(AppMeta::hasRomPreview)
-				winData.viewController.pushAndShow(std::make_unique<RomPreviewView>(viewAttach, ctx.defaultInputEvent()));
+			{
+				if(contentSearchPath.empty())
+				{
+					// 首次启动：弹出文件夹选择器让用户选择ROM目录
+					auto picker = FilePicker::forMediaCreation(viewAttach, ctx.defaultInputEvent());
+					picker->setOnSelectPath(
+						[this](FSPicker &picker, CStringView path, std::string_view, const Input::Event &)
+						{
+							contentSearchPath = path;
+							// 延迟到下一帧，避免输入处理器中修改视图栈导致UAF
+							emuWindow().addOnFrame(
+								[this](FrameParams) -> bool
+								{
+									viewController().popToRoot();
+									viewController().pushAndShow(
+										std::make_unique<RomPreviewView>(attachParams(), appContext().defaultInputEvent()),
+										appContext().defaultInputEvent());
+									return false;
+								});
+						});
+					winData.viewController.pushAndShow(std::move(picker), ctx.defaultInputEvent());
+				}
+				else
+				{
+					winData.viewController.pushAndShow(std::make_unique<RomPreviewView>(viewAttach, ctx.defaultInputEvent()));
+				}
+			}
 			configureSecondaryScreens();
 			video.setRendererTask(renderer.task());
 			video.setTextureBufferMode(system(), textureBufferMode);

@@ -29,7 +29,10 @@ namespace EmuEx
 using namespace IG;
 
 // 游戏列表视图：上方40%预览窗口，下方60%游戏列表
-// 启动时自动扫描上次使用的文件夹(contentSearchPath)
+// 单击游戏→同步加载ROM预览（不改变视图栈）
+// 双击游戏→正式进入游戏运行
+// 所有视图栈操作均通过addOnFrame延迟到下一帧执行，避免输入处理器中的UAF
+// 所有lambda仅捕获this（8字节），适配DelegateFunc的16字节限制
 class RomPreviewView: public TableView, public EmuAppHelper
 {
 public:
@@ -41,6 +44,8 @@ public:
 	void onAddedToController(ViewController *vc, const Input::Event &e) final;
 
 private:
+	enum class PendingAction { None, Preview, Launch };
+
 	TextMenuItem playItem;
 	TextMenuItem backItem;
 	std::vector<TextMenuItem> romItems;
@@ -50,11 +55,20 @@ private:
 	OnFrameDelegate onFrameDel{};
 	bool isRunning{};
 	bool hasContent{};
+	// 双击检测
+	size_t lastClickedIdx{size_t(-1)};
+	SteadyClockTime lastClickTime{};
+	// 帧回调延迟执行
+	PendingAction pendingAction{PendingAction::None};
+	size_t pendingIdx{};
+	bool pendingFrameCallback{};
 
 	void startPreview();
 	void stopPreview();
 	void scanDirectory(ViewAttachParams attach);
 	void loadRom(size_t idx, const Input::Event &e);
+	void doLoadRomSync(size_t idx);
+	void doLaunchGame(size_t idx);
 };
 
 }
