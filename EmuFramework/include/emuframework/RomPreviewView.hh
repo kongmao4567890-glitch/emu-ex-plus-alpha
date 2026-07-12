@@ -41,12 +41,14 @@ public:
 private:
 	TextMenuItem playItem;
 	TextMenuItem backItem;
+	std::vector<TextMenuItem> romItems;
 	Gfx::IQuads bgQuads;
 	OnFrameDelegate onFrameDel{};
 	bool isRunning{};
 
 	void startPreview();
 	void stopPreview();
+	void scanDirectory(ViewAttachParams attach);
 };
 
 }
