@@ -66,7 +66,8 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 			dismiss();
 		}
 	},
-	launchEvent{e}
+	launchEvent{e},
+	bgQuads{attach.rendererTask, {.size = 1}}
 {
 	runPreviewFrames();
 }
@@ -101,9 +102,11 @@ void RomPreviewView::place()
 	{
 		app.videoLayer.place({}, displayRect(), nullptr, sys);
 	}
+	// Update background quad to cover view area
+	bgQuads.write(0, {.bounds = viewRect().as<int16_t>()});
 }
 
-void RomPreviewView::draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawParams params) const
+void RomPreviewView::draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawParams) const
 {
 	auto &app = this->app();
 	auto &sys = system();
@@ -117,10 +120,9 @@ void RomPreviewView::draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawPara
 	cmds.set(BlendMode::OFF);
 	basicEffect.disableTexture(cmds);
 	cmds.setColor({.0, .0, .0, .7});
-	auto tableArea = viewRect();
-	cmds.drawQuad(tableArea.as<int16_t>());
+	cmds.drawQuad(bgQuads, 0);
 	// Draw table items on top
-	TableView::draw(cmds, params);
+	TableView::draw(cmds, {});
 }
 
 }

@@ -20,6 +20,7 @@
 #ifndef IG_USE_MODULE_IMAGINE
 #include <imagine/gui/TableView.hh>
 #include <imagine/gui/MenuItem.hh>
+#include <imagine/gfx/Quads.hh>
 #endif
 
 namespace EmuEx
@@ -40,6 +41,7 @@ private:
 	TextMenuItem playItem;
 	TextMenuItem backItem;
 	Input::Event launchEvent;
+	Gfx::IQuads bgQuads;
 
 	void runPreviewFrames();
 };
