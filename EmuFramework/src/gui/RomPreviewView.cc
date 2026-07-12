@@ -200,7 +200,7 @@ void RomPreviewView::scanDirectory(ViewAttachParams attach)
 	log.info("found {} ROMs in {}", roms.size(), dir);
 }
 
-void RomPreviewView::loadRom(size_t idx, const Input::Event &e)
+void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 {
 	// 延迟到下一帧执行，避免在TableView输入事件回调中修改视图栈导致UAF
 	// 崩溃原因：createSystemWithMedia → pushAndShowModalView → loadRom的TableView被popAndShow
