@@ -587,13 +587,13 @@ void EmuApp::launchSystem(const Input::Event &e)
 }
 
 void EmuApp::onSelectFileFromPicker(IO io, CStringView path, std::string_view displayName,
-	const Input::Event &e, EmuSystemCreateParams params, ViewAttachParams attachParams)
+	const Input::Event &e, EmuSystemCreateParams params, ViewAttachParams vAttachParams)
 {
-	createSystemWithMedia(std::move(io), path, displayName, e, params, attachParams,
+	createSystemWithMedia(std::move(io), path, displayName, e, params, vAttachParams,
 		[this](const Input::Event &e)
 		{
 			recentContent.add(system());
-			if constexpr(AppMeta::hasRomPreview)
+			if(AppMeta::hasRomPreview)
 			{
 				viewController().pushAndShow(std::make_unique<RomPreviewView>(attachParams(), e), e);
 			}
