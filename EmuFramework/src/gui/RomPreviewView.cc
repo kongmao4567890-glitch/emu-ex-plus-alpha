@@ -55,17 +55,20 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, [[maybe_unused]] const I
 	playItem
 	{
 		"\xe5\xbc\x80\xe5\xa7\x8b\xe6\xb8\xb8\xe6\x88\x8f", attach,
-		[](const Input::Event&)
+		[this](const Input::Event &e)
 		{
-			// handled in inputEvent
+			stopPreview();
+			app().launchSystem(e);
 		}
 	},
 	backItem
 	{
 		"\xe8\xbf\x94\xe5\x9b\x9e", attach,
-		[](const Input::Event&)
+		[this](const Input::Event&)
 		{
-			// handled in inputEvent
+			stopPreview();
+			app().closeSystem();
+			dismiss();
 		}
 	},
 	bgQuads{attach.rendererTask, {.size = 1}}
@@ -82,30 +85,6 @@ void RomPreviewView::onAddedToController(ViewController *vc, const Input::Event 
 	startPreview();
 }
 
-void RomPreviewView::onShow()
-{
-	TableView::onShow();
-}
-
-bool RomPreviewView::inputEvent(const Input::Event &e, ViewInputEventParams params)
-{
-	auto &app = this->app();
-	if(e.keyEvent() && e.keyEvent()->pushed(Input::DefaultKey::CONFIRM) && selected == 0)
-	{
-		stopPreview();
-		app.launchSystem(e);
-		return true;
-	}
-	if(e.keyEvent() && e.keyEvent()->pushed(Input::DefaultKey::CANCEL))
-	{
-		stopPreview();
-		app.closeSystem();
-		dismiss();
-		return true;
-	}
-	return TableView::inputEvent(e, params);
-}
-
 void RomPreviewView::startPreview()
 {
 	if(isRunning)
@@ -115,8 +94,12 @@ void RomPreviewView::startPreview()
 	if(!sys.hasContent())
 		return;
 	log.info("starting ROM preview at {}x speed", previewSpeed);
-	// Put system in ACTIVE state so runFrame works correctly
-	sys.start(app);
+	// Follow benchmark pattern: run frames directly without start()
+	// Run a few frames first to initialize the video buffer
+	for([[maybe_unused]] auto i: iotaCount(30))
+	{
+		sys.runFrame({}, &app.video, nullptr);
+	}
 	isRunning = true;
 	onFrameDel =
 		[this](FrameParams)
@@ -144,11 +127,6 @@ void RomPreviewView::stopPreview()
 		auto &app = this->app();
 		app.emuWindow().removeOnFrame(onFrameDel);
 		onFrameDel = {};
-	}
-	auto &sys = system();
-	if(sys.hasContent())
-	{
-		sys.pause(this->app());
 	}
 }
 
