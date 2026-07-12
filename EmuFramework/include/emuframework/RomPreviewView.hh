@@ -32,19 +32,24 @@ class RomPreviewView: public TableView, public EmuAppHelper
 {
 public:
 	RomPreviewView(ViewAttachParams, const Input::Event &e);
+	~RomPreviewView();
 
 	void place() final;
 	void draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawParams p = {}) const final;
 	void prepareDraw() final;
+	void onShow() final;
+	void onHide() final;
 
 private:
 	TextMenuItem playItem;
-	TextMenuItem nextFrameItem;
 	TextMenuItem backItem;
 	Input::Event launchEvent;
 	Gfx::IQuads bgQuads;
+	OnFrameDelegate onFrameDel{};
+	bool isRunning{};
 
-	void runNextFrames(int count);
+	void startPreview();
+	void stopPreview();
 };
 
 }

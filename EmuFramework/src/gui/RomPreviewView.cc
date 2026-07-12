@@ -27,6 +27,9 @@ using namespace IG;
 
 [[maybe_unused]] constexpr SystemLogger log{"RomPreviewView"};
 
+// Preview speed: run 3 emulated frames per screen frame (~3x speed at 60fps)
+static constexpr int previewSpeed = 3;
+
 RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 	TableView
 	{
@@ -36,14 +39,13 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 		{
 			return msg.visit(overloaded
 			{
-				[&](const ItemsMessage&) -> ItemReply { return 3u; },
+				[&](const ItemsMessage&) -> ItemReply { return 2u; },
 				[&](const GetItemMessage& m) -> ItemReply
 				{
 					switch(m.idx)
 					{
 						case 0: return &playItem;
-						case 1: return &nextFrameItem;
-						case 2: return &backItem;
+						case 1: return &backItem;
 						default: std::unreachable();
 					}
 				},
@@ -55,15 +57,8 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 		"\xe5\xbc\x80\xe5\xa7\x8b\xe6\xb8\xb8\xe6\x88\x8f", attachParams(),
 		[this](const Input::Event& e)
 		{
+			stopPreview();
 			app().launchSystem(e);
-		}
-	},
-	nextFrameItem
-	{
-		"\xe8\xbf\x9b\xe5\xb8\xa7 60 \xe5\xb8\xa7", attachParams(),
-		[this](const Input::Event&)
-		{
-			runNextFrames(60);
 		}
 	},
 	backItem
@@ -71,6 +66,7 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 		"\xe8\xbf\x94\xe5\x9b\x9e", attachParams(),
 		[this](const Input::Event&)
 		{
+			stopPreview();
 			app().closeSystem();
 			dismiss();
 		}
@@ -78,7 +74,6 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 	launchEvent{e},
 	bgQuads{attach.rendererTask, {.size = 1}}
 {
-	// Set up video format for the loaded ROM
 	auto &app = this->app();
 	auto &sys = system();
 	if(sys.hasContent())
@@ -87,17 +82,59 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 	}
 }
 
-void RomPreviewView::runNextFrames(int count)
+RomPreviewView::~RomPreviewView()
 {
+	stopPreview();
+}
+
+void RomPreviewView::onShow()
+{
+	TableView::onShow();
+	startPreview();
+}
+
+void RomPreviewView::onHide()
+{
+	TableView::onHide();
+	stopPreview();
+}
+
+void RomPreviewView::startPreview()
+{
+	if(isRunning)
+		return;
 	auto &app = this->app();
 	auto &sys = system();
 	if(!sys.hasContent())
 		return;
-	for([[maybe_unused]] auto i: iotaCount(count))
+	isRunning = true;
+	onFrameDel =
+		[this](FrameParams)
+		{
+			auto &sys = system();
+			auto &app = this->app();
+			if(!sys.hasContent())
+				return false;
+			for([[maybe_unused]] auto i: iotaCount(previewSpeed))
+			{
+				sys.runFrame({}, &app.video, nullptr);
+			}
+			return true;
+		};
+	app.emuWindow().addOnFrame(onFrameDel);
+}
+
+void RomPreviewView::stopPreview()
+{
+	if(!isRunning)
+		return;
+	isRunning = false;
+	if(onFrameDel)
 	{
-		sys.runFrame({}, &app.video, nullptr);
+		auto &app = this->app();
+		app.emuWindow().removeOnFrame(onFrameDel);
+		onFrameDel = {};
 	}
-	postDraw();
 }
 
 void RomPreviewView::prepareDraw()
