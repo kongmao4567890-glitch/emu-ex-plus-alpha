@@ -36,13 +36,14 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 		{
 			return msg.visit(overloaded
 			{
-				[&](const ItemsMessage&) -> ItemReply { return 2u; },
+				[&](const ItemsMessage&) -> ItemReply { return 3u; },
 				[&](const GetItemMessage& m) -> ItemReply
 				{
 					switch(m.idx)
 					{
 						case 0: return &playItem;
-						case 1: return &backItem;
+						case 1: return &nextFrameItem;
+						case 2: return &backItem;
 						default: std::unreachable();
 					}
 				},
@@ -57,6 +58,14 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 			app().launchSystem(e);
 		}
 	},
+	nextFrameItem
+	{
+		"\xe8\xbf\x9b\xe5\xb8\xa7 60 \xe5\xb8\xa7", attachParams(),
+		[this](const Input::Event&)
+		{
+			runNextFrames(60);
+		}
+	},
 	backItem
 	{
 		"\xe8\xbf\x94\xe5\x9b\x9e", attachParams(),
@@ -69,23 +78,26 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 	launchEvent{e},
 	bgQuads{attach.rendererTask, {.size = 1}}
 {
-	runPreviewFrames();
+	// Set up video format for the loaded ROM
+	auto &app = this->app();
+	auto &sys = system();
+	if(sys.hasContent())
+	{
+		app.setRenderPixelFormat(app.windowPixelFormat());
+	}
 }
 
-void RomPreviewView::runPreviewFrames()
+void RomPreviewView::runNextFrames(int count)
 {
 	auto &app = this->app();
 	auto &sys = system();
 	if(!sys.hasContent())
 		return;
-	// Set up video format for the loaded ROM
-	app.setRenderPixelFormat(app.windowPixelFormat());
-	// Run frames to get past boot screen (about 2 seconds of NES)
-	constexpr int previewFrames = 120;
-	for([[maybe_unused]] auto i: iotaCount(previewFrames))
+	for([[maybe_unused]] auto i: iotaCount(count))
 	{
 		sys.runFrame({}, &app.video, nullptr);
 	}
+	postDraw();
 }
 
 void RomPreviewView::prepareDraw()
@@ -102,7 +114,6 @@ void RomPreviewView::place()
 	{
 		app.videoLayer.place({}, displayRect(), nullptr, sys);
 	}
-	// Update background quad to cover view area
 	bgQuads.write(0, {.bounds = viewRect().as<int16_t>()});
 }
 
@@ -114,14 +125,12 @@ void RomPreviewView::draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawPara
 	{
 		app.videoLayer.draw(cmds);
 	}
-	// Draw semi-transparent background for the button area
 	using namespace Gfx;
 	auto &basicEffect = cmds.basicEffect();
 	cmds.set(BlendMode::OFF);
 	basicEffect.disableTexture(cmds);
 	cmds.setColor({.0, .0, .0, .7});
 	cmds.drawQuad(bgQuads, 0);
-	// Draw table items on top
 	TableView::draw(cmds, {});
 }
 

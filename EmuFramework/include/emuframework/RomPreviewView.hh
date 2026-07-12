@@ -39,11 +39,12 @@ public:
 
 private:
 	TextMenuItem playItem;
+	TextMenuItem nextFrameItem;
 	TextMenuItem backItem;
 	Input::Event launchEvent;
 	Gfx::IQuads bgQuads;
 
-	void runPreviewFrames();
+	void runNextFrames(int count);
 };
 
 }
