@@ -30,7 +30,7 @@ using namespace IG;
 // Run 3 emulated frames per screen frame (~3x speed at 60fps)
 static constexpr int previewSpeed = 3;
 
-RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
+RomPreviewView::RomPreviewView(ViewAttachParams attach, [[maybe_unused]] const Input::Event &e):
 	TableView
 	{
 		"ROM Preview",
@@ -55,12 +55,18 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 	playItem
 	{
 		"\xe5\xbc\x80\xe5\xa7\x8b\xe6\xb8\xb8\xe6\x88\x8f", attach,
-		[](const Input::Event&) {}
+		[](const Input::Event&)
+		{
+			// handled in inputEvent
+		}
 	},
 	backItem
 	{
 		"\xe8\xbf\x94\xe5\x9b\x9e", attach,
-		[](const Input::Event&) {}
+		[](const Input::Event&)
+		{
+			// handled in inputEvent
+		}
 	},
 	bgQuads{attach.rendererTask, {.size = 1}}
 {}

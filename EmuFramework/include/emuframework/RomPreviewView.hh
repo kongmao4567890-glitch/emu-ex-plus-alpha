@@ -36,13 +36,13 @@ public:
 
 	void place() final;
 	void draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawParams p = {}) const final;
-	void inputEvent(const Input::Event &e, ViewInputEventParams) final;
+	bool inputEvent(const Input::Event &e, ViewInputEventParams) final;
 	void onShow() final;
 	void onAddedToController(ViewController *vc, const Input::Event &e) final;
 
 private:
-	TextMenuItem playItem{"", {}, {}};
-	TextMenuItem backItem{"", {}, {}};
+	TextMenuItem playItem;
+	TextMenuItem backItem;
 	Gfx::IQuads bgQuads;
 	OnFrameDelegate onFrameDel{};
 	bool isRunning{};
