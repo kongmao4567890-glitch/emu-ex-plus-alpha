@@ -60,7 +60,7 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, const Input::Event &e):
 	backItem
 	{
 		"\xe8\xbf\x94\xe5\x9b\x9e", attachParams(),
-		[this](const Input::Event& e)
+		[this](const Input::Event&)
 		{
 			app().closeSystem();
 			dismiss();
@@ -117,7 +117,7 @@ void RomPreviewView::draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawPara
 	cmds.set(BlendMode::OFF);
 	basicEffect.disableTexture(cmds);
 	cmds.setColor({.0, .0, .0, .7});
-	auto tableArea = params.viewRect;
+	auto tableArea = viewRect();
 	cmds.drawQuad(tableArea.as<int16_t>());
 	// Draw table items on top
 	TableView::draw(cmds, params);
