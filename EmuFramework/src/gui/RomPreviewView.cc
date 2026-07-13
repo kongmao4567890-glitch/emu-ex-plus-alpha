@@ -277,15 +277,14 @@ void RomPreviewView::doLoadRomPreview(size_t idx)
 		[this](const Input::Event&)
 		{
 			// 加载完成回调（在主线程执行）
-			// createSystemWithMedia 已调用 onSystemCreated()
-			// 但它还会 push LoadProgressView 和可能的其他视图
-			// 我们需要 pop 到 RomPreviewView
+			// LoadProgressView 已在自己的 OK 处理中 popModalViews() + onSystemCreated()
 			auto &app = this->app();
 
-			// 关闭 createSystemWithMedia 内部可能显示的 LoadProgressView
-			app.viewController().popModalViews();
-
 			hasContent = true;
+			// 必须调用 applyRenderPixelFormat 初始化 video 的 vidImg 纹理
+			// 否则 runFrame -> video.startFrame() -> img.endFrame() 中
+			// assume(texBuff) 会因为 vidImg 未初始化而崩溃
+			app.applyRenderPixelFormat();
 			place();
 			startPreview();
 		});
