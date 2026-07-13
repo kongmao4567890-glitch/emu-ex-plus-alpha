@@ -368,7 +368,7 @@ void EmuApp::mainInitCommon(ApplicationInitParams initParams, ApplicationContext
 					// 首次启动：弹出文件夹选择器让用户选择ROM目录
 					auto picker = FilePicker::forMediaCreation(viewAttach, ctx.defaultInputEvent());
 					picker->setOnSelectPath(
-						[this](FSPicker &picker, CStringView path, std::string_view, const Input::Event &)
+						[this]([[maybe_unused]] FSPicker &picker, CStringView path, [[maybe_unused]] std::string_view, [[maybe_unused]] const Input::Event &)
 						{
 							contentSearchPath = path;
 							// 延迟到下一帧，避免输入处理器中修改视图栈导致UAF
