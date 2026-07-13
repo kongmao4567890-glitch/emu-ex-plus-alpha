@@ -223,7 +223,7 @@ void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 	auto now = SteadyClock::now();
 
 	// 双击检测：同一索引在400ms内再次点击
-	if(idx == lastClickedIdx && lastClickTime.time_since_epoch().count() > 0 &&
+	if(idx == lastClickedIdx && lastClickTime != SteadyClockTimePoint{} &&
 	   now - lastClickTime < doubleClickTime)
 	{
 		log.info("double-click detected, launching ROM: {}", romNames[idx]);
@@ -253,7 +253,7 @@ void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 					doLaunchGame(pendingIdx);
 				else if(pendingAction == PendingAction::Preview)
 					doLoadRomSync(pendingIdx);
-				pendingAction = PendingAction::None;
+				pendingAction = PendingAction::NoAction;
 				return false;
 			});
 	}

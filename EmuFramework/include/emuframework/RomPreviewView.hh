@@ -44,7 +44,7 @@ public:
 	void onAddedToController(ViewController *vc, const Input::Event &e) final;
 
 private:
-	enum class PendingAction { None, Preview, Launch };
+	enum class PendingAction { NoAction, Preview, Launch };
 
 	TextMenuItem playItem;
 	TextMenuItem backItem;
@@ -57,9 +57,9 @@ private:
 	bool hasContent{};
 	// 双击检测
 	size_t lastClickedIdx{size_t(-1)};
-	SteadyClockTime lastClickTime{};
+	SteadyClockTimePoint lastClickTime{};
 	// 帧回调延迟执行
-	PendingAction pendingAction{PendingAction::None};
+	PendingAction pendingAction{PendingAction::NoAction};
 	size_t pendingIdx{};
 	bool pendingFrameCallback{};
 
