@@ -8,8 +8,8 @@ endif()
 
 string(APPEND CFLAGS_COMMON " -D_GNU_SOURCE")
 string(APPEND CFLAGS_CODEGEN " -pthread")
-string(APPEND LDFLAGS " -lm -fuse-ld=mold \
--Wl,-O3,--gc-sections,--as-needed,--icf=all,--exclude-libs=ALL,--pack-dyn-relocs=${PACK_DYN_RELOCS}")
+string(APPEND LDFLAGS " -lm \
+-Wl,-O3,--gc-sections,--as-needed,--exclude-libs=ALL")
 
 if(NOT CMAKE_C_COMPILER)
 	set(CMAKE_C_COMPILER ${CTARGET}-gcc-16)

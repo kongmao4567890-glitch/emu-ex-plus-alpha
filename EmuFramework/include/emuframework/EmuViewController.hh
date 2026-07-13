@@ -101,6 +101,9 @@ public:
 	bool isMenuDismissKey(const Input::KeyEvent &) const;
 	ApplicationContext appContext() const;
 	bool isShowingEmulation() const { return showingEmulation; }
+	void setPreviewMode(bool on);
+	bool isPreviewMode() const { return previewMode_; }
+	void setPreviewDisplayRect(WRect rect) { previewDisplayRect_ = rect; }
 	void onHide();
 	void movePopupToWindow(Window &win);
 	void moveEmuViewToWindow(Window &win);
@@ -114,6 +117,8 @@ public:
 protected:
 	EmuMenuViewStack viewStack;
 	bool showingEmulation{};
+	WRect previewDisplayRect_{};
+	bool previewMode_{};
 public:
 	bool drawBlankFrame{};
 

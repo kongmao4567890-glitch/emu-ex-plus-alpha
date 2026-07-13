@@ -205,7 +205,11 @@ size_t ArchiveIO::size()
 uint32_t ArchiveIO::crc32() const
 {
 	assume(ptr);
+#if ARCHIVE_VERSION_NUMBER >= 3007000
 	return archive_entry_crc32(ptr);
+#else
+	return 0;
+#endif
 }
 
 bool ArchiveIO::readNextEntry()
