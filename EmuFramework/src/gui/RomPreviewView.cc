@@ -81,12 +81,7 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, [[maybe_unused]] const I
 					stopPreview();
 					if(hasContent)
 					{
-						auto &app = this->app();
-						app.systemTask.stop();
-						system().closeRuntimeSystem(app);
-						app.autosaveManager.resetSlot();
-						app.rewindManager.clear();
-						app.viewController().onSystemClosed();
+						app().closeSystem();
 						hasContent = false;
 					}
 					dismiss();
@@ -118,6 +113,9 @@ void RomPreviewView::startPreview()
 		return;
 	log.info("starting ROM preview");
 	isRunning = true;
+	// 必须调用 system().start(app) 设置 state=ACTIVE、执行 onStart()、启动音频
+	// 否则 systemTask 的 advanceFrames → runFrames → runFrame 在错误状态下执行导致崩溃
+	sys.start(app());
 	app().systemTask.start(app().emuWindow());
 }
 
@@ -127,6 +125,8 @@ void RomPreviewView::stopPreview()
 		return;
 	isRunning = false;
 	app().systemTask.stop();
+	// systemTask.stop() 已 join 线程，安全调用 onStop
+	system().onStop();
 }
 
 void RomPreviewView::scanDirectory(ViewAttachParams attach)
@@ -239,14 +239,11 @@ void RomPreviewView::doLoadRomSync(size_t idx)
 
 	log.info("loading ROM for preview: {}", name);
 
-	// 如果之前已有内容，先完整关闭旧系统，避免systemTask与createWithMedia冲突
+	// 复用 EmuApp::closeSystem() 完整关闭旧系统
+	// 它内部会 systemTask.stop() + closeRuntimeSystem() + resetSlot() + clear() + onSystemClosed()
 	if(sys.hasContent())
 	{
-		app.systemTask.stop();
-		sys.closeRuntimeSystem(app);
-		app.autosaveManager.resetSlot();
-		app.rewindManager.clear();
-		app.viewController().onSystemClosed();
+		app.closeSystem();
 		hasContent = false;
 	}
 
@@ -285,6 +282,8 @@ void RomPreviewView::doLaunchGame(size_t idx)
 
 	log.info("launching ROM: {}", name);
 
+	// createSystemWithMedia 内部会调用 closeSystem()（包含 systemTask.stop()），
+	// 因此 stopPreview() 之后再调 closeSystem 是安全的（重复 stop 有 isStarted() 保护）
 	app.createSystemWithMedia(IO{}, path, name, appContext().defaultInputEvent(), {}, app.attachParams(),
 		[this](const Input::Event &e)
 		{
