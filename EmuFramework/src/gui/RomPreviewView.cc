@@ -28,7 +28,6 @@ using namespace IG;
 
 [[maybe_unused]] constexpr SystemLogger log{"RomPreviewView"};
 
-static constexpr int previewSpeed = 3;
 static constexpr auto doubleClickTime = std::chrono::milliseconds(400);
 
 RomPreviewView::RomPreviewView(ViewAttachParams attach, [[maybe_unused]] const Input::Event &e):
@@ -60,14 +59,11 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, [[maybe_unused]] const I
 		{
 			if(!hasContent)
 				return;
-			// 将所有操作延迟到下一帧，避免输入处理器中的UAF
-			// lambda只捕获this（8字节），适配DelegateFunc的16字节限制
 			app().emuWindow().addOnFrame(
 				[this](FrameParams) -> bool
 				{
 					stopPreview();
 					auto &app = this->app();
-					// 在dismiss之前捕获app引用，dismiss后this销毁但app仍有效
 					dismiss();
 					app.launchSystem(app.appContext().defaultInputEvent());
 					return false;
@@ -79,7 +75,6 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, [[maybe_unused]] const I
 		"返回", attach,
 		[this](const Input::Event&)
 		{
-			// 将所有操作延迟到下一帧，避免输入处理器中的UAF
 			app().emuWindow().addOnFrame(
 				[this](FrameParams) -> bool
 				{
@@ -121,26 +116,9 @@ void RomPreviewView::startPreview()
 	auto &sys = system();
 	if(!sys.hasContent())
 		return;
-	log.info("starting ROM preview at {}x speed", previewSpeed);
-	// 先跑30帧让画面初始化
-	for([[maybe_unused]] auto i: iotaCount(30))
-	{
-		sys.runFrame({}, &app().video, nullptr);
-	}
+	log.info("starting ROM preview");
 	isRunning = true;
-	onFrameDel =
-		[this](FrameParams)
-		{
-			auto &sys = system();
-			if(!sys.hasContent())
-				return false;
-			for([[maybe_unused]] auto i: iotaCount(previewSpeed))
-			{
-				sys.runFrame({}, &app().video, nullptr);
-			}
-			return true;
-		};
-	app().emuWindow().addOnFrame(onFrameDel);
+	app().systemTask.start();
 }
 
 void RomPreviewView::stopPreview()
@@ -148,11 +126,7 @@ void RomPreviewView::stopPreview()
 	if(!isRunning)
 		return;
 	isRunning = false;
-	if(onFrameDel)
-	{
-		app().emuWindow().removeOnFrame(onFrameDel);
-		onFrameDel = {};
-	}
+	app().systemTask.stop();
 }
 
 void RomPreviewView::scanDirectory(ViewAttachParams attach)
@@ -206,7 +180,6 @@ void RomPreviewView::scanDirectory(ViewAttachParams attach)
 		romPaths.push_back(rom.path);
 		romNames.push_back(rom.name);
 		auto idx = romPaths.size() - 1;
-		// TextMenuItem的回调只捕获this+idx（16字节），恰好等于DelegateFunc存储大小
 		romItems.emplace_back(
 			rom.name, attach,
 			[this, idx](const Input::Event &e)
@@ -222,7 +195,6 @@ void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 {
 	auto now = SteadyClock::now();
 
-	// 双击检测：同一索引在400ms内再次点击
 	if(idx == lastClickedIdx && lastClickTime != SteadyClockTimePoint{} &&
 	   now - lastClickTime < doubleClickTime)
 	{
@@ -231,11 +203,9 @@ void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 		lastClickTime = {};
 		pendingAction = PendingAction::Launch;
 		pendingIdx = idx;
-		// 不注册新的帧回调 - 已有的回调会检测pendingAction的变化
 		return;
 	}
 
-	// 单击 - 预览
 	lastClickedIdx = idx;
 	lastClickTime = now;
 	pendingAction = PendingAction::Preview;
@@ -244,7 +214,6 @@ void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 	if(!pendingFrameCallback)
 	{
 		pendingFrameCallback = true;
-		// lambda只捕获this（8字节），适配DelegateFunc的16字节限制
 		app().emuWindow().addOnFrame(
 			[this](FrameParams) -> bool
 			{
@@ -270,8 +239,17 @@ void RomPreviewView::doLoadRomSync(size_t idx)
 
 	log.info("loading ROM for preview: {}", name);
 
-	// 同步加载ROM - 不改变视图栈，不使用LoadProgressView
-	// createWithMedia内部会调用closeRuntimeSystem关闭之前的系统
+	// 如果之前已有内容，先完整关闭旧系统，避免systemTask与createWithMedia冲突
+	if(sys.hasContent())
+	{
+		app.systemTask.stop();
+		sys.closeRuntimeSystem(app);
+		app.autosaveManager.resetSlot();
+		app.rewindManager.clear();
+		app.viewController().onSystemClosed();
+		hasContent = false;
+	}
+
 	try
 	{
 		sys.createWithMedia(IO{}, path, name, {},
@@ -293,7 +271,7 @@ void RomPreviewView::doLoadRomSync(size_t idx)
 
 	hasContent = true;
 	app.onSystemCreated();
-	place(); // 重新布局以显示预览区域
+	place();
 	startPreview();
 }
 
@@ -307,9 +285,6 @@ void RomPreviewView::doLaunchGame(size_t idx)
 
 	log.info("launching ROM: {}", name);
 
-	// 使用createSystemWithMedia进行完整启动流程（含LoadProgressView）
-	// closeSystem()中的showUI()在此场景下是空操作，因为isShowingEmulation()为false
-	// 回调中的lambda捕获this（8字节），在popToRoot之前先捕获app引用
 	app.createSystemWithMedia(IO{}, path, name, appContext().defaultInputEvent(), {}, app.attachParams(),
 		[this](const Input::Event &e)
 		{
@@ -347,19 +322,16 @@ void RomPreviewView::draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawPara
 	using namespace Gfx;
 	auto &basicEffect = cmds.basicEffect();
 
-	// 预览区域背景
 	cmds.set(BlendMode::OFF);
 	basicEffect.disableTexture(cmds);
 	cmds.setColor({.0, .0, .0, 1.});
 	cmds.drawQuad(bgQuads, 0);
 
-	// 游戏预览画面
 	if(hasContent && sys.hasContent() && app.video.hasRendererTask())
 	{
 		app.videoLayer.draw(cmds);
 	}
 
-	// 列表区域半透明背景
 	cmds.set(BlendMode::OFF);
 	basicEffect.disableTexture(cmds);
 	cmds.setColor({.0, .0, .0, .7});

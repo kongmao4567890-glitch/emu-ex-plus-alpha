@@ -52,7 +52,6 @@ private:
 	std::vector<std::string> romPaths;
 	std::vector<std::string> romNames;
 	Gfx::IQuads bgQuads;
-	OnFrameDelegate onFrameDel{};
 	bool isRunning{};
 	bool hasContent{};
 	// 双击检测
