@@ -16,8 +16,6 @@
 #include <emuframework/RomPreviewView.hh>
 #include <emuframework/EmuApp.hh>
 #include <emuframework/EmuSystem.hh>
-#include <emuframework/EmuVideo.hh>
-#include <emuframework/EmuVideoLayer.hh>
 #include <emuframework/FilePicker.hh>
 import imagine;
 
@@ -39,119 +37,47 @@ RomPreviewView::RomPreviewView(ViewAttachParams attach, [[maybe_unused]] const I
 		{
 			return msg.visit(overloaded
 			{
-				[&](const ItemsMessage&) -> ItemReply { return 2u + romItems.size(); },
+				[&](const ItemsMessage&) -> ItemReply { return 1u + romItems.size(); },
 				[&](const GetItemMessage& m) -> ItemReply
 				{
 					auto romCount = romItems.size();
-					if(m.idx == 0)
-						return &playItem;
-					if(m.idx == 1 + romCount)
+					if(m.idx == romCount)
 						return &backItem;
-					return &romItems[m.idx - 1];
+					return &romItems[m.idx];
 				},
 			});
-		}
-	},
-	playItem
-	{
-		"开始游戏", attach,
-		[this](const Input::Event&)
-		{
-			if(!hasContent)
-				return;
-			app().emuWindow().addOnFrame(
-				[this](FrameParams) -> bool
-				{
-					stopPreview();
-					auto &app = this->app();
-					dismiss();
-					app.launchSystem(app.appContext().defaultInputEvent());
-					return false;
-				});
 		}
 	},
 	backItem
 	{
 		"返回", attach,
-		[this](const Input::Event&)
+		[this](const Input::Event &)
 		{
 			app().emuWindow().addOnFrame(
 				[this](FrameParams) -> bool
 				{
-					stopPreview();
-					if(hasContent)
-					{
+					// 如果有游戏在运行，先关闭
+					if(system().hasContent())
 						app().closeSystem();
-						hasContent = false;
-					}
 					dismiss();
 					return false;
 				});
 		}
-	},
-	bgQuads{attach.rendererTask, {.size = 2}}
+	}
 {
 	scanDirectory(attach);
 }
 
 RomPreviewView::~RomPreviewView()
 {
-	stopPreview();
+	// 如果视图销毁时游戏还在运行，关闭它
+	if(system().hasContent())
+		app().closeSystem();
 }
 
 void RomPreviewView::onAddedToController(ViewController *vc, const Input::Event &e)
 {
 	TableView::onAddedToController(vc, e);
-}
-
-void RomPreviewView::startPreview()
-{
-	if(isRunning)
-		return;
-	auto &sys = system();
-	if(!sys.hasContent())
-		return;
-	log.info("starting ROM preview");
-	isRunning = true;
-
-	// 预览初始化：仅设置 state=ACTIVE 和执行子类 onStart()
-	// 不调用 system().start(app)，因为它会：
-	//   1. 启动音频（预览不需要声音）
-	//   2. 启动 autosave/rewind 定时器（预览不需要）
-	//   3. 启动 audio（可能与主线程帧回调冲突）
-	sys.start(app());
-	app().audio.stop();
-	app().autosaveManager.pauseTimer();
-	app().rewindManager.pauseTimer();
-
-	// 用主线程 addOnFrame 运行预览帧
-	// 绝对不能用 systemTask.start()，因为它会从主线程移除帧事件、禁用 UI 绘制
-	onFrameDel =
-		[this](FrameParams) -> bool
-		{
-			auto &sys = system();
-			if(!isRunning || !sys.hasContent())
-				return false;
-			// EmuSystem::benchmark() 也使用 {} 作为 EmuSystemTaskContext 和 nullptr 作为 audio
-			// state=ACTIVE 时 runFrame({}, ...) 安全执行
-			sys.runFrame({}, &app().video, nullptr);
-			return true;
-		};
-	app().emuWindow().addOnFrame(onFrameDel);
-}
-
-void RomPreviewView::stopPreview()
-{
-	if(!isRunning)
-		return;
-	isRunning = false;
-	if(onFrameDel)
-	{
-		app().emuWindow().removeOnFrame(onFrameDel);
-		onFrameDel = {};
-	}
-	// 调用 pause 而不是手动操作 state（pause 会正确设置 state=PAUSED 并调用 onStop）
-	system().pause(app());
 }
 
 void RomPreviewView::scanDirectory(ViewAttachParams attach)
@@ -220,22 +146,26 @@ void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 {
 	auto now = SteadyClock::now();
 
+	// 双击检测：同一项在 400ms 内再次点击
 	if(idx == lastClickedIdx && lastClickTime != SteadyClockTimePoint{} &&
 	   now - lastClickTime < doubleClickTime)
 	{
-		log.info("double-click detected, launching ROM: {}", romNames[idx]);
+		log.info("double-click: launching game (list will close): {}", romNames[idx]);
 		lastClickedIdx = size_t(-1);
 		lastClickTime = {};
-		pendingAction = PendingAction::Launch;
+		pendingAction = PendingAction::DoubleClick;
 		pendingIdx = idx;
-		return;
+	}
+	else
+	{
+		log.info("single-click: opening game (list will stay): {}", romNames[idx]);
+		lastClickedIdx = idx;
+		lastClickTime = now;
+		pendingAction = PendingAction::SingleClick;
+		pendingIdx = idx;
 	}
 
-	lastClickedIdx = idx;
-	lastClickTime = now;
-	pendingAction = PendingAction::Preview;
-	pendingIdx = idx;
-
+	// 延迟到下一帧执行，避免在输入回调中操作视图栈
 	if(!pendingFrameCallback)
 	{
 		pendingFrameCallback = true;
@@ -243,116 +173,58 @@ void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 			[this](FrameParams) -> bool
 			{
 				pendingFrameCallback = false;
-				if(pendingAction == PendingAction::Launch)
-					doLaunchGame(pendingIdx);
-				else if(pendingAction == PendingAction::Preview)
-					doLoadRomPreview(pendingIdx);
-				pendingAction = PendingAction::NoAction;
+				auto action = pendingAction;
+				pendingAction = PendingAction::None;
+				if(action == PendingAction::None)
+					return false;
+				doOpenGame(pendingIdx, action == PendingAction::SingleClick);
 				return false;
 			});
 	}
 }
 
-void RomPreviewView::doLoadRomPreview(size_t idx)
+void RomPreviewView::doOpenGame(size_t idx, bool keepList)
 {
-	stopPreview();
 	auto &app = this->app();
-	auto &sys = system();
-
 	auto path = romPaths[idx];
 	auto name = romNames[idx];
 
-	log.info("loading ROM for preview: {}", name);
+	log.info("opening game: {} (keepList={})", name, keepList);
 
-	// 关闭旧系统
-	if(sys.hasContent())
-	{
-		app.closeSystem();
-		hasContent = false;
-	}
-
-	// 使用 app.createSystemWithMedia 异步加载 ROM（在后台线程）
-	// 之前同步调用 createWithMedia 会阻塞主线程导致 UI 卡死
+	// 完全复用框架的正常启动流程：
+	// createSystemWithMedia 内部会：
+	//   1. closeSystem() 关闭旧系统（含 systemTask.stop()）
+	//   2. pushAndShowModalView(LoadProgressView) 显示加载进度
+	//   3. makeDetachedThread 后台加载 ROM
+	//   4. 加载成功后 popModalViews() + onSystemCreated() + onComplete 回调
+	//
+	// onComplete 中调用 launchSystem：
+	//   1. 加载 autosave
+	//   2. showEmulation() → showEmulationView() → startEmulation()
+	//   3. system().start(app) → 设置 state=ACTIVE、onStart()、启动音频
+	//   4. systemTask.start(emuWindow()) → 启动模拟线程
+	//
+	// 单击(keepList=true)：不 dismiss，RomPreviewView 留在视图栈中
+	//   → 游戏运行时按返回键暂停 → showUI() → showMenuView() → 显示 RomPreviewView
+	//
+	// 双击(keepList=false)：dismiss，RomPreviewView 从视图栈移除
+	//   → 游戏运行时按返回键暂停 → 显示正常的菜单视图
 	app.createSystemWithMedia(IO{}, path, name, appContext().defaultInputEvent(), {}, app.attachParams(),
-		[this](const Input::Event&)
-		{
-			// 加载完成回调（在主线程执行）
-			// LoadProgressView 已在自己的 OK 处理中 popModalViews() + onSystemCreated()
-			auto &app = this->app();
-
-			hasContent = true;
-			// 必须调用 applyRenderPixelFormat 初始化 video 的 vidImg 纹理
-			// 否则 runFrame -> video.startFrame() -> img.endFrame() 中
-			// assume(texBuff) 会因为 vidImg 未初始化而崩溃
-			app.applyRenderPixelFormat();
-			place();
-			startPreview();
-		});
-}
-
-void RomPreviewView::doLaunchGame(size_t idx)
-{
-	stopPreview();
-	auto &app = this->app();
-
-	auto path = romPaths[idx];
-	auto name = romNames[idx];
-
-	log.info("launching ROM: {}", name);
-
-	app.createSystemWithMedia(IO{}, path, name, appContext().defaultInputEvent(), {}, app.attachParams(),
-		[this](const Input::Event &e)
+		[this, keepList](const Input::Event &e)
 		{
 			auto &app = this->app();
-			app.viewController().popToRoot();
 			app.launchSystem(e);
+			if(!keepList)
+			{
+				// 双击：延迟 dismiss 到下一帧，避免在 onComplete 回调中操作视图栈
+				app.emuWindow().addOnFrame(
+					[this](FrameParams) -> bool
+					{
+						dismiss();
+						return false;
+					});
+			}
 		});
-}
-
-void RomPreviewView::place()
-{
-	auto fullRect = viewRect();
-	auto previewHeight = fullRect.ySize() * 40 / 100;
-	auto previewRect = WindowRect{{fullRect.x, fullRect.y}, {fullRect.x2, fullRect.y + previewHeight}};
-	auto bottomRect = WindowRect{{fullRect.x, fullRect.y + previewHeight}, {fullRect.x2, fullRect.y2}};
-
-	setViewRect(bottomRect, bottomRect);
-	TableView::place();
-
-	auto &app = this->app();
-	auto &sys = system();
-	if(hasContent && sys.hasContent() && app.video.hasRendererTask())
-	{
-		app.videoLayer.place({}, previewRect, nullptr, sys);
-	}
-
-	bgQuads.write(0, {.bounds = previewRect.as<int16_t>()});
-	bgQuads.write(1, {.bounds = bottomRect.as<int16_t>()});
-}
-
-void RomPreviewView::draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawParams) const
-{
-	auto &app = this->app();
-	auto &sys = system();
-	using namespace Gfx;
-	auto &basicEffect = cmds.basicEffect();
-
-	cmds.set(BlendMode::OFF);
-	basicEffect.disableTexture(cmds);
-	cmds.setColor({.0, .0, .0, 1.});
-	cmds.drawQuad(bgQuads, 0);
-
-	if(hasContent && sys.hasContent() && app.video.hasRendererTask())
-	{
-		app.videoLayer.draw(cmds);
-	}
-
-	cmds.set(BlendMode::OFF);
-	basicEffect.disableTexture(cmds);
-	cmds.setColor({.0, .0, .0, .7});
-	cmds.drawQuad(bgQuads, 1);
-
-	TableView::draw(cmds, {});
 }
 
 }
