@@ -119,7 +119,7 @@ void RomPreviewView::startPreview()
 	//   1. 启动音频（预览不需要声音）
 	//   2. 启动 autosave/rewind 定时器（预览不需要）
 	//   3. 启动 audio（可能与主线程帧回调冲突）
-	sys.start(*this);
+	sys.start(app());
 	app().audio.stop();
 	app().autosaveManager.pauseTimer();
 	app().rewindManager.pauseTimer();
@@ -151,7 +151,7 @@ void RomPreviewView::stopPreview()
 		onFrameDel = {};
 	}
 	// 调用 pause 而不是手动操作 state（pause 会正确设置 state=PAUSED 并调用 onStop）
-	sys.pause(app());
+	system().pause(app());
 }
 
 void RomPreviewView::scanDirectory(ViewAttachParams attach)
