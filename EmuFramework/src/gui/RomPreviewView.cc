@@ -118,7 +118,7 @@ void RomPreviewView::startPreview()
 		return;
 	log.info("starting ROM preview");
 	isRunning = true;
-	app().systemTask.start();
+	app().systemTask.start(app().emuWindow());
 }
 
 void RomPreviewView::stopPreview()
