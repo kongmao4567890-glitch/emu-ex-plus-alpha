@@ -20,6 +20,7 @@
 #ifndef IG_USE_MODULE_IMAGINE
 #include <imagine/gui/TableView.hh>
 #include <imagine/gui/MenuItem.hh>
+#include <imagine/gfx/Quads.hh>
 #endif
 
 namespace EmuEx
@@ -27,26 +28,33 @@ namespace EmuEx
 
 using namespace IG;
 
-// 游戏列表视图
-// 单击游戏 = 正常打开游戏，游戏列表保留在视图栈中（按返回键可回到列表）
-// 双击游戏 = 正常打开游戏，游戏列表消失
-// 完全复用框架的 createSystemWithMedia + launchSystem 流程
-// 不自己实现 runFrame / systemTask / 预览渲染
+// 游戏列表视图：上方40%预览区，下方60%游戏列表
+// 单击游戏 → 在预览区运行游戏，列表保留
+// 双击游戏 → 显示"运行"按钮
+// 点"运行" → 正常全屏打开游戏
 class RomPreviewView: public TableView, public EmuAppHelper
 {
 public:
 	RomPreviewView(ViewAttachParams, const Input::Event &e);
 	~RomPreviewView();
 
+	void place() final;
+	void draw(Gfx::RendererCommands &__restrict__ cmds, ViewDrawParams p = {}) const final;
 	void onAddedToController(ViewController *vc, const Input::Event &e) final;
 
 private:
-	enum class PendingAction { None, SingleClick, DoubleClick };
+	enum class PendingAction { None, Preview };
 
+	TextMenuItem runItem;
 	TextMenuItem backItem;
 	std::vector<TextMenuItem> romItems;
 	std::vector<std::string> romPaths;
 	std::vector<std::string> romNames;
+	Gfx::IQuads bgQuads;
+	OnFrameDelegate onFrameDel{};
+	bool isRunning{};
+	bool hasContent{};
+	bool showRunButton{};
 	// 双击检测
 	size_t lastClickedIdx{size_t(-1)};
 	SteadyClockTimePoint lastClickTime{};
@@ -55,9 +63,12 @@ private:
 	size_t pendingIdx{};
 	bool pendingFrameCallback{};
 
+	void startPreview();
+	void stopPreview();
 	void scanDirectory(ViewAttachParams attach);
 	void loadRom(size_t idx, const Input::Event &e);
-	void doOpenGame(size_t idx, bool keepList);
+	void doLoadRomForPreview(size_t idx);
+	void doLaunchGame();
 };
 
 }
