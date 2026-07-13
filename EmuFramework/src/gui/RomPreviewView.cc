@@ -113,10 +113,23 @@ void RomPreviewView::startPreview()
 		return;
 	log.info("starting ROM preview");
 	isRunning = true;
-	// 必须调用 system().start(app) 设置 state=ACTIVE、执行 onStart()、启动音频
-	// 否则 systemTask 的 advanceFrames → runFrames → runFrame 在错误状态下执行导致崩溃
+	// 必须调用 system().start(app) 设置 state=ACTIVE、执行子类 onStart()、启动音频和定时器
+	// 否则 runFrame 在 state=OFF 时访问未初始化状态导致崩溃
 	sys.start(app());
-	app().systemTask.start(app().emuWindow());
+	// 用主线程 addOnFrame 运行预览帧，而不是启动 systemTask
+	// systemTask.start() 会从主线程移除帧事件、禁用 UI 绘制，导致主线程 UI 卡死
+	onFrameDel =
+		[this](FrameParams) -> bool
+		{
+			auto &sys = system();
+			if(!isRunning || !sys.hasContent())
+				return false;
+			// EmuSystem::benchmark 也使用 {} 作为 EmuSystemTaskContext
+			// state=ACTIVE 时 runFrame({}, ...) 是安全的
+			sys.runFrame({}, &app().video, nullptr);
+			return true;
+		};
+	app().emuWindow().addOnFrame(onFrameDel);
 }
 
 void RomPreviewView::stopPreview()
@@ -124,8 +137,11 @@ void RomPreviewView::stopPreview()
 	if(!isRunning)
 		return;
 	isRunning = false;
-	app().systemTask.stop();
-	// systemTask.stop() 已 join 线程，安全调用 onStop
+	if(onFrameDel)
+	{
+		app().emuWindow().removeOnFrame(onFrameDel);
+		onFrameDel = {};
+	}
 	system().onStop();
 }
 
