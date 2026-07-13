@@ -113,19 +113,28 @@ void RomPreviewView::startPreview()
 		return;
 	log.info("starting ROM preview");
 	isRunning = true;
-	// 必须调用 system().start(app) 设置 state=ACTIVE、执行子类 onStart()、启动音频和定时器
-	// 否则 runFrame 在 state=OFF 时访问未初始化状态导致崩溃
-	sys.start(app());
-	// 用主线程 addOnFrame 运行预览帧，而不是启动 systemTask
-	// systemTask.start() 会从主线程移除帧事件、禁用 UI 绘制，导致主线程 UI 卡死
+
+	// 预览初始化：仅设置 state=ACTIVE 和执行子类 onStart()
+	// 不调用 system().start(app)，因为它会：
+	//   1. 启动音频（预览不需要声音）
+	//   2. 启动 autosave/rewind 定时器（预览不需要）
+	//   3. 启动 audio（可能与主线程帧回调冲突）
+	{
+		sys.state = EmuSystem::State::ACTIVE;
+		sys.clearInputBuffers();
+		sys.onStart();
+	}
+
+	// 用主线程 addOnFrame 运行预览帧
+	// 绝对不能用 systemTask.start()，因为它会从主线程移除帧事件、禁用 UI 绘制
 	onFrameDel =
 		[this](FrameParams) -> bool
 		{
 			auto &sys = system();
 			if(!isRunning || !sys.hasContent())
 				return false;
-			// EmuSystem::benchmark 也使用 {} 作为 EmuSystemTaskContext
-			// state=ACTIVE 时 runFrame({}, ...) 是安全的
+			// EmuSystem::benchmark() 也使用 {} 作为 EmuSystemTaskContext 和 nullptr 作为 audio
+			// state=ACTIVE 时 runFrame({}, ...) 安全执行
 			sys.runFrame({}, &app().video, nullptr);
 			return true;
 		};
@@ -142,7 +151,10 @@ void RomPreviewView::stopPreview()
 		app().emuWindow().removeOnFrame(onFrameDel);
 		onFrameDel = {};
 	}
+	// 仅调用子类 onStop()，不调用 system().pause()（它会操作音频和定时器）
 	system().onStop();
+	// 重置 state 以便 closeSystem 知道系统需要关闭
+	system().state = EmuSystem::State::OFF;
 }
 
 void RomPreviewView::scanDirectory(ViewAttachParams attach)
@@ -237,14 +249,14 @@ void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 				if(pendingAction == PendingAction::Launch)
 					doLaunchGame(pendingIdx);
 				else if(pendingAction == PendingAction::Preview)
-					doLoadRomSync(pendingIdx);
+					doLoadRomPreview(pendingIdx);
 				pendingAction = PendingAction::NoAction;
 				return false;
 			});
 	}
 }
 
-void RomPreviewView::doLoadRomSync(size_t idx)
+void RomPreviewView::doLoadRomPreview(size_t idx)
 {
 	stopPreview();
 	auto &app = this->app();
@@ -255,37 +267,35 @@ void RomPreviewView::doLoadRomSync(size_t idx)
 
 	log.info("loading ROM for preview: {}", name);
 
-	// 复用 EmuApp::closeSystem() 完整关闭旧系统
-	// 它内部会 systemTask.stop() + closeRuntimeSystem() + resetSlot() + clear() + onSystemClosed()
+	// 关闭旧系统
 	if(sys.hasContent())
 	{
 		app.closeSystem();
 		hasContent = false;
 	}
 
-	try
-	{
-		sys.createWithMedia(IO{}, path, name, {},
-			[](int, int, const char*) -> bool { return true; });
-	}
-	catch(std::exception &err)
-	{
-		log.error("failed to load ROM: {} - {}", name, err.what());
-		hasContent = false;
-		return;
-	}
+	// 使用 app.createSystemWithMedia 异步加载 ROM（在后台线程）
+	// 之前同步调用 createWithMedia 会阻塞主线程导致 UI 卡死
+	app.createSystemWithMedia(IO{}, path, name, appContext().defaultInputEvent(), {}, app.attachParams(),
+		[this](const Input::Event&)
+		{
+			// 加载完成回调（在主线程执行）
+			// createSystemWithMedia 已调用 onSystemCreated()
+			// 但它还会 push LoadProgressView 和可能的其他视图
+			// 我们需要 pop 到 RomPreviewView
+			auto &app = this->app();
 
-	if(!sys.hasContent())
-	{
-		log.error("failed to load ROM: {}", name);
-		hasContent = false;
-		return;
-	}
+			// 关闭 createSystemWithMedia 内部可能显示的 LoadProgressView
+			// pop 回到 RomPreviewView
+			while(app.viewController().viewStack.size() > 1)
+			{
+				app.viewController().pop();
+			}
 
-	hasContent = true;
-	app.onSystemCreated();
-	place();
-	startPreview();
+			hasContent = true;
+			place();
+			startPreview();
+		});
 }
 
 void RomPreviewView::doLaunchGame(size_t idx)
@@ -298,8 +308,6 @@ void RomPreviewView::doLaunchGame(size_t idx)
 
 	log.info("launching ROM: {}", name);
 
-	// createSystemWithMedia 内部会调用 closeSystem()（包含 systemTask.stop()），
-	// 因此 stopPreview() 之后再调 closeSystem 是安全的（重复 stop 有 isStarted() 保护）
 	app.createSystemWithMedia(IO{}, path, name, appContext().defaultInputEvent(), {}, app.attachParams(),
 		[this](const Input::Event &e)
 		{
