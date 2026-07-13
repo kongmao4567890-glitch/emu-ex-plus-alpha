@@ -119,11 +119,10 @@ void RomPreviewView::startPreview()
 	//   1. 启动音频（预览不需要声音）
 	//   2. 启动 autosave/rewind 定时器（预览不需要）
 	//   3. 启动 audio（可能与主线程帧回调冲突）
-	{
-		sys.state = EmuSystem::State::ACTIVE;
-		sys.clearInputBuffers();
-		sys.onStart();
-	}
+	sys.start(*this);
+	app().audio.stop();
+	app().autosaveManager.pauseTimer();
+	app().rewindManager.pauseTimer();
 
 	// 用主线程 addOnFrame 运行预览帧
 	// 绝对不能用 systemTask.start()，因为它会从主线程移除帧事件、禁用 UI 绘制
@@ -151,10 +150,8 @@ void RomPreviewView::stopPreview()
 		app().emuWindow().removeOnFrame(onFrameDel);
 		onFrameDel = {};
 	}
-	// 仅调用子类 onStop()，不调用 system().pause()（它会操作音频和定时器）
-	system().onStop();
-	// 重置 state 以便 closeSystem 知道系统需要关闭
-	system().state = EmuSystem::State::OFF;
+	// 调用 pause 而不是手动操作 state（pause 会正确设置 state=PAUSED 并调用 onStop）
+	sys.pause(app());
 }
 
 void RomPreviewView::scanDirectory(ViewAttachParams attach)
@@ -286,11 +283,7 @@ void RomPreviewView::doLoadRomPreview(size_t idx)
 			auto &app = this->app();
 
 			// 关闭 createSystemWithMedia 内部可能显示的 LoadProgressView
-			// pop 回到 RomPreviewView
-			while(app.viewController().viewStack.size() > 1)
-			{
-				app.viewController().pop();
-			}
+			app.viewController().popModalViews();
 
 			hasContent = true;
 			place();

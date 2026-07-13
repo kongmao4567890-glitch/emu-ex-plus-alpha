@@ -67,7 +67,7 @@ private:
 	void stopPreview();
 	void scanDirectory(ViewAttachParams attach);
 	void loadRom(size_t idx, const Input::Event &e);
-	void doLoadRomSync(size_t idx);
+	void doLoadRomPreview(size_t idx);
 	void doLaunchGame(size_t idx);
 };
 
