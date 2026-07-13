@@ -116,11 +116,11 @@ void RomPreviewView::startPreview()
 	log.info("starting ROM preview");
 	isRunning = true;
 
-	// 初始化视频纹理 — 这是最关键的一步
-	// applyRenderPixelFormat → videoLayer.setFormat → sys.onVideoRenderFormatChange
+	// 初始化视频纹理 — 使用 public API 触发 applyRenderPixelFormat
+	// setRenderPixelFormat 内部调用 applyRenderPixelFormat → videoLayer.setFormat
+	// → video.setRenderPixelFormat → sys.onVideoRenderFormatChange
 	// → updateVideoPixmap → video.setFormat → 创建 vidImg 纹理
-	// 没有 this，runFrame → video.startFrame → vidImg.lock() 返回空 → endFrame 崩溃
-	app().applyRenderPixelFormat();
+	app().setRenderPixelFormat(app().video.renderPixelFormat());
 
 	// 设置 state=ACTIVE + onStart()，让模拟核心准备运行
 	// 然后立即停止音频和定时器（预览不需要声音和自动存档）
