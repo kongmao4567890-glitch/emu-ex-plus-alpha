@@ -46,9 +46,8 @@ private:
 	{
 		std::string path;
 		TextMenuItem text;
-		GameEntry(ViewAttachParams attach, std::string p, std::string_view n, GameBrowserView *browser)
-			: path{p},
-			  text{n, attach, [browser, path = p](const Input::Event &e) { browser->onGameClicked(path, e); }} {}
+		GameEntry(ViewAttachParams attach, std::string p, std::string_view n)
+			: path{std::move(p)}, text{n, attach} {}
 		MenuItem &menuItem() { return text; }
 	};
 
@@ -60,7 +59,7 @@ private:
 	WRect listRect{};
 
 	void loadGameList();
-	void onGameClicked(const std::string &path, const Input::Event &e);
+	void onGameClicked(int idx, const Input::Event &e);
 };
 
 }

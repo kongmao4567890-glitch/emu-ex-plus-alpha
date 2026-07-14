@@ -70,6 +70,16 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 	},
 	bgQuads{attach.rendererTask, {.size = 1}}
 {
+	setOnSelectElement(
+		[this](const Input::Event &e, int i, MenuItem &item)
+		{
+			if(gameList.empty())
+			{
+				item.inputEvent(e, {.parentPtr = this});
+				return;
+			}
+			onGameClicked(i, e);
+		});
 }
 
 GameBrowserView::~GameBrowserView()
@@ -97,7 +107,7 @@ void GameBrowserView::loadGameList()
 					return true;
 				if(!AppMeta::defaultFsFilter(entry.name()))
 					return true;
-				gameList.emplace_back(attachParams(), std::string{entry.path()}, entry.name(), this);
+				gameList.emplace_back(attachParams(), std::string{entry.path()}, entry.name());
 				return true;
 			});
 	}
@@ -130,8 +140,12 @@ void GameBrowserView::loadGameList()
 	postDraw();
 }
 
-void GameBrowserView::onGameClicked(const std::string &path, const Input::Event &e)
+void GameBrowserView::onGameClicked(int idx, const Input::Event &e)
 {
+	if(idx < 0 || idx >= (int)gameList.size())
+		return;
+	auto &entry = gameList[idx];
+	auto path = std::string{entry.path};
 	if(app().system().hasContent() &&
 		path == std::string_view{lastLoadedPath})
 	{
