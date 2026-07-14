@@ -55,7 +55,7 @@ private:
 	std::vector<GameEntry> gameList{};
 	TextMenuItem selectFolderBtn;
 	TextMenuItem titleItem;
-	FS::PathString lastLoadedPath{};
+	std::string lastLoadedPath;
 	Gfx::IColQuads bgQuads;
 	WRect previewRect{};
 	WRect listRect{};

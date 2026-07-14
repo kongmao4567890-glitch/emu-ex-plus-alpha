@@ -840,7 +840,7 @@ void EmuApp::createSystemWithMedia(IO io, CStringView path, std::string_view dis
 	pushAndShowModalView(std::move(loadProgressView), e);
 	gameManager.setGameState({.mode = GameStateMode::None, .isLoading = true});
 	makeDetachedThread(
-		[this, io{std::move(io)}, pathStr = FS::PathString{path}, nameStr = FS::FileString{displayName}, &msgPort, params]() mutable
+		[this, io{std::move(io)}, pathStr = std::string{path}, nameStr = std::string{displayName}, &msgPort, params]() mutable
 		{
 			log.info("starting loader thread");
 			try
