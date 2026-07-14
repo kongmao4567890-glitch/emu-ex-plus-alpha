@@ -105,8 +105,9 @@ void GameBrowserView::loadGameList()
 					return true;
 				if(entry.name().starts_with('.'))
 					return true;
-				if(!AppMeta::defaultFsFilter(entry.name()))
-					return true;
+				if(!AppMeta::defaultFsFilter(entry.name()) &&
+				!EmuApp::hasArchiveExtension(entry.name()))
+				return true;
 				gameList.emplace_back(attachParams(), std::string{entry.path()}, entry.name());
 				return true;
 			});

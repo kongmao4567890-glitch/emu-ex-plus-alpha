@@ -711,7 +711,7 @@ void EmuApp::stopPreviewEmulation()
 	emuWindow().postDraw();
 }
 
-void EmuApp::enterGameFromPreview(const Input::Event &)
+void EmuApp::enterGameFromPreview(const Input::Event &e)
 {
 	if(!system().hasContent())
 		return;
@@ -722,7 +722,7 @@ void EmuApp::enterGameFromPreview(const Input::Event &)
 		system().pause(*this);
 	}
 	viewController().setPreviewMode(false);
-	showEmulation();
+	launchSystem(e);
 }
 
 bool EmuApp::hasArchiveExtension(std::string_view name)
