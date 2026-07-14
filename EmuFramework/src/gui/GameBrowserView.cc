@@ -70,11 +70,6 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 	},
 	bgQuads{attach.rendererTask, {.size = 1}}
 {
-	setOnSelectElement(
-		[this](const Input::Event &e, int i, MenuItem &)
-		{
-			onGameSelected(i, e);
-		});
 }
 
 GameBrowserView::~GameBrowserView()
@@ -102,7 +97,7 @@ void GameBrowserView::loadGameList()
 					return true;
 				if(!AppMeta::defaultFsFilter(entry.name()))
 					return true;
-				gameList.emplace_back(attachParams(), std::string{entry.path()}, entry.name());
+				gameList.emplace_back(attachParams(), std::string{entry.path()}, entry.name(), this);
 				return true;
 			});
 	}
@@ -135,12 +130,14 @@ void GameBrowserView::loadGameList()
 	postDraw();
 }
 
-void GameBrowserView::loadGame(int idx, const Input::Event &e)
+void GameBrowserView::onGameClicked(const std::string &path, const Input::Event &e)
 {
-	if(idx < 0 || idx >= (int)gameList.size())
+	if(app().system().hasContent() &&
+		path == std::string_view{lastLoadedPath})
+	{
+		app().enterGameFromPreview(e);
 		return;
-	auto &entry = gameList[idx];
-	auto path = std::string{entry.path};
+	}
 	auto name = std::string{FS::basename(path)};
 	lastLoadedPath = FS::PathString{path};
 	app().stopPreviewEmulation();
@@ -149,21 +146,6 @@ void GameBrowserView::loadGame(int idx, const Input::Event &e)
 		{
 			app().startPreviewEmulation();
 		});
-}
-
-void GameBrowserView::onGameSelected(int idx, const Input::Event &e)
-{
-	if(gameList.empty())
-		return;
-	// If the same game is already loaded and previewing, enter it (double-click behavior)
-	if(app().system().hasContent() &&
-		gameList[idx].path == std::string_view{lastLoadedPath})
-	{
-		app().enterGameFromPreview(e);
-		return;
-	}
-	// Otherwise, load and preview the game (single-click behavior)
-	loadGame(idx, e);
 }
 
 void GameBrowserView::place()

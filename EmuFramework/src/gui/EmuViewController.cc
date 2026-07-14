@@ -376,7 +376,8 @@ bool EmuViewController::drawMainWindow(Window &win, WindowDrawParams params, Gfx
 			}
 			viewStack.draw(cmds);
 			popup.draw(cmds);
-			cmds.present();
+			cmds.present(std::exchange(presentTime, {}));
+			app().systemTask.notifyWindowPresented();
 		}
 		cmds.clear();
 	});
