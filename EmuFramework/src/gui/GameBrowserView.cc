@@ -106,7 +106,7 @@ void GameBrowserView::loadGameListAsync()
 	pendingEntries = std::make_shared<std::vector<std::pair<std::string, std::string>>>();
 	auto entriesPtr = pendingEntries;
 	makeDetachedThread(
-		[this, path, ctx, entriesPtr]()
+		[this, path, ctx, entriesPtr]() mutable
 		{
 			try
 			{
