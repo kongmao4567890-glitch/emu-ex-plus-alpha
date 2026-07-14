@@ -81,21 +81,10 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 			}
 			onGameClicked(i, e);
 		});
-	loadMsgPort = std::make_shared<MessagePort<GameListLoadedMessage>>("GameBrowserLoad");
-	loadMsgPort->attach(
-		[this](auto msgs)
-		{
-			for(auto msg : msgs)
-			{
-				onGameListLoaded(msg.generation);
-			}
-		});
 }
 
 GameBrowserView::~GameBrowserView()
 {
-	if(loadMsgPort)
-		loadMsgPort->detach();
 	app().stopPreviewEmulation();
 }
 
@@ -105,67 +94,34 @@ void GameBrowserView::loadGameList()
 	auto &searchPath = app().contentSearchPath;
 	if(searchPath.empty())
 	{
-		isLoadingList = false;
 		postDraw();
 		return;
 	}
-	isLoadingList = true;
-	postDraw();
-
-	auto gen = ++loadGeneration;
-	auto entries = std::make_shared<std::vector<std::pair<std::string, std::string>>>();
-	pendingEntries = entries;
-	auto searchPathStr = std::string{searchPath};
-	auto ctx = appContext();
-	auto port = loadMsgPort;
-
-	makeDetachedThread(
-		[port, ctx, entries, searchPathStr, gen]()
-		{
-			try
-			{
-				ctx.forEachInDirectoryUri(searchPathStr,
-					[entries](auto &entry)
-					{
-						if(entry.type() == FS::file_type::directory)
-							return true;
-						if(entry.name().starts_with('.'))
-							return true;
-						if(!AppMeta::defaultFsFilter(entry.name()) &&
-						!EmuApp::hasArchiveExtension(entry.name()))
-						return true;
-						entries->emplace_back(std::string{entry.path()}, entry.name());
-						return true;
-					});
-			}
-			catch(std::system_error &)
-			{
-				log.error("can't open directory:{}", searchPathStr);
-			}
-			std::ranges::sort(*entries,
-				[](const auto &a, const auto &b)
-				{
-					return caselessLexCompare(a.first, b.first);
-				});
-			port->send({gen});
-		});
-}
-
-void GameBrowserView::onGameListLoaded(int generation)
-{
-	if(generation != loadGeneration)
-		return;
-	isLoadingList = false;
-	auto entries = pendingEntries;
-	pendingEntries.reset();
-	if(!entries)
-		return;
-	gameList.clear();
-	gameList.reserve(entries->size());
-	for(auto &e : *entries)
+	try
 	{
-		gameList.emplace_back(attachParams(), std::move(e.first), std::move(e.second));
+		appContext().forEachInDirectoryUri(searchPath,
+			[this](auto &entry)
+			{
+				if(entry.type() == FS::file_type::directory)
+					return true;
+				if(entry.name().starts_with('.'))
+					return true;
+				if(!AppMeta::defaultFsFilter(entry.name()) &&
+				!EmuApp::hasArchiveExtension(entry.name()))
+				return true;
+				gameList.emplace_back(attachParams(), std::string{entry.path()}, entry.name());
+				return true;
+			});
 	}
+	catch(std::system_error &err)
+	{
+		log.error("can't open directory:{}", searchPath);
+	}
+	std::ranges::sort(gameList,
+		[](const GameEntry &a, const GameEntry &b)
+		{
+			return caselessLexCompare(a.path, b.path);
+		});
 	resetItemSource(
 		[this](TableView::ItemMessage msg)
 		{
@@ -260,7 +216,7 @@ void GameBrowserView::draw(Gfx::RendererCommands &cmds, ViewDrawParams params) c
 void GameBrowserView::onShow()
 {
 	TableView::onShow();
-	if(gameList.empty() && !isLoadingList)
+	if(gameList.empty())
 		loadGameList();
 }
 
@@ -272,6 +228,7 @@ void GameBrowserView::onHide()
 void GameBrowserView::onAddedToController(ViewController *, const Input::Event &e)
 {
 	TableView::onAddedToController(nullptr, e);
+	loadGameList();
 }
 
 }

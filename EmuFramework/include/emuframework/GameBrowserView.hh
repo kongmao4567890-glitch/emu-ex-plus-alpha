@@ -21,9 +21,6 @@
 #include <imagine/gui/MenuItem.hh>
 #include <imagine/gfx/Quads.hh>
 #include <imagine/fs/FSDefs.hh>
-#include <imagine/base/MessagePort.hh>
-#include <memory>
-#include <utility>
 #endif
 
 namespace EmuEx
@@ -63,18 +60,7 @@ private:
 	WRect previewRect{};
 	WRect listRect{};
 
-	struct GameListLoadedMessage
-	{
-		int generation;
-	};
-
-	std::shared_ptr<MessagePort<GameListLoadedMessage>> loadMsgPort;
-	std::shared_ptr<std::vector<std::pair<std::string, std::string>>> pendingEntries;
-	bool isLoadingList = false;
-	int loadGeneration = 0;
-
 	void loadGameList();
-	void onGameListLoaded(int generation);
 	void onGameClicked(int idx, const Input::Event &e);
 };
 
