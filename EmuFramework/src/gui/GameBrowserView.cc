@@ -154,7 +154,7 @@ void GameBrowserView::onGameClicked(int idx, const Input::Event &e)
 		app().enterGameFromPreview(e);
 		return;
 	}
-	auto name = std::string{FS::basename(path)};
+	auto &name = entry.name;
 	lastLoadedPath = FS::PathString{path};
 	app().stopPreviewEmulation();
 	app().createSystemWithMedia({}, path, name, e, {}, attachParams(),

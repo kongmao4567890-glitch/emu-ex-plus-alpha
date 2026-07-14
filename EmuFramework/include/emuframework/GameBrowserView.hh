@@ -45,9 +45,10 @@ private:
 	struct GameEntry
 	{
 		std::string path;
+		std::string name;
 		TextMenuItem text;
 		GameEntry(ViewAttachParams attach, std::string p, std::string_view n)
-			: path{std::move(p)}, text{n, attach} {}
+			: path{std::move(p)}, name{n}, text{n, attach} {}
 		MenuItem &menuItem() { return text; }
 	};
 

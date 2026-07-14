@@ -834,13 +834,27 @@ void EmuApp::createSystemWithMedia(IO io, CStringView path, std::string_view dis
 	{
 		return;
 	}
+	// Construct fixed-size path/name strings early so if they exceed capacity,
+	// we can handle the error gracefully before modifying any app state
+	FS::PathString pathStr;
+	FS::FileString nameStr;
+	try
+	{
+		pathStr = FS::PathString{path};
+		nameStr = FS::FileString{displayName};
+	}
+	catch(std::length_error &)
+	{
+		postErrorMessage(std::format("路径或文件名过长，无法加载:\n{}", path));
+		return;
+	}
 	closeSystem();
 	auto loadProgressView = std::make_unique<LoadProgressView>(attachParams, e, onComplete);
 	auto &msgPort = loadProgressView->messagePort();
 	pushAndShowModalView(std::move(loadProgressView), e);
 	gameManager.setGameState({.mode = GameStateMode::None, .isLoading = true});
 	makeDetachedThread(
-		[this, io{std::move(io)}, pathStr = FS::PathString{path}, nameStr = FS::FileString{displayName}, &msgPort, params]() mutable
+		[this, io{std::move(io)}, pathStr, nameStr, &msgPort, params]() mutable
 		{
 			log.info("starting loader thread");
 			try
