@@ -21,7 +21,6 @@
 #include <imagine/gfx/RendererCommands.hh>
 #include <imagine/gfx/Mat4.hh>
 #include <imagine/base/Window.hh>
-#include <imagine/thread/Thread.hh>
 #include <imagine/logger/SystemLogger.hh>
 import imagine;
 
@@ -63,7 +62,7 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 				[this](FSPicker &picker, CStringView path, std::string_view, const Input::Event &)
 				{
 					app().contentSearchPath = path;
-					loadGameListAsync();
+					loadGameList();
 					picker.dismiss();
 				});
 			pushAndShowModal(std::move(picker), e);
@@ -87,115 +86,6 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 GameBrowserView::~GameBrowserView()
 {
 	app().stopPreviewEmulation();
-}
-
-void GameBrowserView::loadGameListAsync()
-{
-	if(loadingList)
-		return;
-	auto &searchPath = app().contentSearchPath;
-	if(searchPath.empty())
-	{
-		postDraw();
-		return;
-	}
-	// Use cached list if available and path matches
-	if(!app().cachedGameList.empty() && app().cachedGameListPath == searchPath)
-	{
-		gameList.clear();
-		auto ap = attachParams();
-		for(auto &[p, n] : app().cachedGameList)
-			gameList.emplace_back(ap, p, n);
-		resetItemSource(
-			[this](TableView::ItemMessage msg)
-			{
-				return msg.visit(overloaded
-				{
-					[&](const ItemsMessage&) -> ItemReply
-					{
-						return gameList.empty() ? 1 : gameList.size();
-					},
-					[&](const GetItemMessage& m) -> ItemReply
-					{
-						if(gameList.empty())
-							return static_cast<MenuItem*>(&selectFolderBtn);
-						return static_cast<MenuItem*>(&gameList[m.idx].text);
-					},
-				});
-			});
-		postDraw();
-		return;
-	}
-	loadingList = true;
-	auto path = std::string{searchPath};
-	auto ctx = appContext();
-	pendingEntries = std::make_shared<std::vector<std::pair<std::string, std::string>>>();
-	auto entriesPtr = pendingEntries;
-	makeDetachedThread(
-		[this, path, ctx, entriesPtr]() mutable
-		{
-			try
-			{
-				ctx.forEachInDirectoryUri(path,
-					[&entriesPtr](auto &entry)
-					{
-						if(entry.type() == FS::file_type::directory)
-							return true;
-						if(entry.name().starts_with('.'))
-							return true;
-						if(!AppMeta::defaultFsFilter(entry.name()) &&
-						!EmuApp::hasArchiveExtension(entry.name()))
-							return true;
-						entriesPtr->emplace_back(std::string{entry.path()}, std::string{entry.name()});
-						return true;
-					});
-			}
-			catch(std::system_error &err)
-			{
-				log.error("can't open directory:{}", path);
-			}
-			std::ranges::sort(*entriesPtr,
-				[](const auto &a, const auto &b)
-				{
-					return caselessLexCompare(a.first, b.first);
-				});
-			ctx.runOnMainThread(
-				[this](ApplicationContext)
-				{
-					if(!pendingEntries)
-					{
-						loadingList = false;
-						return;
-					}
-					// Cache the list for future use
-					app().cachedGameList = *pendingEntries;
-					app().cachedGameListPath = app().contentSearchPath;
-					gameList.clear();
-					auto ap = attachParams();
-					for(auto &[p, n] : *pendingEntries)
-						gameList.emplace_back(ap, std::move(p), std::move(n));
-					pendingEntries.reset();
-					resetItemSource(
-						[this](TableView::ItemMessage msg)
-						{
-							return msg.visit(overloaded
-							{
-								[&](const ItemsMessage&) -> ItemReply
-								{
-									return gameList.empty() ? 1 : gameList.size();
-								},
-								[&](const GetItemMessage& m) -> ItemReply
-								{
-									if(gameList.empty())
-										return static_cast<MenuItem*>(&selectFolderBtn);
-									return static_cast<MenuItem*>(&gameList[m.idx].text);
-								},
-							});
-						});
-					loadingList = false;
-					postDraw();
-				});
-		});
 }
 
 void GameBrowserView::loadGameList()
@@ -326,8 +216,8 @@ void GameBrowserView::draw(Gfx::RendererCommands &cmds, ViewDrawParams params) c
 void GameBrowserView::onShow()
 {
 	TableView::onShow();
-	if(gameList.empty() && !loadingList)
-		loadGameListAsync();
+	if(gameList.empty())
+		loadGameList();
 }
 
 void GameBrowserView::onHide()

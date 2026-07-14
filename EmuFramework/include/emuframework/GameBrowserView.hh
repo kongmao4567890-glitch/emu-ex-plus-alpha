@@ -22,7 +22,6 @@
 #include <imagine/gfx/Quads.hh>
 #include <imagine/fs/FSDefs.hh>
 #endif
-#include <memory>
 
 namespace EmuEx
 {
@@ -59,11 +58,8 @@ private:
 	Gfx::IColQuads bgQuads;
 	WRect previewRect{};
 	WRect listRect{};
-	bool loadingList{false};
-	std::shared_ptr<std::vector<std::pair<std::string, std::string>>> pendingEntries;
 
 	void loadGameList();
-	void loadGameListAsync();
 	void onGameClicked(int idx, const Input::Event &e);
 };
 
