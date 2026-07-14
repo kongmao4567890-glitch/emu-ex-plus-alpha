@@ -231,8 +231,17 @@ void EmuViewController::showMenuView(bool updateTopView)
 
 void EmuViewController::placeEmuViews()
 {
+	if(previewMode_ && previewDisplayRect_.xSize() > 0)
+		emuView.setViewRect(previewDisplayRect_, previewDisplayRect_);
 	emuView.place();
 	inputView.place();
+}
+
+void EmuViewController::setPreviewMode(bool on)
+{
+	previewMode_ = on;
+	if(!on)
+		placeEmuViews();
 }
 
 void EmuViewController::placeElements()
@@ -245,7 +254,6 @@ void EmuViewController::placeElements()
 	}
 	auto &winData = app().mainWindowData();
 	emuView.manager().setTableXIndentToDefault(appContext().mainWindow());
-	placeEmuViews();
 	WRect contentBounds = winData.contentBounds();
 	WRect windowBounds = winData.windowBounds();
 	if(app().menuScale != 100)
@@ -256,6 +264,7 @@ void EmuViewController::placeElements()
 		windowBounds = contentBounds;
 	}
 	viewStack.place(contentBounds, windowBounds);
+	placeEmuViews();
 }
 
 void EmuViewController::updateMainWindowViewport(Window &win, Viewport viewport, Gfx::RendererTask &task)
@@ -367,7 +376,8 @@ bool EmuViewController::drawMainWindow(Window &win, WindowDrawParams params, Gfx
 			}
 			viewStack.draw(cmds);
 			popup.draw(cmds);
-			cmds.present();
+			cmds.present(std::exchange(presentTime, {}));
+			app().systemTask.notifyWindowPresented();
 		}
 		cmds.clear();
 	});

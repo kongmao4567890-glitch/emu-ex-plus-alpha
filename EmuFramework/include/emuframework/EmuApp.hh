@@ -128,6 +128,9 @@ public:
 	void startEmulation();
 	void pauseEmulation();
 	void showUI(bool updateTopView = true);
+	void startPreviewEmulation();
+	void stopPreviewEmulation();
+	void enterGameFromPreview(const Input::Event &e);
 	void launchSystem(const Input::Event &);
 	static bool hasArchiveExtension(std::string_view name);
 	void unpostMessage();

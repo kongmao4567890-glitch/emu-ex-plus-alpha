@@ -23,6 +23,7 @@
 #include <emuframework/GUIOptionView.hh>
 #include <emuframework/FilePathOptionView.hh>
 #include <emuframework/FilePicker.hh>
+#include <emuframework/GameBrowserView.hh>
 #include <emuframework/Option.hh>
 #include "gui/AutosaveSlotView.hh"
 #include "WindowData.hh"
@@ -360,6 +361,13 @@ void EmuApp::mainInitCommon(ApplicationInitParams initParams, ApplicationContext
 			}
 			winData.viewController.placeElements();
 			winData.viewController.pushAndShow(makeView(viewAttach, ViewID::MAIN_MENU));
+			if(contentSearchPath.empty())
+			{
+				auto sharedPath = ctx.sharedStoragePath();
+				if(sharedPath.size())
+					contentSearchPath = sharedPath;
+			}
+			winData.viewController.pushAndShow(std::make_unique<GameBrowserView>(viewAttach), appContext().defaultInputEvent(), false);
 			configureSecondaryScreens();
 			video.setRendererTask(renderer.task());
 			video.setTextureBufferMode(system(), textureBufferMode);
@@ -667,6 +675,12 @@ void EmuApp::showUI(bool updateTopView)
 	configureAppForEmulation(false);
 	videoLayer.setBrightnessScale(menuVideoBrightnessScale);
 	viewController().showMenuView(updateTopView);
+	if(system().hasContent())
+	{
+		viewController().setPreviewMode(true);
+		viewController().placeEmuViews();
+		emuWindow().postDraw();
+	}
 }
 
 void EmuApp::pauseEmulation()
@@ -677,6 +691,44 @@ void EmuApp::pauseEmulation()
 	system().pause(*this);
 	setRunSpeed(1.);
 	videoLayer.setBrightnessScale(pausedVideoBrightnessScale);
+}
+
+void EmuApp::startPreviewEmulation()
+{
+	if(!system().hasContent())
+		return;
+	videoLayer.setBrightnessScale(1.f);
+	system().start(*this);
+	systemTask.start(emuWindow());
+	setCPUNeedsLowLatency(appContext(), true);
+	viewController().setPreviewMode(true);
+	viewController().placeEmuViews();
+	emuWindow().postDraw();
+}
+
+void EmuApp::stopPreviewEmulation()
+{
+	if(!viewController().isPreviewMode())
+		return;
+	systemTask.stop();
+	setCPUNeedsLowLatency(appContext(), false);
+	system().pause(*this);
+	viewController().setPreviewMode(false);
+	emuWindow().postDraw();
+}
+
+void EmuApp::enterGameFromPreview(const Input::Event &e)
+{
+	if(!system().hasContent())
+		return;
+	if(viewController().isPreviewMode())
+	{
+		systemTask.stop();
+		setCPUNeedsLowLatency(appContext(), false);
+		system().pause(*this);
+	}
+	viewController().setPreviewMode(false);
+	launchSystem(e);
 }
 
 bool EmuApp::hasArchiveExtension(std::string_view name)

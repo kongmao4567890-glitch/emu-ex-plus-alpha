@@ -42,6 +42,7 @@ target_sources(
 	gui/FilePathOptionView.cc
 	gui/FilePicker.cc
 	gui/FrameTimingView.cc
+	gui/GameBrowserView.cc
 	gui/GUIOptionView.cc
 	gui/InputManagerView.cc
 	gui/InputOverridesView.cc
