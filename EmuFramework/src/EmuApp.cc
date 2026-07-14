@@ -361,6 +361,12 @@ void EmuApp::mainInitCommon(ApplicationInitParams initParams, ApplicationContext
 			}
 			winData.viewController.placeElements();
 			winData.viewController.pushAndShow(makeView(viewAttach, ViewID::MAIN_MENU));
+			if(contentSearchPath.empty())
+			{
+				auto sharedPath = ctx.sharedStoragePath();
+				if(sharedPath.size())
+					contentSearchPath = sharedPath;
+			}
 			winData.viewController.pushAndShow(std::make_unique<GameBrowserView>(viewAttach), appContext().defaultInputEvent(), false);
 			configureSecondaryScreens();
 			video.setRendererTask(renderer.task());

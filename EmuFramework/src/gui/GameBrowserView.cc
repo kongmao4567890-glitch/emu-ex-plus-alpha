@@ -21,6 +21,7 @@
 #include <imagine/gfx/RendererCommands.hh>
 #include <imagine/gfx/Mat4.hh>
 #include <imagine/base/Window.hh>
+#include <imagine/thread/Thread.hh>
 #include <imagine/logger/SystemLogger.hh>
 import imagine;
 
@@ -62,12 +63,13 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 				[this](FSPicker &picker, CStringView path, std::string_view, const Input::Event &)
 				{
 					app().contentSearchPath = path;
-					loadGameList();
+					loadGameListAsync();
 					picker.dismiss();
 				});
 			pushAndShowModal(std::move(picker), e);
 		}
 	},
+	titleItem{"游戏列表", attach},
 	bgQuads{attach.rendererTask, {.size = 1}}
 {
 	setOnSelectElement(
@@ -85,6 +87,86 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 GameBrowserView::~GameBrowserView()
 {
 	app().stopPreviewEmulation();
+}
+
+void GameBrowserView::loadGameListAsync()
+{
+	if(loadingList)
+		return;
+	loadingList = true;
+	auto &searchPath = app().contentSearchPath;
+	if(searchPath.empty())
+	{
+		loadingList = false;
+		postDraw();
+		return;
+	}
+	auto path = std::string{searchPath};
+	auto ctx = appContext();
+	pendingEntries = std::make_shared<std::vector<std::pair<std::string, std::string>>>();
+	auto entriesPtr = pendingEntries;
+	makeDetachedThread(
+		[this, path, ctx, entriesPtr]()
+		{
+			try
+			{
+				ctx.forEachInDirectoryUri(path,
+					[&entriesPtr](auto &entry)
+					{
+						if(entry.type() == FS::file_type::directory)
+							return true;
+						if(entry.name().starts_with('.'))
+							return true;
+						if(!AppMeta::defaultFsFilter(entry.name()) &&
+						!EmuApp::hasArchiveExtension(entry.name()))
+							return true;
+						entriesPtr->emplace_back(std::string{entry.path()}, std::string{entry.name()});
+						return true;
+					});
+			}
+			catch(std::system_error &err)
+			{
+				log.error("can't open directory:{}", path);
+			}
+			std::ranges::sort(*entriesPtr,
+				[](const auto &a, const auto &b)
+				{
+					return caselessLexCompare(a.first, b.first);
+				});
+			ctx.runOnMainThread(
+				[this](ApplicationContext)
+				{
+					if(!pendingEntries)
+					{
+						loadingList = false;
+						return;
+					}
+					gameList.clear();
+					auto ap = attachParams();
+					for(auto &[p, n] : *pendingEntries)
+						gameList.emplace_back(ap, std::move(p), std::move(n));
+					pendingEntries.reset();
+					resetItemSource(
+						[this](TableView::ItemMessage msg)
+						{
+							return msg.visit(overloaded
+							{
+								[&](const ItemsMessage&) -> ItemReply
+								{
+									return gameList.empty() ? 1 : gameList.size();
+								},
+								[&](const GetItemMessage& m) -> ItemReply
+								{
+									if(gameList.empty())
+										return static_cast<MenuItem*>(&selectFolderBtn);
+									return static_cast<MenuItem*>(&gameList[m.idx].text);
+								},
+							});
+						});
+					loadingList = false;
+					postDraw();
+				});
+		});
 }
 
 void GameBrowserView::loadGameList()
@@ -167,12 +249,17 @@ void GameBrowserView::place()
 {
 	auto fullRect = viewRect();
 	int totalH = fullRect.ySize();
-	int previewH = totalH * 55 / 100;
+	int previewH = totalH * 40 / 100;
 	int listY = fullRect.y + previewH;
 	previewRect = WRect{{fullRect.x, fullRect.y}, {fullRect.x2, listY}};
+
+	titleItem.place();
+	auto titleH = titleItem.ySize();
+
+	auto tableRect = WRect{{fullRect.x, listY + titleH}, {fullRect.x2, fullRect.y2}};
 	listRect = WRect{{fullRect.x, listY}, {fullRect.x2, fullRect.y2}};
 
-	setViewRect(listRect, listRect);
+	setViewRect(tableRect, tableRect);
 	app().viewController().setPreviewDisplayRect(previewRect);
 
 	auto bgColor = Gfx::PackedColor::format.build(0.08, 0.08, 0.08, 1.0);
@@ -184,6 +271,7 @@ void GameBrowserView::place()
 void GameBrowserView::prepareDraw()
 {
 	TableView::prepareDraw();
+	titleItem.prepareDraw();
 }
 
 void GameBrowserView::draw(Gfx::RendererCommands &cmds, ViewDrawParams params) const
@@ -199,14 +287,18 @@ void GameBrowserView::draw(Gfx::RendererCommands &cmds, ViewDrawParams params) c
 		cmds.setVertexBuffer(bgQuads);
 		cmds.drawQuads(0, 1);
 	}
+	auto titleH = titleItem.ySize();
+	auto titleRect = listRect;
+	titleRect.y2 = titleRect.y + titleH;
+	titleItem.draw(cmds, {.rect = titleRect, .align = {Origin::center, Origin::center}});
 	TableView::draw(cmds, params);
 }
 
 void GameBrowserView::onShow()
 {
 	TableView::onShow();
-	if(gameList.empty())
-		loadGameList();
+	if(gameList.empty() && !loadingList)
+		loadGameListAsync();
 }
 
 void GameBrowserView::onHide()
