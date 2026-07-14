@@ -81,7 +81,14 @@ void EmuSystem::setupContentUriPaths(CStringView uri, std::string_view displayNa
 	contentFileName_ = displayName;
 	contentName_ = withoutDotExtension(contentFileName_);
 	contentLocation_ = uri;
-	contentDirectory_ = FS::dirnameUri(uri);
+	auto dir = FS::dirnameUri(uri);
+	// Tree-based document URIs (from SAF ACTION_OPEN_DOCUMENT_TREE) can't be
+	// used directly as save directory since openFileUri() can't create new
+	// files in them. Fall back to default save directory.
+	if(dir.size() && dir.find(FS::uriPathSegmentTreeName) != std::string_view::npos)
+		contentDirectory_ = {};
+	else
+		contentDirectory_ = dir;
 	updateContentSaveDirectory();
 }
 

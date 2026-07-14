@@ -93,14 +93,40 @@ void GameBrowserView::loadGameListAsync()
 {
 	if(loadingList)
 		return;
-	loadingList = true;
 	auto &searchPath = app().contentSearchPath;
 	if(searchPath.empty())
 	{
-		loadingList = false;
 		postDraw();
 		return;
 	}
+	// Use cached list if available and path matches
+	if(!app().cachedGameList.empty() && app().cachedGameListPath == searchPath)
+	{
+		gameList.clear();
+		auto ap = attachParams();
+		for(auto &[p, n] : app().cachedGameList)
+			gameList.emplace_back(ap, p, n);
+		resetItemSource(
+			[this](TableView::ItemMessage msg)
+			{
+				return msg.visit(overloaded
+				{
+					[&](const ItemsMessage&) -> ItemReply
+					{
+						return gameList.empty() ? 1 : gameList.size();
+					},
+					[&](const GetItemMessage& m) -> ItemReply
+					{
+						if(gameList.empty())
+							return static_cast<MenuItem*>(&selectFolderBtn);
+						return static_cast<MenuItem*>(&gameList[m.idx].text);
+					},
+				});
+			});
+		postDraw();
+		return;
+	}
+	loadingList = true;
 	auto path = std::string{searchPath};
 	auto ctx = appContext();
 	pendingEntries = std::make_shared<std::vector<std::pair<std::string, std::string>>>();
@@ -141,6 +167,9 @@ void GameBrowserView::loadGameListAsync()
 						loadingList = false;
 						return;
 					}
+					// Cache the list for future use
+					app().cachedGameList = *pendingEntries;
+					app().cachedGameListPath = app().contentSearchPath;
 					gameList.clear();
 					auto ap = attachParams();
 					for(auto &[p, n] : *pendingEntries)
