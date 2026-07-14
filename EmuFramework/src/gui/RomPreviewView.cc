@@ -235,6 +235,8 @@ void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 		if(hasContent && !showRunButton)
 		{
 			showRunButton = true;
+			// showRunButton 变化后索引偏移改变，重新高亮当前游戏（idx+1 因为 runItem 在首位）
+			highlightCell(1 + idx);
 			postDraw();
 		}
 		return;
@@ -243,6 +245,9 @@ void RomPreviewView::loadRom(size_t idx, [[maybe_unused]] const Input::Event &e)
 	// 单击：加载 ROM 并在预览区运行
 	lastClickedIdx = idx;
 	lastClickTime = now;
+	// 保持当前游戏高亮显示，直到点击下一个游戏
+	// TableView 在触摸释放时会清除 selected，这里重新设置
+	highlightCell((showRunButton ? 1 : 0) + idx);
 	pendingAction = PendingAction::Preview;
 	pendingIdx = idx;
 
@@ -276,6 +281,8 @@ void RomPreviewView::doLoadRomForPreview(size_t idx)
 		showRunButton = false;
 		postDraw();
 	}
+	// showRunButton 变化后索引偏移改变，重新高亮当前游戏
+	highlightCell(pendingIdx);
 
 	// 使用框架的异步加载流程
 	// createSystemWithMedia 内部：
@@ -290,6 +297,8 @@ void RomPreviewView::doLoadRomForPreview(size_t idx)
 			// LoadProgressView 已自动 pop，onSystemCreated 已调用
 			hasContent = true;
 			place();
+			// 加载完成后重新高亮当前选中的游戏
+			highlightCell((showRunButton ? 1 : 0) + pendingIdx);
 			startPreview();
 		});
 }
