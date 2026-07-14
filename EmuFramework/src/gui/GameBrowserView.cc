@@ -79,6 +79,10 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 				item.inputEvent(e, {.parentPtr = this});
 				return;
 			}
+			// Keep the selection highlight on the tapped item
+			selected = i;
+			lastSelectedIdx = i;
+			postDraw();
 			onGameClicked(i, e);
 		});
 }
@@ -90,13 +94,41 @@ GameBrowserView::~GameBrowserView()
 
 void GameBrowserView::loadGameList()
 {
-	gameList.clear();
 	auto &searchPath = app().contentSearchPath;
 	if(searchPath.empty())
 	{
+		gameList.clear();
 		postDraw();
 		return;
 	}
+	// Use cached list if path matches
+	if(!app().cachedGameList.empty() && app().cachedGameListPath == searchPath)
+	{
+		gameList.clear();
+		auto ap = attachParams();
+		for(auto &[p, n] : app().cachedGameList)
+			gameList.emplace_back(ap, p, n);
+		resetItemSource(
+			[this](TableView::ItemMessage msg)
+			{
+				return msg.visit(overloaded
+				{
+					[&](const ItemsMessage&) -> ItemReply
+					{
+						return gameList.empty() ? 1 : gameList.size();
+					},
+					[&](const GetItemMessage& m) -> ItemReply
+					{
+						if(gameList.empty())
+							return static_cast<MenuItem*>(&selectFolderBtn);
+						return static_cast<MenuItem*>(&gameList[m.idx].text);
+					},
+				});
+			});
+		postDraw();
+		return;
+	}
+	gameList.clear();
 	try
 	{
 		appContext().forEachInDirectoryUri(searchPath,
@@ -122,6 +154,12 @@ void GameBrowserView::loadGameList()
 		{
 			return caselessLexCompare(a.path, b.path);
 		});
+	// Cache the list for next time
+	app().cachedGameList.clear();
+	app().cachedGameList.reserve(gameList.size());
+	for(auto &e : gameList)
+		app().cachedGameList.emplace_back(e.path, e.name);
+	app().cachedGameListPath = searchPath;
 	resetItemSource(
 		[this](TableView::ItemMessage msg)
 		{
@@ -218,6 +256,11 @@ void GameBrowserView::onShow()
 	TableView::onShow();
 	if(gameList.empty())
 		loadGameList();
+	else if(lastSelectedIdx >= 0)
+	{
+		selected = lastSelectedIdx;
+		postDraw();
+	}
 }
 
 void GameBrowserView::onHide()

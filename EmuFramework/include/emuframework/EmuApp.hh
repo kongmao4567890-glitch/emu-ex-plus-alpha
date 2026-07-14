@@ -53,6 +53,8 @@
 #include <cstring>
 #include <span>
 #include <string>
+#include <utility>
+#include <vector>
 #endif
 
 #ifndef IG_USE_MODULE_IMAGINE
@@ -335,6 +337,8 @@ public:
 	BluetoothAdapter bluetoothAdapter;
 	RecentContent recentContent;
 	FS::PathString contentSearchPath;
+	std::vector<std::pair<std::string, std::string>> cachedGameList;
+	FS::PathString cachedGameListPath;
 	std::string userScreenshotPath;
 	Property<PixelFormat, CFGKEY_RENDER_PIXEL_FORMAT,
 	{
