@@ -426,7 +426,10 @@ public final class BaseActivity extends NativeActivity implements AudioManager.O
 		Window win = getWindow();
 		win.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR);
 		super.onCreate(savedInstanceState);
-		win.setBackgroundDrawable(null);
+		// Keep the theme's windowBackground (solid splash color) during cold
+		// start so the window isn't black while the native core loads and the
+		// first GL frame is drawn. The opaque GL surface fully covers it once
+		// rendering begins, so there's no visible overdraw.
 		win.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 		if(android.os.Build.VERSION.SDK_INT >= 11)
 		{

@@ -230,10 +230,14 @@ android_HoloTheme := android:Theme.Holo.NoActionBar.TranslucentDecor
 android_LegacyHoloTheme := android:Theme.Holo.NoActionBar
 android_LegacyTheme := android:Theme.NoTitleBar
 android_ShortEdgesItem := <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+# Solid window background shown during cold start so the window isn't black
+# while the native core loads and the first GL frame is drawn. Matches the
+# app's list background (0.08, 0.08, 0.08 -> #141414) for a seamless handoff.
+android_windowBackgroundItem := <item name="android:windowBackground">@color/splash_bg</item>
 
 $(android_styles21Xml) :
 	@mkdir -p $(@D)
-	printf '$(xmlDecl)\n<resources>\n\t<style name="AppTheme" parent="$(android_MaterialTheme)">\n\t\t$(android_ShortEdgesItem)\n\t</style>\n</resources>\n' > $@
+	printf '$(xmlDecl)\n<resources>\n\t<style name="AppTheme" parent="$(android_MaterialTheme)">\n\t\t$(android_windowBackgroundItem)\n\t\t$(android_ShortEdgesItem)\n\t</style>\n</resources>\n' > $@
 
 android_stylesXmlFiles += $(android_styles21Xml)
 
@@ -243,7 +247,7 @@ android_styles19Xml := $(android_resPath)/values-v19/styles.xml
 
 $(android_styles19Xml) :
 	@mkdir -p $(@D)
-	printf '$(xmlDecl)\n<resources>\n\t<style name="AppTheme" parent="$(android_HoloTheme)"/>\n</resources>\n' > $@
+	printf '$(xmlDecl)\n<resources>\n\t<style name="AppTheme" parent="$(android_HoloTheme)">\n\t\t$(android_windowBackgroundItem)\n\t</style>\n</resources>\n' > $@
 
 android_stylesXmlFiles += $(android_styles19Xml)
 
@@ -255,7 +259,7 @@ android_styles11Xml := $(android_resPath)/values-v11/styles.xml
 
 $(android_styles11Xml) :
 	@mkdir -p $(@D)
-	printf '$(xmlDecl)\n<resources>\n\t<style name="AppTheme" parent="$(android_LegacyHoloTheme)"/>\n</resources>\n' > $@
+	printf '$(xmlDecl)\n<resources>\n\t<style name="AppTheme" parent="$(android_LegacyHoloTheme)">\n\t\t$(android_windowBackgroundItem)\n\t</style>\n</resources>\n' > $@
 
 android_stylesXmlFiles += $(android_styles11Xml)
 
@@ -267,7 +271,7 @@ android_stylesXml := $(android_resPath)/values/styles.xml
 
 $(android_stylesXml) :
 	@mkdir -p $(@D)
-	printf '$(xmlDecl)\n<resources>\n\t<style name="AppTheme" parent="$(android_LegacyTheme)"/>\n</resources>\n' > $@
+	printf '$(xmlDecl)\n<resources>\n\t<style name="AppTheme" parent="$(android_LegacyTheme)">\n\t\t$(android_windowBackgroundItem)\n\t</style>\n</resources>\n' > $@
 
 android_stylesXmlFiles += $(android_stylesXml)
 
@@ -279,11 +283,17 @@ $(android_stringsXml) : $(projectPath)/metadata/conf.mk
 	@mkdir -p $(@D)
 	printf '$(xmlDecl)\n<resources>\n\t<string name="app_name">$(android_metadata_name)</string>\n</resources>\n' > $@
 
+android_colorsXml := $(android_resPath)/values/colors.xml
+
+$(android_colorsXml) :
+	@mkdir -p $(@D)
+	printf '$(xmlDecl)\n<resources>\n\t<color name="splash_bg">#141414</color>\n</resources>\n' > $@
+
 gradleSrcPath = $(IMAGINE_PATH)/make/gradle
 
 android_buildGradle := $(android_targetPath)/build.gradle
 
-$(android_buildGradle) : | $(android_manifestXml) $(android_stringsXml) $(android_imagineLib9) \
+$(android_buildGradle) : | $(android_manifestXml) $(android_stringsXml) $(android_colorsXml) $(android_imagineLib9) \
 $(android_drawableIconPaths) $(android_assetsPath) $(android_stylesXmlFiles)
 	cp $(gradleSrcPath)/gradlew $(gradleSrcPath)/app/build.gradle $(gradleSrcPath)/app/gradle.properties $(@D)
 	cp -r $(gradleSrcPath)/gradle $(@D)
