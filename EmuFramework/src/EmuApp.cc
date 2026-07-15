@@ -361,13 +361,6 @@ void EmuApp::mainInitCommon(ApplicationInitParams initParams, ApplicationContext
 			}
 			winData.viewController.placeElements();
 			winData.viewController.pushAndShow(makeView(viewAttach, ViewID::MAIN_MENU));
-			if(contentSearchPath.empty())
-			{
-				auto sharedPath = ctx.sharedStoragePath();
-				if(sharedPath.size())
-					contentSearchPath = sharedPath;
-			}
-			winData.viewController.pushAndShow(std::make_unique<GameBrowserView>(viewAttach), appContext().defaultInputEvent(), false);
 			configureSecondaryScreens();
 			video.setRendererTask(renderer.task());
 			video.setTextureBufferMode(system(), textureBufferMode);
@@ -523,14 +516,21 @@ void EmuApp::mainInitCommon(ApplicationInitParams initParams, ApplicationContext
 					return true;
 				}, -10);
 
+			win.show();
+
+			if(contentSearchPath.empty())
+			{
+				auto sharedPath = ctx.sharedStoragePath();
+				if(sharedPath.size())
+					contentSearchPath = sharedPath;
+			}
+			winData.viewController.pushAndShow(std::make_unique<GameBrowserView>(viewAttach), appContext().defaultInputEvent(), false);
 			if(auto launchPathStr = system().contentLocation();
 				launchPathStr.size())
 			{
 				system().setInitialLoadPath("");
 				handleOpenFileCommand(launchPathStr);
 			}
-
-			win.show();
 		});
 }
 
