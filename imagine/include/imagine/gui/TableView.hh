@@ -19,6 +19,7 @@
 #include <imagine/gfx/defs.hh>
 #include <imagine/gfx/Quads.hh>
 #include <imagine/gui/ScrollView.hh>
+#include <imagine/time/Time.hh>
 #include <imagine/util/rectangle2.h>
 #include <imagine/util/concepts.hh>
 #include <imagine/util/variant.hh>
@@ -74,6 +75,7 @@ public:
 	void onAddedToController(ViewController *, const Input::Event &) override;
 	void setFocus(bool focused) override;
 	void setOnSelectElement(SelectElementDelegate del);
+	void setPersistentSelection(bool on);
 	auto& item(this auto&& self, size_t idx) { return self.item(self.itemSrc, idx); }
 	size_t cells() const;
 	WSize cellSize() const;
@@ -102,6 +104,9 @@ protected:
 	bool onlyScrollIfNeeded = false;
 	bool selectedIsActivated = false;
 	bool hasFocus = true;
+	bool persistentSelection = false;
+	int pressedCell = -1;
+	SteadyClockTimePoint pressTime{};
 
 	void setYCellSize(int s);
 	WRect focusRect();
