@@ -243,7 +243,7 @@ void GameBrowserView::draw(Gfx::RendererCommands &cmds, ViewDrawParams params) c
 	titleItem.draw(cmds, {.rect = titleRect, .align = {Origin::center, Origin::center}});
 	if(app().viewController().isPreviewMode())
 	{
-		fastForwardBtn.draw(cmds, {.rect = fastForwardRect, .align = {Origin::left, Origin::top}});
+		fastForwardBtn.draw(cmds, {.rect = fastForwardRect, .align = LT2DO});
 	}
 	TableView::draw(cmds, params);
 }
