@@ -88,8 +88,8 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 			fastForwardBtn.prepareDraw();
 			fastForwardBtn.place();
 			auto ffColor = fastForwardActive
-				? Gfx::PackedColor::format.build(0.9, 0.2, 0.2, 0.85)
-				: Gfx::PackedColor::format.build(0.2, 0.5, 0.9, 0.85);
+				? Gfx::PackedColor::format.build(0.9, 0.2, 0.2, 0.5)
+				: Gfx::PackedColor::format.build(0.2, 0.5, 0.9, 0.5);
 			ffBtnQuads.write(0, {.bounds = fastForwardRect.as<int16_t>(), .color = ffColor});
 			postDraw();
 		}
@@ -212,8 +212,8 @@ void GameBrowserView::place()
 		{previewRect.x + margin + btnW, previewRect.y + margin + btnH}
 	};
 	auto ffColor = fastForwardActive
-		? Gfx::PackedColor::format.build(0.9, 0.2, 0.2, 0.85)
-		: Gfx::PackedColor::format.build(0.2, 0.5, 0.9, 0.85);
+		? Gfx::PackedColor::format.build(0.9, 0.2, 0.2, 0.5)
+		: Gfx::PackedColor::format.build(0.2, 0.5, 0.9, 0.5);
 	ffBtnQuads.write(0, {.bounds = fastForwardRect.as<int16_t>(), .color = ffColor});
 
 	auto tableRect = WRect{{fullRect.x, listY + titleH}, {fullRect.x2, fullRect.y2}};
