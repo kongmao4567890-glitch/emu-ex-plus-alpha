@@ -17,6 +17,7 @@
 
 #include <emuframework/EmuAppHelper.hh>
 #ifndef IG_USE_MODULE_IMAGINE
+#include <memory>
 #include <imagine/gui/TableView.hh>
 #include <imagine/gui/MenuItem.hh>
 #include <imagine/gfx/Quads.hh>
@@ -60,7 +61,19 @@ private:
 	WRect previewRect{};
 	WRect listRect{};
 
+	// Async game list loading: the directory iteration (which can be slow via
+	// Android SAF) runs on a background thread so the list UI renders
+	// immediately on the first frame. Entries are collected as raw strings
+	// (no GL resources) and converted to GameEntry on the main thread.
+	struct PendingGameList
+	{
+		std::vector<std::pair<std::string, std::string>> entries;
+	};
+	std::shared_ptr<PendingGameList> pendingGameList;
+	int loadGeneration{};
+
 	void loadGameList();
+	void loadGameListAsync();
 	void onGameClicked(int idx, const Input::Event &e);
 };
 

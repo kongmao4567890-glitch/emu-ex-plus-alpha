@@ -93,6 +93,8 @@ GameBrowserView::~GameBrowserView()
 
 void GameBrowserView::loadGameList()
 {
+	loadGeneration++; // invalidate any pending async load
+	pendingGameList.reset();
 	gameList.clear();
 	auto &searchPath = app().contentSearchPath;
 	if(searchPath.empty())
@@ -143,6 +145,82 @@ void GameBrowserView::loadGameList()
 			});
 		});
 	postDraw();
+}
+
+void GameBrowserView::loadGameListAsync()
+{
+	auto &searchPath = app().contentSearchPath;
+	if(searchPath.empty())
+	{
+		postDraw();
+		return;
+	}
+	loadGeneration++;
+	auto gen = loadGeneration;
+	pendingGameList = std::make_shared<PendingGameList>();
+	auto pending = pendingGameList;
+	auto ctx = appContext();
+	auto path = std::string{searchPath};
+	makeDetachedThread(
+		[this, pending, ctx, path, gen]()
+		{
+			try
+			{
+				ctx.forEachInDirectoryUri(path,
+					[pending](auto &entry)
+					{
+						if(entry.type() == FS::file_type::directory)
+							return true;
+						if(entry.name().starts_with('.'))
+							return true;
+						if(!AppMeta::defaultFsFilter(entry.name()) &&
+						!EmuApp::hasArchiveExtension(entry.name()))
+							return true;
+						pending->entries.emplace_back(std::string{entry.path()}, std::string{entry.name()});
+						return true;
+					});
+			}
+			catch(std::system_error &err)
+			{
+				log.error("can't open directory:{}", path);
+			}
+			std::ranges::sort(pending->entries,
+				[](const auto &a, const auto &b)
+				{
+					return caselessLexCompare(a.first, b.first);
+				});
+			ctx.runOnMainThread(
+				[this, gen](ApplicationContext)
+				{
+					if(gen != loadGeneration || !pendingGameList)
+						return; // superseded by a newer load
+					gameList.clear();
+					for(auto &e : pendingGameList->entries)
+					{
+						gameList.emplace_back(attachParams(), std::move(e.first), std::move(e.second));
+					}
+					pendingGameList.reset();
+					resetItemSource(
+						[this](TableView::ItemMessage msg)
+						{
+							return msg.visit(overloaded
+							{
+								[&](const ItemsMessage&) -> ItemReply
+								{
+									return gameList.empty() ? 1 : gameList.size();
+								},
+								[&](const GetItemMessage& m) -> ItemReply
+								{
+									if(gameList.empty())
+										return static_cast<MenuItem*>(&selectFolderBtn);
+									return static_cast<MenuItem*>(&gameList[m.idx].text);
+								},
+							});
+						});
+					prepareDraw();
+					postDraw();
+				});
+		});
 }
 
 void GameBrowserView::onGameClicked(int idx, const Input::Event &e)
@@ -219,8 +297,8 @@ void GameBrowserView::draw(Gfx::RendererCommands &cmds, ViewDrawParams params) c
 void GameBrowserView::onShow()
 {
 	TableView::onShow();
-	if(gameList.empty())
-		loadGameList();
+	if(gameList.empty() && !pendingGameList)
+		loadGameListAsync();
 }
 
 void GameBrowserView::onHide()
