@@ -39,7 +39,6 @@ public:
 	void onShow() final;
 	void onHide() final;
 	void onAddedToController(ViewController*, const Input::Event&) final;
-	bool inputEvent(const Input::Event&, ViewInputEventParams) final;
 	std::u16string_view name() const final { return u"游戏列表"; }
 
 private:
@@ -56,13 +55,10 @@ private:
 	std::vector<GameEntry> gameList{};
 	TextMenuItem selectFolderBtn;
 	TextMenuItem titleItem;
-	TextMenuItem fastForwardBtn;
 	FS::PathString lastLoadedPath{};
 	Gfx::IColQuads bgQuads;
 	WRect previewRect{};
 	WRect listRect{};
-	WRect fastForwardRect{};
-	bool fastForwardActive{};
 
 	void loadGameList();
 	void onGameClicked(int idx, const Input::Event &e);
