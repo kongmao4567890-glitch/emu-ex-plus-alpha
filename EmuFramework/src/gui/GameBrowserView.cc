@@ -228,7 +228,6 @@ void GameBrowserView::onHide()
 void GameBrowserView::onAddedToController(ViewController *, const Input::Event &e)
 {
 	TableView::onAddedToController(nullptr, e);
-	loadGameList();
 }
 
 }
