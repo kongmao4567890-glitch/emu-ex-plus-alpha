@@ -182,21 +182,15 @@ void GameBrowserView::onGameClicked(int idx, const Input::Event &e)
 	}
 	auto &name = entry.name;
 	lastLoadedPath = FS::PathString{path};
-	if(fastForwardActive)
-	{
-		fastForwardActive = false;
-		app().setRunSpeed(1.0);
-		fastForwardBtn.setName("快进");
-		fastForwardBtn.prepareDraw();
-		fastForwardBtn.place();
-		auto ffColor = Gfx::PackedColor::format.build(0.2, 0.5, 0.9, 0.5);
-		ffBtnQuads.write(0, {.bounds = fastForwardRect.as<int16_t>(), .color = ffColor});
-	}
 	app().stopPreviewEmulation();
 	app().createSystemWithMedia({}, path, name, e, {}, attachParams(),
 		[this](const Input::Event &)
 		{
 			app().startPreviewEmulation();
+			if(fastForwardActive)
+			{
+				app().setRunSpeed(app().altSpeedAsDouble(AltSpeedMode::fast));
+			}
 		});
 }
 
