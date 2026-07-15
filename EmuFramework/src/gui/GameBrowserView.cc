@@ -81,6 +81,9 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 			}
 			onGameClicked(i, e);
 		});
+	// Keep the tapped game highlighted until another game is tapped.
+	// Long-presses (and scrolls) must not move or clear this highlight.
+	setPersistentSelection(true);
 }
 
 GameBrowserView::~GameBrowserView()

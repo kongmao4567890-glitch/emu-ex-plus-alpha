@@ -25,6 +25,10 @@ namespace IG
 
 static SystemLogger log{"TableView"};
 
+// Hold time after which a press is treated as a long-press instead of a tap.
+// Matches Android's default long-press timeout so quick taps always select.
+static constexpr SteadyClockDuration longPressThreshold{Milliseconds{500}};
+
 size_t TableView::cells() const
 {
 	return getAs<size_t>(itemSrc(ItemsMessage{*this}));
@@ -214,6 +218,11 @@ void TableView::setOnSelectElement(SelectElementDelegate del)
 	selectElementDel = del;
 }
 
+void TableView::setPersistentSelection(bool on)
+{
+	persistentSelection = on;
+}
+
 void TableView::setScrollableIfNeeded(bool on)
 {
 	onlyScrollIfNeeded = on;
@@ -246,7 +255,10 @@ bool TableView::inputEvent(const Input::Event& e, ViewInputEventParams)
 	auto motionEv = e.motionEvent();
 	if(motionEv && handleScroll && scrollInputEvent(*motionEv))
 	{
-		selected = -1;
+		// A drag/scroll gesture must never move the persistent highlight.
+		pressedCell = -1;
+		if(!persistentSelection)
+			selected = -1;
 		return true;
 	}
 	bool movedSelected = false;
@@ -454,6 +466,7 @@ bool TableView::handleTableInput(const Input::Event &e, bool &movedSelected)
 			if(i < 0 || i >= cells_)
 			{
 				//logMsg("pushed outside of item bounds");
+				pressedCell = -1;
 				return false;
 			}
 			auto &it = item(i);
@@ -463,22 +476,55 @@ bool TableView::handleTableInput(const Input::Event &e, bool &movedSelected)
 				hasFocus = true;
 				if(i >= 0 && i < cells_ && it.selectable())
 				{
-					selected = i;
-					postDraw();
+					if(persistentSelection)
+					{
+						// Don't move the persistent highlight on press so a
+						// long-press can never change it. Remember the pressed
+						// cell and time to detect a real tap on release.
+						pressedCell = i;
+						pressTime = motionEv.time();
+					}
+					else
+					{
+						selected = i;
+						postDraw();
+					}
 				}
 			}
 			else if(motionEv.isOff()) // TODO, need to check that Input::PUSHED was sent on entry
 			{
 				//log.info("input released on cell:{}", i);
-				if(i >= 0 && i < cells_ && selected == i && it.selectable())
+				auto pressedIdx = pressedCell;
+				pressedCell = -1;
+				if(i >= 0 && i < cells_ && it.selectable())
 				{
-					postDraw();
-					selected = -1;
-					if(!motionEv.canceled())
+					if(persistentSelection)
 					{
-						//log.debug("entry:{} pushed", i);
-						selectedIsActivated = true;
-						onSelectElement(e, i, it);
+						// Only a quick tap on the same cell commits the
+						// highlight and activates the item. Long-presses and
+						// canceled gestures leave the existing persistent
+						// highlight untouched.
+						bool isTap = pressedIdx == i
+							&& !motionEv.canceled()
+							&& motionEv.time() - pressTime < longPressThreshold;
+						if(isTap)
+						{
+							selected = i;
+							postDraw();
+							selectedIsActivated = true;
+							onSelectElement(e, i, it);
+						}
+					}
+					else if(selected == i)
+					{
+						postDraw();
+						selected = -1;
+						if(!motionEv.canceled())
+						{
+							//log.debug("entry:{} pushed", i);
+							selectedIsActivated = true;
+							onSelectElement(e, i, it);
+						}
 					}
 				}
 			}
