@@ -69,7 +69,33 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 		}
 	},
 	titleItem{"游戏列表", attach},
-	bgQuads{attach.rendererTask, {.size = 1}}
+	fastForwardBtn
+	{
+		"快进", attach,
+		[this](const Input::Event &)
+		{
+			fastForwardActive = !fastForwardActive;
+			if(fastForwardActive)
+			{
+				app().setRunSpeed(app().altSpeedAsDouble(AltSpeedMode::fast));
+				fastForwardBtn.setName("正常");
+			}
+			else
+			{
+				app().setRunSpeed(1.0);
+				fastForwardBtn.setName("快进");
+			}
+			fastForwardBtn.prepareDraw();
+			fastForwardBtn.place();
+			auto ffColor = fastForwardActive
+				? Gfx::PackedColor::format.build(0.9, 0.2, 0.2, 0.5)
+				: Gfx::PackedColor::format.build(0.2, 0.5, 0.9, 0.5);
+			ffBtnQuads.write(0, {.bounds = fastForwardRect.as<int16_t>(), .color = ffColor});
+			postDraw();
+		}
+	},
+	bgQuads{attach.rendererTask, {.size = 1}},
+	ffBtnQuads{attach.rendererTask, {.size = 1}}
 {
 	setOnSelectElement(
 		[this](const Input::Event &e, int i, MenuItem &item)
@@ -164,6 +190,10 @@ void GameBrowserView::onGameClicked(int idx, const Input::Event &e)
 		[this](const Input::Event &)
 		{
 			app().startPreviewEmulation();
+			if(fastForwardActive)
+			{
+				app().setRunSpeed(app().altSpeedAsDouble(AltSpeedMode::fast));
+			}
 		});
 }
 
@@ -177,6 +207,19 @@ void GameBrowserView::place()
 
 	titleItem.place();
 	auto titleH = titleItem.ySize();
+
+	fastForwardBtn.place();
+	auto btnW = std::max(fastForwardBtn.xSize(), 80);
+	auto btnH = std::max(fastForwardBtn.ySize(), 32);
+	int margin = 8;
+	fastForwardRect = WRect{
+		{previewRect.x + margin, previewRect.y + margin},
+		{previewRect.x + margin + btnW, previewRect.y + margin + btnH}
+	};
+	auto ffColor = fastForwardActive
+		? Gfx::PackedColor::format.build(0.9, 0.2, 0.2, 0.5)
+		: Gfx::PackedColor::format.build(0.2, 0.5, 0.9, 0.5);
+	ffBtnQuads.write(0, {.bounds = fastForwardRect.as<int16_t>(), .color = ffColor});
 
 	auto tableRect = WRect{{fullRect.x, listY + titleH}, {fullRect.x2, fullRect.y2}};
 	listRect = WRect{{fullRect.x, listY}, {fullRect.x2, fullRect.y2}};
@@ -194,6 +237,7 @@ void GameBrowserView::prepareDraw()
 {
 	TableView::prepareDraw();
 	titleItem.prepareDraw();
+	fastForwardBtn.prepareDraw();
 }
 
 void GameBrowserView::draw(Gfx::RendererCommands &cmds, ViewDrawParams params) const
@@ -208,6 +252,17 @@ void GameBrowserView::draw(Gfx::RendererCommands &cmds, ViewDrawParams params) c
 		cmds.setVertexArray(bgQuads);
 		cmds.setVertexBuffer(bgQuads);
 		cmds.drawQuads(0, 1);
+	}
+	if(app().viewController().isPreviewMode() && ffBtnQuads)
+	{
+		cmds.set(BlendMode::ALPHA);
+		cmds.basicEffect().disableTexture(cmds);
+		cmds.basicEffect().setModelView(cmds, Mat4::ident());
+		cmds.setColor(ColorName::WHITE);
+		cmds.setVertexArray(ffBtnQuads);
+		cmds.setVertexBuffer(ffBtnQuads);
+		cmds.drawQuads(0, 1);
+		fastForwardBtn.draw(cmds, {.rect = fastForwardRect, .align = {Origin::center, Origin::center}});
 	}
 	auto titleH = titleItem.ySize();
 	auto titleRect = listRect;
@@ -231,6 +286,23 @@ void GameBrowserView::onHide()
 void GameBrowserView::onAddedToController(ViewController *, const Input::Event &e)
 {
 	TableView::onAddedToController(nullptr, e);
+}
+
+bool GameBrowserView::inputEvent(const Input::Event &e, ViewInputEventParams p)
+{
+	if(app().viewController().isPreviewMode())
+	{
+		if(auto motionEv = e.motionEvent())
+		{
+			if(motionEv->isPointer() && motionEv->pushed() &&
+				fastForwardRect.overlaps(motionEv->pos()))
+			{
+				fastForwardBtn.inputEvent(e, {.parentPtr = this});
+				return true;
+			}
+		}
+	}
+	return TableView::inputEvent(e, p);
 }
 
 }
