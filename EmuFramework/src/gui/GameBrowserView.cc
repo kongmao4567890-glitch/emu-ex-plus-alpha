@@ -162,7 +162,7 @@ void GameBrowserView::loadGameListAsync()
 	auto ctx = appContext();
 	auto path = std::string{searchPath};
 	makeDetachedThread(
-		[this, pending, ctx, path, gen]()
+		[this, pending, ctx, path, gen]() mutable
 		{
 			try
 			{
