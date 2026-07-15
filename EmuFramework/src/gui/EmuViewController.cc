@@ -146,10 +146,6 @@ bool EmuViewController::inputEvent(const Input::Event& e)
 	{
 		return inputView.inputEvent(e);
 	}
-	if(previewMode_ && inputView.inputEvent(e))
-	{
-		return true;
-	}
 	return viewStack.inputEvent(e);
 }
 
@@ -377,10 +373,6 @@ bool EmuViewController::drawMainWindow(Window &win, WindowDrawParams params, Gfx
 			if(winData.hasEmuView)
 			{
 				emuView.draw(cmds);
-			}
-			if(previewMode_)
-			{
-				inputView.draw(cmds);
 			}
 			viewStack.draw(cmds);
 			popup.draw(cmds);
