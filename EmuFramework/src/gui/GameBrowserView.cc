@@ -69,6 +69,25 @@ GameBrowserView::GameBrowserView(ViewAttachParams attach):
 		}
 	},
 	titleItem{"游戏列表", attach},
+	fastForwardBtn
+	{
+		"快进", attach,
+		[this](const Input::Event &)
+		{
+			fastForwardActive = !fastForwardActive;
+			if(fastForwardActive)
+			{
+				app().setRunSpeed(app().altSpeedAsDouble(AltSpeedMode::fast));
+				fastForwardBtn.setName("正常");
+			}
+			else
+			{
+				app().setRunSpeed(1.0);
+				fastForwardBtn.setName("快进");
+			}
+			postDraw();
+		}
+	},
 	bgQuads{attach.rendererTask, {.size = 1}}
 {
 	setOnSelectElement(
@@ -156,6 +175,8 @@ void GameBrowserView::onGameClicked(int idx, const Input::Event &e)
 	}
 	auto &name = entry.name;
 	lastLoadedPath = FS::PathString{path};
+	fastForwardActive = false;
+	fastForwardBtn.setName("快进");
 	app().stopPreviewEmulation();
 	app().createSystemWithMedia({}, path, name, e, {}, attachParams(),
 		[this](const Input::Event &)
@@ -175,6 +196,15 @@ void GameBrowserView::place()
 	titleItem.place();
 	auto titleH = titleItem.ySize();
 
+	fastForwardBtn.place();
+	auto btnW = fastForwardBtn.xSize();
+	auto btnH = fastForwardBtn.ySize();
+	int margin = 4;
+	fastForwardRect = WRect{
+		{previewRect.x + margin, previewRect.y + margin},
+		{previewRect.x + margin + btnW, previewRect.y + margin + btnH}
+	};
+
 	auto tableRect = WRect{{fullRect.x, listY + titleH}, {fullRect.x2, fullRect.y2}};
 	listRect = WRect{{fullRect.x, listY}, {fullRect.x2, fullRect.y2}};
 
@@ -191,6 +221,7 @@ void GameBrowserView::prepareDraw()
 {
 	TableView::prepareDraw();
 	titleItem.prepareDraw();
+	fastForwardBtn.prepareDraw();
 }
 
 void GameBrowserView::draw(Gfx::RendererCommands &cmds, ViewDrawParams params) const
@@ -210,6 +241,10 @@ void GameBrowserView::draw(Gfx::RendererCommands &cmds, ViewDrawParams params) c
 	auto titleRect = listRect;
 	titleRect.y2 = titleRect.y + titleH;
 	titleItem.draw(cmds, {.rect = titleRect, .align = {Origin::center, Origin::center}});
+	if(app().viewController().isPreviewMode())
+	{
+		fastForwardBtn.draw(cmds, {.rect = fastForwardRect, .align = {Origin::left, Origin::top}});
+	}
 	TableView::draw(cmds, params);
 }
 
@@ -228,6 +263,23 @@ void GameBrowserView::onHide()
 void GameBrowserView::onAddedToController(ViewController *, const Input::Event &e)
 {
 	TableView::onAddedToController(nullptr, e);
+}
+
+bool GameBrowserView::inputEvent(const Input::Event &e, ViewInputEventParams p)
+{
+	if(app().viewController().isPreviewMode())
+	{
+		if(auto motionEv = e.motionEvent())
+		{
+			if(motionEv->isPointer() && motionEv->pushed() &&
+				fastForwardRect.overlaps(motionEv->pos()))
+			{
+				fastForwardBtn.inputEvent(e, {.parentPtr = this});
+				return true;
+			}
+		}
+	}
+	return TableView::inputEvent(e, p);
 }
 
 }
