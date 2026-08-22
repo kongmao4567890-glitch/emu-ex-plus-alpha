@@ -172,6 +172,8 @@ public:
 	std::vector<Cheat> cheats;
 	std::string cheatsPath;
 	void syncCheats();
+	void saveCheatsFile();
+	void loadCheatsFile();
 	Cheat* newCheat(EmuApp&, const char* name, CheatCodeDesc);
 	bool setCheatName(Cheat&, const char* name);
 	std::string_view cheatName(const Cheat&) const;

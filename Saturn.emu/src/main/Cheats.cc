@@ -76,6 +76,98 @@ void SaturnSystem::syncCheats()
 			MDFNI_AddCheat(patch);
 		}
 	}
+	// Persist cheat changes so they survive game/app restarts
+	saveCheatsFile();
+}
+
+void SaturnSystem::saveCheatsFile()
+{
+	if(!hasContent())
+	{
+		log.warn("skipping cheat file save with no game loaded");
+		return;
+	}
+	auto ctx = appContext();
+	auto path = userFilePath(cheatsPath, ".cht");
+	if(cheats.empty())
+	{
+		log.info("no cheats present, removing cheat file:{}", path);
+		ctx.removeFileUri(path);
+		return;
+	}
+	auto file = ctx.openFileUri(path, OpenFlags::testNewFile());
+	if(!file)
+	{
+		log.warn("error creating cheat file:{}", path);
+		return;
+	}
+	log.info("saving {} cheat(s) to:{}", cheats.size(), path);
+	std::string buff;
+	buff.reserve(cheats.size() * 64);
+	for(auto& cheat: cheats)
+	{
+		// name may not contain '|' or newlines; trim at first separator
+		auto name = std::string_view{cheat.name};
+		auto pipePos = name.find('|');
+		if(pipePos != std::string_view::npos)
+			name = name.substr(0, pipePos);
+		if(name.empty())
+			name = "未命名";
+		buff += std::format("cheat|{}|{}\n", name, cheat.enabled ? 1 : 0);
+		for(auto& code: cheat.codes)
+		{
+			buff += std::format("code|{:X}|{:X}|{}|{}\n", code.addr, code.val, code.compare, code.length);
+		}
+	}
+	file.write(buff.data(), buff.size());
+}
+
+void SaturnSystem::loadCheatsFile()
+{
+	// drop any cheats still in memory from a previous game
+	cheats.clear();
+	auto path = userFilePath(cheatsPath, ".cht");
+	auto file = appContext().openFileUri(path, {.test = true, .accessHint = IOAccessHint::All});
+	if(!file)
+	{
+		return;
+	}
+	log.info("reading cheat file:{}", path);
+	char line[512];
+	FileStream<FileIO> fileStream{std::move(file), "r"};
+	Cheat* currentCheat = nullptr;
+	while(fgets(line, sizeof(line), fileStream.filePtr()))
+	{
+		std::string_view lineStr{line};
+		while(!lineStr.empty() && (lineStr.back() == '\n' || lineStr.back() == '\r'))
+			lineStr.remove_suffix(1);
+		if(lineStr.empty())
+			continue;
+		if(lineStr.starts_with("cheat|"))
+		{
+			auto rest = lineStr.substr(6);
+			auto pipePos = rest.find('|');
+			if(pipePos == std::string_view::npos)
+				continue;
+			auto name = rest.substr(0, pipePos);
+			auto enabled = rest.substr(pipePos + 1);
+			cheats.emplace_back(name);
+			currentCheat = &cheats.back();
+			currentCheat->enabled = enabled == "1";
+		}
+		else if(lineStr.starts_with("code|") && currentCheat)
+		{
+			unsigned addr{};
+			unsigned long long val{};
+			long long compare{-1};
+			unsigned length{1};
+			if(std::sscanf(lineStr.data(), "code|%x|%llx|%lld|%u", &addr, &val, &compare, &length) >= 2)
+			{
+				currentCheat->codes.emplace_back(uint32_t(addr), uint64_t(val), int64_t(compare), length ? length : 1);
+			}
+		}
+	}
+	log.info("loaded {} cheat(s) from file", cheats.size());
 }
 
 Cheat* SaturnSystem::newCheat(EmuApp& app, const char* name, CheatCodeDesc desc)
@@ -93,6 +185,7 @@ Cheat* SaturnSystem::newCheat(EmuApp& app, const char* name, CheatCodeDesc desc)
 bool SaturnSystem::setCheatName(Cheat& c, const char* name)
 {
 	c.name = name;
+	saveCheatsFile();
 	return true;
 }
 
