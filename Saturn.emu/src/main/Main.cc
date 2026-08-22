@@ -286,6 +286,9 @@ void SaturnSystem::loadContent(IO &io, EmuSystemCreateParams, OnLoadProgressDele
 	mSurfacePix.clear();
 	lastInterlaceMode = MDFN_IEN_SS::VDP2::InterlaceMode;
 	frameRate_ = makeFrameRate(MDFN_IEN_SS::VDP2::InterlaceMode);
+	// Restore saved cheats for this game and apply them
+	loadCheatsFile();
+	syncCheats();
 }
 
 bool SaturnSystem::onVideoRenderFormatChange(EmuVideo&, PixelFormat fmt)
