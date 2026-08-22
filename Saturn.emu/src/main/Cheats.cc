@@ -113,7 +113,13 @@ void SaturnSystem::saveCheatsFile()
 			name = name.substr(0, pipePos);
 		if(name.empty())
 			name = "未命名";
-		buff += std::format("cheat|{}|{}\n", name, cheat.enabled ? 1 : 0);
+		// avoid std::format with string_view args; it wrongly
+		// instantiates the wchar_t overload with libc++ 22 modules
+		buff += "cheat|";
+		buff.append(name);
+		buff += '|';
+		buff += cheat.enabled ? '1' : '0';
+		buff += '\n';
 		for(auto& code: cheat.codes)
 		{
 			buff += std::format("code|{:X}|{:X}|{}|{}\n", code.addr, code.val, code.compare, code.length);
